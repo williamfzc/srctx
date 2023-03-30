@@ -19,7 +19,7 @@ type Parser struct {
 	pr *io.PipeReader
 }
 
-func NewParser(ctx context.Context, r io.Reader) (io.ReadCloser, error) {
+func NewParser(ctx context.Context, r io.Reader) (*Parser, error) {
 	docs, err := NewDocs()
 	if err != nil {
 		return nil, err
@@ -62,13 +62,11 @@ func NewParser(ctx context.Context, r io.Reader) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	pr, pw := io.Pipe()
+	pr, _ := io.Pipe()
 	parser := &Parser{
 		Docs: docs,
 		pr:   pr,
 	}
-
-	go parser.transform(pw)
 
 	return parser, nil
 }
