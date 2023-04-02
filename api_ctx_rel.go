@@ -13,9 +13,13 @@ func (sc *SourceContext) RefsByDefId(DefId int) ([]*FactVertex, error) {
 		return ret, nil
 	}
 
-	err = graph.DFS(sc.RelGraph, DefId, func(i int) bool {
+	err = graph.BFS(sc.RelGraph, DefId, func(i int) bool {
 		// exclude itself
 		if DefId == i {
+			return false
+		}
+		// connected to current?
+		if _, err := sc.RelGraph.Edge(DefId, i); err != nil {
 			return false
 		}
 
