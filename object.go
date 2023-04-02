@@ -34,8 +34,12 @@ type FileExtras struct {
 	Path string
 }
 
-func (v *FactVertex) GetId() int {
+func (v *FactVertex) Id() int {
 	return v.DocId
+}
+
+func (v *FactVertex) LineNumber() int {
+	return int(v.Range.Line + 1)
 }
 
 type RelVertex struct {
@@ -43,6 +47,23 @@ type RelVertex struct {
 	Kind  RelKind
 }
 
-func (v *RelVertex) GetId() int {
+func (v *RelVertex) Id() int {
 	return v.DocId
+}
+
+type SourceContext struct {
+	FileMapping map[string]int
+	FactGraph   graph.Graph[int, *FactVertex]
+	RelGraph    graph.Graph[int, *RelVertex]
+}
+
+func NewSourceContext() SourceContext {
+	factGraph := graph.New((*FactVertex).Id, graph.Directed())
+	relGraph := graph.New((*RelVertex).Id, graph.Directed())
+
+	return SourceContext{
+		FileMapping: make(map[string]int),
+		FactGraph:   factGraph,
+		RelGraph:    relGraph,
+	}
 }

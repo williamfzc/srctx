@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 
-	"github.com/dominikbraun/graph"
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/parser"
 )
@@ -23,12 +22,9 @@ func FromLsifZip(lsifZip string) (*SourceContext, error) {
 }
 
 func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
-	factGraph := graph.New((*FactVertex).GetId, graph.Directed())
-	relGraph := graph.New((*RelVertex).GetId, graph.Directed())
-	ret := &SourceContext{
-		FactGraph: factGraph,
-		RelGraph:  relGraph,
-	}
+	ret := NewSourceContext()
+	factGraph := ret.FactGraph
+	relGraph := ret.RelGraph
 
 	// file level
 	for eachFileId, eachFile := range readyParser.Docs.Entries {
@@ -45,6 +41,7 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 		if err != nil {
 			return nil, err
 		}
+		ret.FileMapping[eachFile] = int(eachFileId)
 	}
 
 	// contains / defs
@@ -73,7 +70,7 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 				}
 
 				// and edge
-				err = factGraph.AddEdge(int(eachFileId), eachRangeVertex.GetId(), EdgeAttrContains)
+				err = factGraph.AddEdge(int(eachFileId), eachRangeVertex.Id(), EdgeAttrContains)
 				if err != nil {
 					return nil, err
 				}
@@ -149,5 +146,5 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 			}
 		}
 	}
-	return ret, nil
+	return &ret, nil
 }
