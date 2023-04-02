@@ -1,9 +1,11 @@
 package srctx
 
-import "github.com/williamfzc/srctx/parser"
+import (
+	"github.com/williamfzc/srctx/parser/lsif"
+)
 
-func reverseMap(m map[parser.Id]parser.Id) map[parser.Id]parser.Id {
-	n := make(map[parser.Id]parser.Id, len(m))
+func reverseMap(m map[lsif.Id]lsif.Id) map[lsif.Id]lsif.Id {
+	n := make(map[lsif.Id]lsif.Id, len(m))
 	for k, v := range m {
 		n[v] = k
 	}

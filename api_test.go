@@ -9,7 +9,7 @@ import (
 )
 
 func TestApi(t *testing.T) {
-	srcctxResult, err := FromLsifZip("./parser/testdata/dump.lsif.zip")
+	srcctxResult, err := FromLsifZip("./parser/lsif/testdata/dump.lsif.zip")
 	assert.Nil(t, err)
 
 	factGraph := srcctxResult.FactGraph
@@ -53,10 +53,12 @@ func TestApi(t *testing.T) {
 			vertices, err := srcctxResult.RefsByDefId(each.Id())
 			assert.Nil(t, err)
 			for _, eachV := range vertices {
-				log.Infof("def in file %s %d, ref in: %s %d",
+				log.Infof("def in file %s %d:%d, ref in: %s %d:%d",
 					fileName, each.LineNumber(),
+					each.Range.Character+1,
 					srcctxResult.FileName(eachV.FileId),
-					eachV.LineNumber())
+					eachV.LineNumber(),
+					eachV.Range.Character+1)
 			}
 		}
 	})

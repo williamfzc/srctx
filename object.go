@@ -2,7 +2,7 @@ package srctx
 
 import (
 	"github.com/dominikbraun/graph"
-	"github.com/williamfzc/srctx/parser"
+	"github.com/williamfzc/srctx/parser/lsif"
 )
 
 type FactKind = string
@@ -26,7 +26,7 @@ type FactVertex struct {
 	DocId  int
 	FileId int
 	Kind   FactKind
-	Range  *parser.Range
+	Range  *lsif.Range
 	Extras interface{}
 }
 

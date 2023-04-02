@@ -5,7 +5,7 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/williamfzc/srctx/parser"
+	"github.com/williamfzc/srctx/parser/lsif"
 )
 
 func FromLsifZip(lsifZip string) (*SourceContext, error) {
@@ -14,14 +14,14 @@ func FromLsifZip(lsifZip string) (*SourceContext, error) {
 		return nil, err
 	}
 	defer file.Close()
-	newParser, err := parser.NewParser(context.Background(), file)
+	newParser, err := lsif.NewParser(context.Background(), file)
 	if err != nil {
 		return nil, err
 	}
 	return FromParser(newParser)
 }
 
-func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
+func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
 	ret := NewSourceContext()
 	factGraph := ret.FactGraph
 	relGraph := ret.RelGraph
@@ -49,7 +49,7 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 		// def ranges in this file
 		if inVs, ok := readyParser.Docs.DocRanges[eachFileId]; ok {
 			for _, eachRangeId := range inVs {
-				rawRange := &parser.Range{}
+				rawRange := &lsif.Range{}
 				err := readyParser.Docs.Ranges.Cache.Entry(eachRangeId, rawRange)
 				if err != nil {
 					return nil, err
@@ -94,7 +94,7 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 			eachDef.Line)
 
 		refs := readyParser.Docs.Ranges.References.GetItems(eachReferenceResultId)
-		refRanges := make(map[parser.Id]interface{}, 0)
+		refRanges := make(map[lsif.Id]interface{}, 0)
 		for _, eachRef := range refs {
 			log.Debugf("def %d refed in file %s, line %d",
 				eachReferenceResultId,
