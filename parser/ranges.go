@@ -17,6 +17,26 @@ type Ranges struct {
 	References *References
 	Hovers     *Hovers
 	Cache      *cache
+
+	NextMap           map[Id]Id
+	TextReferenceMap  map[Id]Id
+	TextDefinitionMap map[Id]Id
+}
+
+type Next struct {
+	Id    Id     `json:"id"`
+	Type  string `json:"type"`
+	Label string `json:"label"`
+	OutV  Id     `json:"outV"`
+	InV   Id     `json:"inV"`
+}
+
+type TextReference struct {
+	Id    Id     `json:"id"`
+	Type  string `json:"type"`
+	Label string `json:"label"`
+	OutV  Id     `json:"outV"`
+	InV   Id     `json:"inV"`
 }
 
 type RawRange struct {
@@ -38,8 +58,9 @@ type RawItem struct {
 }
 
 type Item struct {
-	Line  int32
-	DocId Id
+	Line    int32
+	DocId   Id
+	RangeId Id
 }
 
 type SerializedRange struct {
@@ -67,10 +88,13 @@ func NewRanges() (*Ranges, error) {
 	}
 
 	return &Ranges{
-		DefRefs:    make(map[Id]Item),
-		References: references,
-		Hovers:     hovers,
-		Cache:      cache,
+		DefRefs:           make(map[Id]Item),
+		References:        references,
+		Hovers:            hovers,
+		Cache:             cache,
+		NextMap:           make(map[Id]Id),
+		TextReferenceMap:  make(map[Id]Id),
+		TextDefinitionMap: make(map[Id]Id),
 	}, nil
 }
 
@@ -85,6 +109,26 @@ func (r *Ranges) Read(label string, line []byte) error {
 			return err
 		}
 	default:
+		switch label {
+		case "next":
+			var rawNext Next
+			if err := json.Unmarshal(line, &rawNext); err != nil {
+				return err
+			}
+			r.NextMap[rawNext.OutV] = rawNext.InV
+		case "textDocument/references":
+			var textReference TextReference
+			if err := json.Unmarshal(line, &textReference); err != nil {
+				return err
+			}
+			r.TextReferenceMap[textReference.OutV] = textReference.InV
+		case "textDocument/definition":
+			var textReference TextReference
+			if err := json.Unmarshal(line, &textReference); err != nil {
+				return err
+			}
+			r.TextDefinitionMap[textReference.OutV] = textReference.InV
+		}
 		return r.Hovers.Read(label, line)
 	}
 
@@ -191,8 +235,9 @@ func (r *Ranges) addItem(line []byte) error {
 		}
 
 		item := Item{
-			Line:  rg.Line + 1,
-			DocId: rawItem.DocId,
+			Line:    rg.Line + 1,
+			DocId:   rawItem.DocId,
+			RangeId: rangeId,
 		}
 
 		if rawItem.Property == definitions {

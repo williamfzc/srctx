@@ -43,7 +43,7 @@ func NewReferences() (*References, error) {
 // The references are stored in a file to cache them. It is like
 // `map[Id][]Item` (where `Id` is `refId`) but relies on caching the array and
 // its offset in files for storage to reduce RAM usage. The items can be
-// fetched by calling `getItems`.
+// fetched by calling `GetItems`.
 func (r *References) Store(refId Id, references []Item) error {
 	size := len(references)
 
@@ -51,7 +51,7 @@ func (r *References) Store(refId Id, references []Item) error {
 		return nil
 	}
 
-	items := append(r.getItems(refId), references...)
+	items := append(r.GetItems(refId), references...)
 	err := r.Items.SetEntry(r.CurrentOffsetId, items)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func (r *References) Store(refId Id, references []Item) error {
 }
 
 func (r *References) For(docs map[Id]string, refId Id) []SerializedReference {
-	references := r.getItems(refId)
+	references := r.GetItems(refId)
 	if references == nil {
 		return nil
 	}
@@ -95,7 +95,7 @@ func (r *References) Close() error {
 	return nil
 }
 
-func (r *References) getItems(refId Id) []Item {
+func (r *References) GetItems(refId Id) []Item {
 	var offset ReferencesOffset
 	if err := r.Offsets.Entry(refId, &offset); err != nil || offset.Len == 0 {
 		return nil

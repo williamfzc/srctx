@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/alecthomas/chroma/v2 v2.7.0
+	github.com/dominikbraun/graph v0.16.2
 	github.com/stretchr/testify v1.8.2
 )
 
