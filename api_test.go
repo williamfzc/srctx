@@ -1,10 +1,10 @@
 package srctx
 
 import (
-	"log"
 	"testing"
 
 	"github.com/dominikbraun/graph"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +21,7 @@ func TestMainApi(t *testing.T) {
 		if err != nil {
 			return true
 		}
-		log.Printf("def in file %d range: %v", vertex.FileId, vertex.Range)
+		log.Infof("def in file %d range: %v", vertex.FileId, vertex.Range)
 
 		// any links?
 		relVertex, err := relGraph.Vertex(i)
@@ -33,7 +33,7 @@ func TestMainApi(t *testing.T) {
 			if err != nil {
 				return true
 			}
-			log.Printf("refered by file %d range: %v", cur.FileId, cur.Range)
+			log.Infof("refered by file %d range: %v", cur.FileId, cur.Range)
 			return false
 		})
 		if err != nil {

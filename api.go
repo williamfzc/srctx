@@ -2,10 +2,10 @@ package srctx
 
 import (
 	"context"
-	"log"
 	"os"
 
 	"github.com/dominikbraun/graph"
+	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/parser"
 )
 
@@ -65,7 +65,7 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 					Range:  rawRange,
 					Extras: nil,
 				}
-				log.Printf("f %s range %v", eachFile, rawRange)
+				log.Debugf("file %s range %v", eachFile, rawRange)
 
 				err = factGraph.AddVertex(eachRangeVertex)
 				if err != nil {
@@ -79,7 +79,7 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 				}
 			}
 		} else {
-			log.Printf("no any links to %d", eachFileId)
+			log.Warnf("no any links to %d", eachFileId)
 		}
 	}
 
@@ -91,7 +91,7 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 	reverseRefMap := reverseMap(readyParser.Docs.Ranges.TextReferenceMap)
 	for eachReferenceResultId, eachDef := range readyParser.Docs.Ranges.DefRefs {
 		refFileId := eachDef.DocId
-		log.Printf("def %d in file %s line %d",
+		log.Debugf("def %d in file %s line %d",
 			eachReferenceResultId,
 			readyParser.Docs.Entries[refFileId],
 			eachDef.Line)
@@ -99,7 +99,7 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 		refs := readyParser.Docs.Ranges.References.GetItems(eachReferenceResultId)
 		refRanges := make(map[parser.Id]interface{}, 0)
 		for _, eachRef := range refs {
-			log.Printf("def %d refed in file %s, line %d",
+			log.Debugf("def %d refed in file %s, line %d",
 				eachReferenceResultId,
 				readyParser.Docs.Entries[eachRef.DocId],
 				eachRef.Line)
@@ -113,24 +113,24 @@ func FromParser(readyParser *parser.Parser) (*SourceContext, error) {
 			// starts with the ref point
 			resultSetId, ok := readyParser.Docs.Ranges.NextMap[eachRefRange]
 			if !ok {
-				log.Printf("failed to jump with nextMap: %v", eachRefRange)
+				log.Warnf("failed to jump with nextMap: %v", eachRefRange)
 				continue
 			}
 			foundReferenceResultId, ok := readyParser.Docs.Ranges.TextReferenceMap[resultSetId]
 			if !ok {
-				log.Printf("failed to jump with reference map: %v", resultSetId)
+				log.Warnf("failed to jump with reference map: %v", resultSetId)
 				continue
 			}
 
 			foundItem, ok := reverseRefMap[foundReferenceResultId]
 			if !ok {
-				log.Printf("failed to jump with rev ref map: %v", resultSetId)
+				log.Warnf("failed to jump with rev ref map: %v", resultSetId)
 				continue
 			}
 
 			foundRange, ok := reverseNextMap[foundItem]
 			if !ok {
-				log.Printf("failed to jump with rev next map: %v", resultSetId)
+				log.Warnf("failed to jump with rev next map: %v", resultSetId)
 				continue
 			}
 

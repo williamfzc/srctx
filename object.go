@@ -46,8 +46,3 @@ type RelVertex struct {
 func (v *RelVertex) GetId() int {
 	return v.DocId
 }
-
-type SourceContext struct {
-	FactGraph graph.Graph[int, *FactVertex]
-	RelGraph  graph.Graph[int, *RelVertex]
-}
