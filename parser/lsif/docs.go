@@ -133,7 +133,8 @@ func (d *Docs) addDocument(line []byte) error {
 		relativePath = doc.Uri
 	}
 
-	d.Entries[doc.Id] = relativePath
+	// for windows
+	d.Entries[doc.Id] = filepath.ToSlash(relativePath)
 
 	return nil
 }
