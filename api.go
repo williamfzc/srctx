@@ -5,6 +5,7 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/williamfzc/srctx/lexer"
 	"github.com/williamfzc/srctx/parser/lsif"
 )
 
@@ -54,6 +55,13 @@ func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
 				err := readyParser.Docs.Ranges.Cache.Entry(eachRangeId, rawRange)
 				if err != nil {
 					return nil, err
+				}
+
+				tokens, err := lexer.File2Tokens(eachFile)
+				if err == nil {
+					// it's ok
+					_ = tokens[rawRange.Line]
+					// todo: switch handler here
 				}
 
 				eachRangeVertex := &FactVertex{
