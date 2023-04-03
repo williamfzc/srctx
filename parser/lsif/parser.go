@@ -62,11 +62,13 @@ func NewParser(ctx context.Context, r io.Reader) (*Parser, error) {
 		return nil, err
 	}
 
-	pr, _ := io.Pipe()
+	pr, pw := io.Pipe()
 	parser := &Parser{
 		Docs: docs,
 		pr:   pr,
 	}
+
+	go parser.transform(pw)
 
 	return parser, nil
 }

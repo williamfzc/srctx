@@ -18,6 +18,7 @@ func FromLsifZip(lsifZip string) (*SourceContext, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer newParser.Close()
 	return FromParser(newParser)
 }
 
