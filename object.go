@@ -1,6 +1,7 @@
 package srctx
 
 import (
+	"github.com/alecthomas/chroma/v2"
 	"github.com/dominikbraun/graph"
 	"github.com/williamfzc/srctx/parser/lsif"
 )
@@ -32,6 +33,11 @@ type FactVertex struct {
 
 type FileExtras struct {
 	Path string
+}
+
+type DefExtras struct {
+	DefType   DefType
+	RawTokens []chroma.Token
 }
 
 func (v *FactVertex) Id() int {

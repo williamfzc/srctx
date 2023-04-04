@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/alecthomas/chroma/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/lexer"
 	"github.com/williamfzc/srctx/parser/lsif"
@@ -57,11 +58,14 @@ func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
 					return nil, err
 				}
 
+				defExtras := &DefExtras{}
 				tokens, err := lexer.File2Tokens(eachFile)
 				if err == nil {
-					// it's ok
-					_ = tokens[rawRange.Line]
-					// todo: switch handler here
+					log.Debugf("file %s, tokens: %d, cur line: %d", eachFile, len(tokens), rawRange.Line)
+					curLineTokens := tokens[rawRange.Line]
+					defType := judgeTypeFromTokens(curLineTokens)
+					defExtras.DefType = defType
+					defExtras.RawTokens = curLineTokens
 				}
 
 				eachRangeVertex := &FactVertex{
@@ -69,7 +73,7 @@ func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
 					FileId: int(eachFileId),
 					Kind:   FactDef,
 					Range:  rawRange,
-					Extras: nil,
+					Extras: defExtras,
 				}
 				log.Debugf("file %s range %v", eachFile, rawRange)
 
@@ -156,4 +160,30 @@ func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
 		}
 	}
 	return &ret, nil
+}
+
+type DefType = string
+
+const (
+	DefFunction  DefType = "function"
+	DefClass     DefType = "class"
+	DefNamespace DefType = "namespace"
+	DefUnknown   DefType = ""
+)
+
+func judgeTypeFromTokens(tokens []chroma.Token) DefType {
+	for _, token := range tokens {
+		switch token.Type {
+		case chroma.NameFunction:
+			return DefFunction
+		case chroma.NameClass:
+			return DefClass
+		case chroma.NameNamespace:
+			return DefNamespace
+
+		default:
+			continue
+		}
+	}
+	return DefUnknown
 }
