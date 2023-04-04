@@ -31,12 +31,6 @@ func NewParser(ctx context.Context, r io.Reader) (*Parser, error) {
 		return nil, err
 	}
 
-	defer tempFile.Close()
-
-	if err := os.Remove(tempFile.Name()); err != nil {
-		return nil, err
-	}
-
 	size, err := io.Copy(tempFile, r)
 	if err != nil {
 		return nil, err

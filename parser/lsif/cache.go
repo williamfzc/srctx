@@ -20,10 +20,6 @@ func newCache(filename string, data interface{}) (*cache, error) {
 		return nil, err
 	}
 
-	if err := os.Remove(f.Name()); err != nil {
-		return nil, err
-	}
-
 	return &cache{file: f, chunkSize: int64(binary.Size(data))}, nil
 }
 

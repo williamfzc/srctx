@@ -41,10 +41,6 @@ func NewHovers() (*Hovers, error) {
 		return nil, err
 	}
 
-	if err := os.Remove(file.Name()); err != nil {
-		return nil, err
-	}
-
 	offsets, err := newCache("hovers-indexes", Offset{})
 	if err != nil {
 		return nil, err
