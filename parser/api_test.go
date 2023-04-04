@@ -1,4 +1,4 @@
-package srctx
+package parser
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestApi(t *testing.T) {
-	srcctxResult, err := FromLsifZip("./parser/lsif/testdata/dump.lsif.zip")
+	srcctxResult, err := FromLsifZip("./lsif/testdata/dump.lsif.zip")
 	assert.Nil(t, err)
 
 	factGraph := srcctxResult.FactGraph

@@ -1,4 +1,4 @@
-package srctx
+package parser
 
 import (
 	"github.com/williamfzc/srctx/parser/lsif"

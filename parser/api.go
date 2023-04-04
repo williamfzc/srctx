@@ -1,16 +1,16 @@
-package srctx
+package parser
 
 import (
 	"context"
 	"os"
 
-	"github.com/alecthomas/chroma/v2"
 	log "github.com/sirupsen/logrus"
-	"github.com/williamfzc/srctx/lexer"
+	"github.com/williamfzc/srctx/object"
+	"github.com/williamfzc/srctx/parser/lexer"
 	"github.com/williamfzc/srctx/parser/lsif"
 )
 
-func FromLsifZip(lsifZip string) (*SourceContext, error) {
+func FromLsifZip(lsifZip string) (*object.SourceContext, error) {
 	file, err := os.Open(lsifZip)
 	if err != nil {
 		return nil, err
@@ -24,19 +24,19 @@ func FromLsifZip(lsifZip string) (*SourceContext, error) {
 	return FromParser(newParser)
 }
 
-func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
-	ret := NewSourceContext()
+func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
+	ret := object.NewSourceContext()
 	factGraph := ret.FactGraph
 	relGraph := ret.RelGraph
 
 	// file level
 	for eachFileId, eachFile := range readyParser.Docs.Entries {
-		eachFileVertex := &FactVertex{
+		eachFileVertex := &object.FactVertex{
 			DocId:  int(eachFileId),
 			FileId: int(eachFileId),
 			Range:  nil,
-			Kind:   FactFile,
-			Extras: &FileExtras{
+			Kind:   object.FactFile,
+			Extras: &object.FileExtras{
 				Path: eachFile,
 			},
 		}
@@ -58,20 +58,20 @@ func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
 					return nil, err
 				}
 
-				defExtras := &DefExtras{}
+				defExtras := &object.DefExtras{}
 				tokens, err := lexer.File2Tokens(eachFile)
 				if err == nil {
 					log.Debugf("file %s, tokens: %d, cur line: %d", eachFile, len(tokens), rawRange.Line)
 					curLineTokens := tokens[rawRange.Line]
-					defType := judgeTypeFromTokens(curLineTokens)
+					defType := lexer.TypeFromTokens(curLineTokens)
 					defExtras.DefType = defType
 					defExtras.RawTokens = curLineTokens
 				}
 
-				eachRangeVertex := &FactVertex{
+				eachRangeVertex := &object.FactVertex{
 					DocId:  int(eachRangeId),
 					FileId: int(eachFileId),
-					Kind:   FactDef,
+					Kind:   object.FactDef,
 					Range:  rawRange,
 					Extras: defExtras,
 				}
@@ -83,7 +83,7 @@ func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
 				}
 
 				// and edge
-				err = factGraph.AddEdge(int(eachFileId), eachRangeVertex.Id(), EdgeAttrContains)
+				err = factGraph.AddEdge(int(eachFileId), eachRangeVertex.Id(), object.EdgeAttrContains)
 				if err != nil {
 					return nil, err
 				}
@@ -144,46 +144,20 @@ func FromParser(readyParser *lsif.Parser) (*SourceContext, error) {
 				continue
 			}
 
-			_ = relGraph.AddVertex(&RelVertex{
+			_ = relGraph.AddVertex(&object.RelVertex{
 				DocId: int(eachRefRange),
-				Kind:  FactRef,
+				Kind:  object.FactRef,
 			})
-			_ = relGraph.AddVertex(&RelVertex{
+			_ = relGraph.AddVertex(&object.RelVertex{
 				DocId: int(foundRange),
-				Kind:  FactDef,
+				Kind:  object.FactDef,
 			})
 
-			err := relGraph.AddEdge(int(foundRange), int(eachRefRange), EdgeAttrReference)
+			err := relGraph.AddEdge(int(foundRange), int(eachRefRange), object.EdgeAttrReference)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 	return &ret, nil
-}
-
-type DefType = string
-
-const (
-	DefFunction  DefType = "function"
-	DefClass     DefType = "class"
-	DefNamespace DefType = "namespace"
-	DefUnknown   DefType = ""
-)
-
-func judgeTypeFromTokens(tokens []chroma.Token) DefType {
-	for _, token := range tokens {
-		switch token.Type {
-		case chroma.NameFunction:
-			return DefFunction
-		case chroma.NameClass:
-			return DefClass
-		case chroma.NameNamespace:
-			return DefNamespace
-
-		default:
-			continue
-		}
-	}
-	return DefUnknown
 }

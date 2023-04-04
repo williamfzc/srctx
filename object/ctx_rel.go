@@ -1,4 +1,4 @@
-package srctx
+package object
 
 import (
 	"github.com/dominikbraun/graph"

@@ -7,6 +7,7 @@ import (
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/williamfzc/srctx/object"
 )
 
 // not good but temp
@@ -35,4 +36,21 @@ func File2Tokens(fileName string) ([][]chroma.Token, error) {
 	defer l.Unlock()
 	tokenCache[fileName] = ret
 	return ret, nil
+}
+
+func TypeFromTokens(tokens []chroma.Token) object.DefType {
+	for _, token := range tokens {
+		switch token.Type {
+		case chroma.NameFunction:
+			return object.DefFunction
+		case chroma.NameClass:
+			return object.DefClass
+		case chroma.NameNamespace:
+			return object.DefNamespace
+
+		default:
+			continue
+		}
+	}
+	return object.DefUnknown
 }

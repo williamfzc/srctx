@@ -1,4 +1,4 @@
-package srctx
+package object
 
 import (
 	"github.com/alecthomas/chroma/v2"
@@ -73,3 +73,12 @@ func NewSourceContext() SourceContext {
 		RelGraph:    relGraph,
 	}
 }
+
+type DefType = string
+
+const (
+	DefFunction  DefType = "function"
+	DefClass     DefType = "class"
+	DefNamespace DefType = "namespace"
+	DefUnknown   DefType = ""
+)
