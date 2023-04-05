@@ -49,12 +49,18 @@ func (v *FactVertex) LineNumber() int {
 }
 
 type RelVertex struct {
-	DocId int
-	Kind  RelKind
+	DocId  int
+	FileId int
+	Kind   FactKind
+	Range  *lsif.Range
 }
 
 func (v *RelVertex) Id() int {
 	return v.DocId
+}
+
+func (v *RelVertex) LineNumber() int {
+	return int(v.Range.Line + 1)
 }
 
 type SourceContext struct {

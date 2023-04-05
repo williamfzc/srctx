@@ -6,6 +6,38 @@ import (
 	"github.com/dominikbraun/graph"
 )
 
+func (sc *SourceContext) RefVertexesByFileName(fileName string) ([]*RelVertex, error) {
+	// get all the reference points in this file
+	startId := sc.FileId(fileName)
+	if startId == 0 {
+		return nil, fmt.Errorf("no file named: %s", fileName)
+	}
+
+	ret := make([]*RelVertex, 0)
+	err := graph.DFS(sc.RelGraph, startId, func(i int) bool {
+		// exclude itself
+		if i == startId {
+			return false
+		}
+		vertex, err := sc.RelGraph.Vertex(i)
+		if err != nil {
+			return true
+		}
+
+		if vertex.Kind == FactRef {
+			if _, err := sc.RelGraph.Edge(startId, i); err == nil {
+				ret = append(ret, vertex)
+			}
+		}
+
+		return false
+	})
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
 func (sc *SourceContext) RefsByDefId(defId int) ([]*FactVertex, error) {
 	// check
 	ret := make([]*FactVertex, 0)
@@ -40,23 +72,35 @@ func (sc *SourceContext) RefsByDefId(defId int) ([]*FactVertex, error) {
 }
 
 func (sc *SourceContext) RefsByLine(fileName string, lineNum int) ([]*FactVertex, error) {
-	allVertexes, err := sc.DefVertexesByFileName(fileName)
+	allVertexes, err := sc.RefVertexesByFileName(fileName)
 	if err != nil {
 		return nil, err
 	}
-	var startPoint *FactVertex
+	startPoints := make([]*RelVertex, 0)
 	for _, each := range allVertexes {
 		if each.LineNumber() == lineNum {
-			startPoint = each
-			break
+			startPoints = append(startPoints, each)
 		}
 	}
-	if startPoint == nil {
-		return nil, fmt.Errorf("no def found in %s %d", fileName, lineNum)
+	if len(startPoints) == 0 {
+		return nil, fmt.Errorf("no ref found in %s %d", fileName, lineNum)
 	}
-	ret, err := sc.RefsByDefId(startPoint.Id())
-	if err != nil {
-		return nil, err
+
+	// search all the related points
+	ret := make(map[int]*FactVertex, 0)
+	for _, each := range startPoints {
+		curRet, err := sc.RefsByDefId(each.Id())
+		if err != nil {
+			return nil, err
+		}
+		for _, eachRef := range curRet {
+			ret[eachRef.Id()] = eachRef
+		}
 	}
-	return ret, nil
+
+	final := make([]*FactVertex, 0, len(ret))
+	for _, v := range ret {
+		final = append(final, v)
+	}
+	return final, nil
 }

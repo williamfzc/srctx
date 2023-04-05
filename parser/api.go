@@ -62,6 +62,10 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 				tokens, err := lexer.File2Tokens(eachFile)
 				if err == nil {
 					log.Debugf("file %s, tokens: %d, cur line: %d", eachFile, len(tokens), rawRange.Line)
+					if int(rawRange.Line) >= len(tokens) {
+						log.Warnf("access out of range: %d", rawRange.Line)
+						continue
+					}
 					curLineTokens := tokens[rawRange.Line]
 					defType := lexer.TypeFromTokens(curLineTokens)
 					defExtras.DefType = defType
@@ -107,19 +111,19 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 			eachDef.Line)
 
 		refs := readyParser.Docs.Ranges.References.GetItems(eachReferenceResultId)
-		refRanges := make(map[lsif.Id]interface{}, 0)
+		refRanges := make(map[lsif.Id]lsif.Id, 0)
 		for _, eachRef := range refs {
 			log.Debugf("def %d refed in file %s, line %d",
 				eachReferenceResultId,
 				readyParser.Docs.Entries[eachRef.DocId],
 				eachRef.Line)
 
-			refRanges[eachRef.RangeId] = nil
+			refRanges[eachRef.RangeId] = eachRef.DocId
 		}
 
 		// connect between ranges to ranges
 		// range - next -> resultSet - text/references -> referenceResult - item -> range
-		for eachRefRange := range refRanges {
+		for eachRefRange, eachFileId := range refRanges {
 			// starts with the ref point
 			resultSetId, ok := readyParser.Docs.Ranges.NextMap[eachRefRange]
 			if !ok {
@@ -144,16 +148,33 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 				continue
 			}
 
-			_ = relGraph.AddVertex(&object.RelVertex{
-				DocId: int(eachRefRange),
-				Kind:  object.FactRef,
-			})
-			_ = relGraph.AddVertex(&object.RelVertex{
+			// file
+			eachFileVertex := &object.RelVertex{
+				DocId: int(eachFileId),
+				Kind:  object.FactFile,
+			}
+			rawRange := &lsif.Range{}
+			err := readyParser.Docs.Ranges.Cache.Entry(eachRefRange, rawRange)
+
+			eachRefVertex := &object.RelVertex{
+				DocId:  int(eachRefRange),
+				FileId: eachFileVertex.DocId,
+				Kind:   object.FactRef,
+				Range:  rawRange,
+			}
+
+			_ = relGraph.AddVertex(eachFileVertex)
+			_ = relGraph.AddVertex(eachRefVertex)
+			// edge between file and ref
+			_ = relGraph.AddEdge(eachFileVertex.Id(), eachRefVertex.Id(), object.EdgeAttrContains)
+
+			// edge between ref and def
+			eachDefVertex := &object.RelVertex{
 				DocId: int(foundRange),
 				Kind:  object.FactDef,
-			})
-
-			err := relGraph.AddEdge(int(foundRange), int(eachRefRange), object.EdgeAttrReference)
+			}
+			_ = relGraph.AddVertex(eachDefVertex)
+			err = relGraph.AddEdge(eachRefVertex.Id(), eachDefVertex.Id(), object.EdgeAttrReference)
 			if err != nil {
 				return nil, err
 			}
