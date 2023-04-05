@@ -3,6 +3,7 @@ package parser
 import (
 	"context"
 	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/object"
@@ -10,13 +11,19 @@ import (
 	"github.com/williamfzc/srctx/parser/lsif"
 )
 
-func FromLsifZip(lsifZip string) (*object.SourceContext, error) {
-	file, err := os.Open(lsifZip)
+func FromLsifFile(lsifFile string) (*object.SourceContext, error) {
+	file, err := os.Open(lsifFile)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-	newParser, err := lsif.NewParser(context.Background(), file)
+
+	var newParser *lsif.Parser
+	if strings.HasSuffix(lsifFile, ".zip") {
+		newParser, err = lsif.NewParser(context.Background(), file)
+	} else {
+		newParser, err = lsif.NewParserRaw(context.Background(), file)
+	}
 	if err != nil {
 		return nil, err
 	}

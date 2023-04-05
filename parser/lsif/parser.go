@@ -19,6 +19,30 @@ type Parser struct {
 	pr *io.PipeReader
 }
 
+func NewParserRaw(ctx context.Context, r io.Reader) (*Parser, error) {
+	docs, err := NewDocs()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := docs.Parse(r); err != nil {
+		return nil, err
+	}
+
+	pr, pw := io.Pipe()
+	parser := &Parser{
+		Docs: docs,
+		pr:   pr,
+	}
+
+	err = pw.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return parser, nil
+}
+
 func NewParser(ctx context.Context, r io.Reader) (*Parser, error) {
 	docs, err := NewDocs()
 	if err != nil {

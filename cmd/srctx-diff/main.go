@@ -15,14 +15,14 @@ func main() {
 	src := flag.String("src", ".", "repo path")
 	before := flag.String("before", "HEAD~1", "before rev")
 	after := flag.String("after", "HEAD", "after rev")
-	lsifZip := flag.String("lsif", "./dump.lsif.zip", "lsif zip path")
+	lsifZip := flag.String("lsif", "./dump.lsif", "lsif path, can be zip or origin file")
 	outputJson := flag.String("outputJson", "./srctx.diff.json", "srctx json output")
 	flag.Parse()
 
 	// prepare
 	lineMap, err := diff.GitDiff(*src, *before, *after)
 	panicIfErr(err)
-	sourceContext, err := parser.FromLsifZip(*lsifZip)
+	sourceContext, err := parser.FromLsifFile(*lsifZip)
 	panicIfErr(err)
 
 	// calc

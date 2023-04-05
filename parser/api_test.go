@@ -9,7 +9,7 @@ import (
 )
 
 func TestApi(t *testing.T) {
-	srcctxResult, err := FromLsifZip("./lsif/testdata/dump.lsif.zip")
+	srcctxResult, err := FromLsifFile("./lsif/testdata/dump.lsif.zip")
 	assert.Nil(t, err)
 
 	factGraph := srcctxResult.FactGraph
