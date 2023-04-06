@@ -34,6 +34,6 @@ jobs:
         with:
           files: |
             srctx_linux_amd64
-            srctx_windows_amd64
+            srctx_windows_amd64.exe
             srctx_macos_amd64
             srctx_macos_arm64
