@@ -2,9 +2,11 @@ package parser
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
+	"github.com/dominikbraun/graph"
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser/lexer"
@@ -155,7 +157,7 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 				continue
 			}
 
-			// file
+			// ref file
 			eachFileVertex := &object.RelVertex{
 				DocId: int(eachFileId),
 				Kind:  object.FactFile,
@@ -170,18 +172,52 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 				Range:  rawRange,
 			}
 
-			_ = relGraph.AddVertex(eachFileVertex)
-			_ = relGraph.AddVertex(eachRefVertex)
+			_ = relGraph.AddVertex(eachFileVertex, func(vertexProperties *graph.VertexProperties) {
+				vertexProperties.Attributes["label"] = ret.FileName(eachFileVertex.DocId)
+			})
+			_ = relGraph.AddVertex(eachRefVertex, func(vertexProperties *graph.VertexProperties) {
+				vertexProperties.Attributes["label"] = fmt.Sprintf("%d:%d", eachRefVertex.LineNumber(), eachRefVertex.Range.Character)
+			})
 			// edge between file and ref
 			_ = relGraph.AddEdge(eachFileVertex.Id(), eachRefVertex.Id(), object.EdgeAttrContains)
 
 			// edge between ref and def
+			defRange := &lsif.Range{}
+			err = readyParser.Docs.Ranges.Cache.Entry(foundRange, defRange)
+			if err != nil {
+				return nil, err
+			}
+
 			eachDefVertex := &object.RelVertex{
 				DocId: int(foundRange),
 				Kind:  object.FactDef,
+				Range: defRange,
 			}
-			_ = relGraph.AddVertex(eachDefVertex)
+			_ = relGraph.AddVertex(eachDefVertex, func(vertexProperties *graph.VertexProperties) {
+				vertexProperties.Attributes["label"] = fmt.Sprintf("%d:%d", eachDefVertex.LineNumber(), eachDefVertex.Range.Character)
+			})
 			err = relGraph.AddEdge(eachRefVertex.Id(), eachDefVertex.Id(), object.EdgeAttrReference)
+
+			// edge between file and def
+			// find its belonging
+			eachDefVertexInFact, err := factGraph.Vertex(eachDefVertex.Id())
+			if err != nil {
+				return nil, err
+			}
+			defFileVertexInFact, err := factGraph.Vertex(eachDefVertexInFact.FileId)
+			if err != nil {
+				return nil, err
+			}
+			eachDefFileVertexInRef := defFileVertexInFact.ToRelVertex()
+
+			if err != nil {
+				return nil, err
+			}
+			_ = relGraph.AddVertex(eachDefFileVertexInRef, func(vertexProperties *graph.VertexProperties) {
+				vertexProperties.Attributes["label"] = ret.FileName(eachDefFileVertexInRef.DocId)
+			})
+			_ = relGraph.AddEdge(eachDefFileVertexInRef.Id(), eachDefVertex.Id(), object.EdgeAttrContains)
+
 			if err != nil {
 				return nil, err
 			}

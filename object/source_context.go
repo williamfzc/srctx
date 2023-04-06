@@ -10,7 +10,7 @@ type FactKind = string
 type RelKind = string
 
 const (
-	EdgeTypeName = "relType"
+	EdgeTypeName = "label"
 
 	FactFile FactKind = "file"
 	FactDef  FactKind = "def"
@@ -46,6 +46,15 @@ func (v *FactVertex) Id() int {
 
 func (v *FactVertex) LineNumber() int {
 	return int(v.Range.Line + 1)
+}
+
+func (v *FactVertex) ToRelVertex() *RelVertex {
+	return &RelVertex{
+		DocId:  v.DocId,
+		FileId: v.FileId,
+		Kind:   v.Kind,
+		Range:  v.Range,
+	}
 }
 
 type RelVertex struct {

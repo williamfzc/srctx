@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dominikbraun/graph/draw"
 	"github.com/gocarina/gocsv"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -19,6 +20,7 @@ func AddDiffCmd(app *cli.App) {
 	var lsifZip string
 	var outputJson string
 	var outputCsv string
+	var outputDot string
 
 	diffCmd := &cli.Command{
 		Name:  "diff",
@@ -51,14 +53,20 @@ func AddDiffCmd(app *cli.App) {
 			&cli.StringFlag{
 				Name:        "outputJson",
 				Value:       "",
-				Usage:       "srctx json output",
+				Usage:       "json output",
 				Destination: &outputJson,
 			},
 			&cli.StringFlag{
 				Name:        "outputCsv",
 				Value:       "srctx-diff.csv",
-				Usage:       "srctx csv output",
+				Usage:       "csv output",
 				Destination: &outputCsv,
+			},
+			&cli.StringFlag{
+				Name:        "outputDot",
+				Value:       "",
+				Usage:       "reference dot file output",
+				Destination: &outputDot,
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
@@ -97,6 +105,7 @@ func AddDiffCmd(app *cli.App) {
 				panicIfErr(err)
 				err = os.WriteFile(outputJson, data, 0644)
 				panicIfErr(err)
+				log.Infof("dump json to %s", outputJson)
 			}
 
 			if outputCsv != "" {
@@ -106,9 +115,14 @@ func AddDiffCmd(app *cli.App) {
 				if err := gocsv.MarshalFile(&lineStats, csvFile); err != nil { // Load clients from file
 					panic(err)
 				}
+				log.Infof("dump csv to %s", outputCsv)
 			}
 
-			log.Infof("dump finished.")
+			if outputDot != "" {
+				f, _ := os.Create(outputDot)
+				_ = draw.DOT(sourceContext.RelGraph, f)
+				log.Infof("dump dot to %s", outputDot)
+			}
 			return nil
 		},
 	}
