@@ -6,7 +6,7 @@ import (
 	"github.com/dominikbraun/graph"
 )
 
-func (sc *SourceContext) RefVertexesByFileName(fileName string) ([]*RelVertex, error) {
+func (sc *SourceContext) RefsByFileName(fileName string) ([]*RelVertex, error) {
 	// get all the reference points in this file
 	startId := sc.FileId(fileName)
 	if startId == 0 {
@@ -72,7 +72,7 @@ func (sc *SourceContext) RefsByDefId(defId int) ([]*FactVertex, error) {
 }
 
 func (sc *SourceContext) RefsByLine(fileName string, lineNum int) ([]*FactVertex, error) {
-	allVertexes, err := sc.RefVertexesByFileName(fileName)
+	allVertexes, err := sc.RefsByFileName(fileName)
 	if err != nil {
 		return nil, err
 	}

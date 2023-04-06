@@ -47,7 +47,7 @@ func TestApi(t *testing.T) {
 
 	t.Run("test_ctx", func(t *testing.T) {
 		fileName := "morestrings/reverse.go"
-		allDefVertexes, err := srcctxResult.DefVertexesByFileName(fileName)
+		allDefVertexes, err := srcctxResult.DefsByFileName(fileName)
 		assert.Nil(t, err)
 		for _, each := range allDefVertexes {
 			vertices, err := srcctxResult.RefsByDefId(each.Id())

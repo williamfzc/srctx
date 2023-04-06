@@ -36,7 +36,7 @@ func (sc *SourceContext) FileVertexByName(fileName string) *FactVertex {
 	return factVertex
 }
 
-func (sc *SourceContext) DefVertexesByFileName(fileName string) ([]*FactVertex, error) {
+func (sc *SourceContext) DefsByFileName(fileName string) ([]*FactVertex, error) {
 	startId := sc.FileId(fileName)
 	if startId == 0 {
 		return nil, fmt.Errorf("no file named: %s", fileName)
@@ -61,4 +61,22 @@ func (sc *SourceContext) DefVertexesByFileName(fileName string) ([]*FactVertex, 
 		return nil, err
 	}
 	return ret, nil
+}
+
+func (sc *SourceContext) DefsByLine(fileName string, lineNum int) ([]*FactVertex, error) {
+	allVertexes, err := sc.DefsByFileName(fileName)
+	if err != nil {
+		return nil, err
+	}
+	final := make([]*FactVertex, 0)
+	for _, each := range allVertexes {
+		if each.LineNumber() == lineNum {
+			final = append(final, each)
+		}
+	}
+	if len(final) == 0 {
+		return nil, fmt.Errorf("no def found in %s %d", fileName, lineNum)
+	}
+
+	return final, nil
 }
