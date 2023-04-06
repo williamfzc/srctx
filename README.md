@@ -53,6 +53,8 @@ Please see [cmd/srctx/cmd_diff.go](cmd/srctx/cmd_diff.go).
 
 ## Usage as Cli
 
+A full example can be found in our CI: https://github.com/williamfzc/srctx/blob/f2f236872914674d3fdc8c08b0d35e89096a8ff2/.github/workflows/ci.yml#L25
+
 ### 1. Generate LSIF file
 
 https://lsif.dev/
@@ -79,9 +81,19 @@ You can see every edited lines and their impacts. Currently we provided:
 - referenced out of current files
 - referenced out of current dir
 
+# Roadmap
+
+- keep more data from LSIF
+- combination with AIGC
+
 # Contribution
 
 Issues and PRs are always welcome.
+
+# References
+
+- https://lsif.dev/
+- https://code.visualstudio.com/blogs/2019/02/19/lsif#_how-to-get-started
 
 # License
 
