@@ -9,11 +9,21 @@ A lib for source context analysis based on [LSIF](https://code.visualstudio.com/
 | Code Coverage  | [![codecov](https://codecov.io/github/williamfzc/srctx/branch/main/graph/badge.svg?token=1DuAXh12Ys)](https://codecov.io/github/williamfzc/srctx) |
 | Code Style     | [![Go Report Card](https://goreportcard.com/badge/github.com/williamfzc/srctx)](https://goreportcard.com/report/github.com/williamfzc/srctx)      |
 
-## About
+## What's LSIF?
+
+LSIF is a standard format for persisted code analyzer output. 
+Today, several companies are working to support its growth, including Sourcegraph and GitHub/Microsoft. 
+The LSIF defines a standard format for language servers or other programming tools to emit their knowledge about a code workspace.
+
+https://microsoft.github.io/language-server-protocol/overviews/lsif/overview/
+
+## About this tool
 
 This lib processes LSIF file into graphs then you can apply some analysis on them.
 
 This lib originally was designed for monitoring the influence of each commits.
+
+## Usecase with git diff
 
 With the raw diff, we can only get something like:
 
@@ -49,7 +59,41 @@ We hope to utilize the powerful indexing capabilities of LSIF to quantify and ev
 
 ## Usage as Lib
 
-Please see [cmd/srctx/cmd_diff.go](cmd/srctx/cmd_diff.go).
+```go
+yourLsif := "../parser/lsif/testdata/dump.lsif.zip"
+sourceContext, _ := parser.FromLsifFile(yourLsif)
+
+// all files?
+files := sourceContext.Files()
+log.Infof("files in lsif: %d", len(files))
+
+// search definition in a specific file
+defs, _ := sourceContext.DefsByFileName(files[0])
+log.Infof("there are %d def happend in %s", len(defs), files[0])
+
+for _, eachDef := range defs {
+    log.Infof("happened in %d:%d", eachDef.LineNumber(), eachDef.Range.Character)
+}
+
+// or specific line?
+_, _ = sourceContext.DefsByLine(files[0], 1)
+
+// get all the references of a definition
+refs, err := sourceContext.RefsByDefId(defs[0].Id())
+if err != nil {
+    panic(err)
+}
+log.Infof("there are %d refs", len(refs))
+
+for _, eachRef := range refs {
+    log.Infof("happened in file %s %d:%d",
+    sourceContext.FileName(eachRef.FileId),
+    eachRef.LineNumber(),
+    eachRef.Range.Character)
+}
+```
+
+Or see [cmd/srctx/cmd_diff.go](cmd/srctx/cmd_diff.go) for a real example with git diff.
 
 ## Usage as Cli
 
