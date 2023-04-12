@@ -7,13 +7,17 @@ import (
 )
 
 func main() {
+	mainFunc(os.Args)
+}
+
+func mainFunc(args []string) {
 	app := cli.NewApp()
 	app.Name = "srctx"
 	app.Usage = "source context tool"
 
 	AddDiffCmd(app)
 
-	err := app.Run(os.Args)
+	err := app.Run(args)
 	panicIfErr(err)
 }
 

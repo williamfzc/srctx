@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
 	"github.com/gocarina/gocsv"
 	log "github.com/sirupsen/logrus"
@@ -79,6 +80,17 @@ func AddDiffCmd(app *cli.App) {
 			// calc
 			lineStats := make([]*LineStat, 0)
 			log.Infof("diff / total (files): %d / %d", len(lineMap), len(sourceContext.Files()))
+
+			fileRefMap := make(map[string]*fileVertex)
+			// directly
+			for path := range lineMap {
+				fileRefMap[path] = &fileVertex{
+					Name:     path,
+					Refs:     nil,
+					Directly: true,
+				}
+			}
+
 			for path, lines := range lineMap {
 				for _, eachLine := range lines {
 					lineStat := NewLineStat(path, eachLine)
@@ -88,6 +100,18 @@ func AddDiffCmd(app *cli.App) {
 					lineStat.RefScope.TotalRefCount = len(vertices)
 					for _, eachVertex := range vertices {
 						refFileName := sourceContext.FileName(eachVertex.FileId)
+
+						// indirectly
+						if v, ok := fileRefMap[refFileName]; ok {
+							v.Refs = append(v.Refs, refFileName)
+						} else {
+							fileRefMap[refFileName] = &fileVertex{
+								Name:     refFileName,
+								Refs:     []string{path},
+								Directly: false,
+							}
+						}
+
 						if refFileName != path {
 							lineStat.RefScope.CrossFileRefCount++
 						}
@@ -119,12 +143,42 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			if outputDot != "" {
+				// only create a file level graph
+				fileGraph := graph.New((*fileVertex).Id, graph.Directed())
+				for _, vertex := range fileRefMap {
+					if vertex.Directly {
+						_ = fileGraph.AddVertex(vertex, func(vertexProperties *graph.VertexProperties) {
+							vertexProperties.Attributes["style"] = "filled"
+							vertexProperties.Attributes["fillcolor"] = "yellow"
+						})
+					} else {
+						_ = fileGraph.AddVertex(vertex)
+					}
+				}
+				for _, vertex := range fileRefMap {
+					for _, eachRef := range vertex.Refs {
+						// ignore self ref
+						if eachRef != vertex.Id() {
+							_ = fileGraph.AddEdge(eachRef, vertex.Id())
+						}
+					}
+				}
 				f, _ := os.Create(outputDot)
-				_ = draw.DOT(sourceContext.RelGraph, f)
+				_ = draw.DOT(fileGraph, f)
 				log.Infof("dump dot to %s", outputDot)
 			}
 			return nil
 		},
 	}
 	app.Commands = append(app.Commands, diffCmd)
+}
+
+type fileVertex struct {
+	Name     string
+	Refs     []string
+	Directly bool
+}
+
+func (vertex *fileVertex) Id() string {
+	return vertex.Name
 }
