@@ -1,0 +1,22 @@
+name: imagebuild
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  imagebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Pack image
+        run:
+          docker build -t williamfzc/srctx:$GITHUB_REF_NAME .
+      - name: Upload image
+        run: |
+          docker login -u williamfzc -p ${{ secrets.DOCKER_TOKEN }}
+          docker push williamfzc/srctx:$GITHUB_REF_NAME
