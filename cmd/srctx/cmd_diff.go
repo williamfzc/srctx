@@ -136,7 +136,15 @@ func AddDiffCmd(app *cli.App) {
 				csvFile, err := os.OpenFile(outputCsv, os.O_RDWR|os.O_CREATE, os.ModePerm)
 				panicIfErr(err)
 				defer csvFile.Close()
-				if err := gocsv.MarshalFile(&lineStats, csvFile); err != nil { // Load clients from file
+
+				unsafeLines := make([]*LineStat, 0)
+				for _, each := range lineStats {
+					if !each.RefScope.IsSafe() {
+						unsafeLines = append(unsafeLines, each)
+					}
+				}
+
+				if err := gocsv.MarshalFile(&unsafeLines, csvFile); err != nil { // Load clients from file
 					panic(err)
 				}
 				log.Infof("dump csv to %s", outputCsv)

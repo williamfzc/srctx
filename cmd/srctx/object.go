@@ -11,6 +11,10 @@ type ReferenceScope struct {
 	CrossDirRefCount  int `json:"crossDirRefCount"`
 }
 
+func (r *ReferenceScope) IsSafe() bool {
+	return r.TotalRefCount == 0 && r.CrossFileRefCount == 0 && r.CrossDirRefCount == 0
+}
+
 type LineStat struct {
 	*FileScope
 	RefScope *ReferenceScope `json:"ref"`
