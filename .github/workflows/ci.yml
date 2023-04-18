@@ -36,7 +36,6 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
       - name: diffctx
-        uses: williamfzc/diffctx@v0.1.6
+        uses: williamfzc/diffctx@v0.3.0
         with:
           lang: "golang"
-          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
