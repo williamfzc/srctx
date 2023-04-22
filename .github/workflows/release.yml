@@ -24,16 +24,20 @@ jobs:
         run: |
           go test -v ./...
       - name: Build
-        run: |
-          make build_linux_amd64
-          make build_windows_amd64
-          make build_macos_amd64
-          make build_macos_arm64
+        uses: crazy-max/ghaction-xgo@v2
+        with:
+          xgo_version: latest
+          go_version: 1.19
+          pkg: cmd/srctx
+          dest: build
+          prefix: srctx
+          targets: windows/amd64,linux/amd64,linux/arm64,darwin/amd64,darwin/arm64
+          v: true
+          x: false
+          ldflags: -s -w
+          buildmode: default
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            srctx_linux_amd64
-            srctx_windows_amd64.exe
-            srctx_macos_amd64
-            srctx_macos_arm64
+            build/srctx-*
