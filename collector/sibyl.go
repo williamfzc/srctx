@@ -14,7 +14,16 @@ func IsSupported(path string) bool {
 	if strings.HasSuffix(path, ".java") {
 		return true
 	}
+	if strings.HasSuffix(path, ".kt") {
+		return true
+	}
 	if strings.HasSuffix(path, ".go") {
+		return true
+	}
+	if strings.HasSuffix(path, ".py") {
+		return true
+	}
+	if strings.HasSuffix(path, ".js") {
 		return true
 	}
 	return false
