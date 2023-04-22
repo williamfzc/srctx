@@ -8,8 +8,10 @@ import (
 	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
 	"github.com/gocarina/gocsv"
+	"github.com/opensibyl/sibyl2/pkg/extractor/object"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/williamfzc/srctx/collector"
 	"github.com/williamfzc/srctx/diff"
 	"github.com/williamfzc/srctx/parser"
 )
@@ -22,6 +24,7 @@ func AddDiffCmd(app *cli.App) {
 	var outputJson string
 	var outputCsv string
 	var outputDot string
+	var funcEnhance bool
 
 	diffCmd := &cli.Command{
 		Name:  "diff",
@@ -69,6 +72,13 @@ func AddDiffCmd(app *cli.App) {
 				Usage:       "reference dot file output",
 				Destination: &outputDot,
 			},
+			// experimental
+			&cli.BoolFlag{
+				Name:        "funcEnhance",
+				Value:       true,
+				Usage:       "function level diff json",
+				Destination: &funcEnhance,
+			},
 		},
 		Action: func(cCtx *cli.Context) error {
 			// prepare
@@ -92,6 +102,7 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			for path, lines := range lineMap {
+				curFileLines := make([]*LineStat, 0, len(lines))
 				for _, eachLine := range lines {
 					lineStat := NewLineStat(path, eachLine)
 					vertices, _ := sourceContext.RefsByLine(path, eachLine)
@@ -119,8 +130,48 @@ func AddDiffCmd(app *cli.App) {
 							lineStat.RefScope.CrossDirRefCount++
 						}
 					}
-					lineStats = append(lineStats, lineStat)
+					curFileLines = append(curFileLines, lineStat)
 				}
+
+				if funcEnhance {
+					functionFile, err := collector.GetFunctionMetadataFromFile(filepath.Join(src, path))
+					if _, ok := err.(*collector.NotSupportLangError); ok {
+						log.Warnf("file %v not supported", err)
+						goto eachFileEnd
+					}
+
+					if err != nil {
+						return err
+					}
+					// what happened in these lines
+					influences := make([]*object.Function, 0)
+					for _, eachUnit := range functionFile.Units {
+						if eachUnit.GetSpan().ContainAnyLine(lines...) {
+							influences = append(influences, eachUnit)
+						}
+					}
+					for _, eachFunc := range influences {
+						// def line (not precise
+						funcDefLine := eachFunc.GetSpan().Start.Row + 1
+						vertices, _ := sourceContext.RefsByLine(path, int(funcDefLine))
+						log.Debugf("[func scope] path %s line %d affected %d vertexes", path, funcDefLine, len(vertices))
+						// update status
+						for _, eachLine := range curFileLines {
+							eachLine.FuncRefScope.TotalFuncRefCount += len(vertices)
+							for _, eachVertex := range vertices {
+								fileName := sourceContext.FileName(eachVertex.FileId)
+								if fileName != path {
+									eachLine.FuncRefScope.CrossFuncFileRefCount++
+								}
+								if filepath.Dir(fileName) != filepath.Dir(path) {
+									eachLine.FuncRefScope.CrossFuncDirRefCount++
+								}
+							}
+						}
+					}
+				}
+			eachFileEnd:
+				lineStats = append(lineStats, curFileLines...)
 			}
 			log.Infof("diff finished.")
 
@@ -139,7 +190,7 @@ func AddDiffCmd(app *cli.App) {
 
 				unsafeLines := make([]*LineStat, 0)
 				for _, each := range lineStats {
-					if !each.RefScope.IsSafe() {
+					if !each.IsSafe() {
 						unsafeLines = append(unsafeLines, each)
 					}
 				}
