@@ -1,14 +1,11 @@
 package main
 
 import (
-	"path/filepath"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx/collector"
 	"github.com/williamfzc/srctx/diff"
 	"github.com/williamfzc/srctx/parser"
-	"golang.org/x/exp/slices"
 )
 
 func AddDiffCmd(app *cli.App) {
@@ -77,93 +74,40 @@ func AddDiffCmd(app *cli.App) {
 			// metadata
 			factStorage, err := collector.CreateFact(src)
 			panicIfErr(err)
+			funcGraph, err := collector.CreateGraph(factStorage, sourceContext)
+			panicIfErr(err)
 
 			// line offset
-			funcDefLineMap := make(map[string][]int)
+			startPoints := make([]*collector.FuncVertex, 0)
 			for path, lines := range lineMap {
 				functionFile := factStorage.GetByFile(path)
 				if functionFile != nil {
 					for _, eachUnit := range functionFile.Units {
 						// append these def lines
 						if eachUnit.GetSpan().ContainAnyLine(lines...) {
-							defLine := int(eachUnit.GetSpan().Start.Row + 1)
-							if !slices.Contains(funcDefLineMap[path], defLine) {
-								funcDefLineMap[path] = append(funcDefLineMap[path], defLine)
+							cur := &collector.FuncVertex{
+								Function: eachUnit,
+								FuncPos: &collector.FuncPos{
+									Path:  path,
+									Lang:  string(functionFile.Language),
+									Start: int(eachUnit.GetSpan().Start.Row),
+									End:   int(eachUnit.GetSpan().End.Row),
+								},
 							}
+							startPoints = append(startPoints, cur)
 						}
 					}
 				}
 			}
-			for k, v := range funcDefLineMap {
-				log.Infof("file %v append %d lines", k, len(v))
-				for _, eachLine := range v {
-					if slices.Contains(lineMap[k], eachLine) {
-						lineMap[k] = append(lineMap[k], eachLine)
-					}
-				}
+
+			// start scan
+			for _, eachPtr := range startPoints {
+				log.Infof("start point: %v", eachPtr.Id())
+				counts := funcGraph.InfluenceCount(eachPtr)
+				log.Infof("counts: %d", counts)
 			}
 
-			// calc file ref counts
-			lineStats := make([]*LineStat, 0)
-			log.Infof("diff / total (files): %d / %d", len(lineMap), len(sourceContext.Files()))
-			fileRefMap := make(map[string]*fileVertex)
-			// directly
-			for path := range lineMap {
-				fileRefMap[path] = &fileVertex{
-					Name:     path,
-					Refs:     nil,
-					Directly: true,
-				}
-			}
-
-			for path, lines := range lineMap {
-				curFileLines := make([]*LineStat, 0, len(lines))
-				for _, eachLine := range lines {
-					lineStat := NewLineStat(path, eachLine)
-					// which lines will reference this line
-					vertices, _ := sourceContext.RefsByLine(path, eachLine)
-					// todo: and this line will reference what
-					// todo: and a BFS search for specific depth
-					log.Debugf("path %s line %d affected %d vertexes", path, eachLine, len(vertices))
-
-					lineStat.RefScope.TotalRefCount = len(vertices)
-					for _, eachVertex := range vertices {
-						refFileName := sourceContext.FileName(eachVertex.FileId)
-
-						// indirectly
-						if v, ok := fileRefMap[refFileName]; ok {
-							v.Refs = append(v.Refs, refFileName)
-						} else {
-							fileRefMap[refFileName] = &fileVertex{
-								Name:     refFileName,
-								Refs:     []string{path},
-								Directly: false,
-							}
-						}
-
-						if refFileName != path {
-							lineStat.RefScope.CrossFileRefCount++
-						}
-						if filepath.Dir(refFileName) != filepath.Dir(path) {
-							lineStat.RefScope.CrossDirRefCount++
-						}
-					}
-					curFileLines = append(curFileLines, lineStat)
-				}
-
-				lineStats = append(lineStats, curFileLines...)
-			}
 			log.Infof("diff finished.")
-
-			if outputJson != "" {
-				exportJson(outputJson, lineStats)
-			}
-			if outputCsv != "" {
-				exportCsv(outputCsv, lineStats)
-			}
-			if outputDot != "" {
-				exportDot(outputDot, fileRefMap)
-			}
 			return nil
 		},
 	}
