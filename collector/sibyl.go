@@ -1,50 +1,37 @@
 package collector
 
 import (
-	"fmt"
-	"strings"
+	"path/filepath"
 
 	"github.com/opensibyl/sibyl2"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
+	log "github.com/sirupsen/logrus"
 )
 
-type FunctionMetaMap = map[string]*extractor.FunctionFileResult
-
-func IsSupported(path string) bool {
-	if strings.HasSuffix(path, ".java") {
-		return true
+func CreateFact(root string) (*FactStorage, error) {
+	abs, err := filepath.Abs(root)
+	if err != nil {
+		return nil, err
 	}
-	if strings.HasSuffix(path, ".kt") {
-		return true
-	}
-	if strings.HasSuffix(path, ".go") {
-		return true
-	}
-	if strings.HasSuffix(path, ".py") {
-		return true
-	}
-	if strings.HasSuffix(path, ".js") {
-		return true
-	}
-	return false
-}
-
-type NotSupportLangError struct {
-	msg string
-}
-
-func (e *NotSupportLangError) Error() string {
-	return fmt.Sprintf("not supported lang: %s", e.msg)
-}
-
-func GetFunctionMetadataFromFile(targetFile string) (*extractor.FunctionFileResult, error) {
-	if !IsSupported(targetFile) {
-		return nil, &NotSupportLangError{targetFile}
-	}
-	res, err := sibyl2.ExtractFunction(targetFile, sibyl2.DefaultConfig())
+	functionFiles, err := sibyl2.ExtractFunction(abs, sibyl2.DefaultConfig())
 	if err != nil {
 		return nil, err
 	}
 
-	return res[0], nil
+	fact := &FactStorage{
+		cache: make(map[string]*extractor.FunctionFileResult),
+	}
+	for _, eachFunc := range functionFiles {
+		log.Infof("create func file for: %v", eachFunc.Path)
+		fact.cache[eachFunc.Path] = eachFunc
+	}
+	return fact, nil
+}
+
+type FactStorage struct {
+	cache map[string]*extractor.FunctionFileResult
+}
+
+func (fs *FactStorage) GetByFile(fileName string) *extractor.FunctionFileResult {
+	return fs.cache[fileName]
 }
