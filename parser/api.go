@@ -2,12 +2,13 @@ package parser
 
 import (
 	"context"
+	"os"
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser/lexer"
 	"github.com/williamfzc/srctx/parser/lsif"
-	"os"
-	"strings"
 )
 
 func FromLsifFile(lsifFile string) (*object.SourceContext, error) {

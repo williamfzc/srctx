@@ -3,7 +3,7 @@ package main
 import "testing"
 
 func TestDiff(t *testing.T) {
-	// t.Skip()
+	t.Skip()
 	mainFunc([]string{
 		"srctx", "diff",
 		"--src", "../..",

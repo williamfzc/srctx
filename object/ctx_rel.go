@@ -2,6 +2,7 @@ package object
 
 import (
 	"fmt"
+
 	"github.com/dominikbraun/graph"
 	log "github.com/sirupsen/logrus"
 )
@@ -35,38 +36,7 @@ func (sc *SourceContext) RefsByFileName(fileName string) ([]*RelVertex, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	ret := make([]*RelVertex, 0)
-	for _, eachPoint := range startPoints {
-		if _, err := sc.RelGraph.Vertex(eachPoint.Id()); err != nil {
-			// hoverResult
-			continue
-		}
-
-		startId := eachPoint.Id()
-		err = graph.BFS(sc.RelGraph, startId, func(i int) bool {
-			// exclude itself
-			if i == startId {
-				return false
-			}
-			if _, err := sc.RelGraph.Edge(startId, i); err != nil {
-				return true
-			}
-
-			v, err := sc.RelGraph.Vertex(i)
-			if err != nil {
-				log.Warnf("unknown vertex: %d", i)
-				return true
-			}
-			ret = append(ret, v)
-			return false
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return ret, nil
+	return startPoints, nil
 }
 
 func (sc *SourceContext) RefsByDefId(defId int) ([]*FactVertex, error) {
@@ -107,7 +77,7 @@ func (sc *SourceContext) RefsByLine(fileName string, lineNum int) ([]*FactVertex
 	if err != nil {
 		return nil, err
 	}
-	log.Infof("file %s refs: %d", fileName, len(allVertexes))
+	log.Debugf("file %s refs: %d", fileName, len(allVertexes))
 	startPoints := make([]*RelVertex, 0)
 	for _, each := range allVertexes {
 		if each.LineNumber() == lineNum {
