@@ -4,10 +4,13 @@ import (
 	"github.com/williamfzc/srctx/parser/lsif"
 )
 
-func reverseMap(m map[lsif.Id]lsif.Id) map[lsif.Id]lsif.Id {
-	n := make(map[lsif.Id]lsif.Id, len(m))
+func reverseMap(m map[lsif.Id]lsif.Id) map[lsif.Id][]lsif.Id {
+	n := make(map[lsif.Id][]lsif.Id)
 	for k, v := range m {
-		n[v] = k
+		if _, ok := n[v]; !ok {
+			n[v] = make([]lsif.Id, 0)
+		}
+		n[v] = append(n[v], k)
 	}
 	return n
 }

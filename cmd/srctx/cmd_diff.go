@@ -85,15 +85,7 @@ func AddDiffCmd(app *cli.App) {
 					for _, eachUnit := range functionFile.Units {
 						// append these def lines
 						if eachUnit.GetSpan().ContainAnyLine(lines...) {
-							cur := &collector.FuncVertex{
-								Function: eachUnit,
-								FuncPos: &collector.FuncPos{
-									Path:  path,
-									Lang:  string(functionFile.Language),
-									Start: int(eachUnit.GetSpan().Start.Row),
-									End:   int(eachUnit.GetSpan().End.Row),
-								},
-							}
+							cur := collector.CreateFuncVertex(eachUnit, functionFile)
 							startPoints = append(startPoints, cur)
 						}
 					}

@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// file name -> lines
 type AffectedLineMap = map[string][]int
 
 func GitDiff(rootDir string, before string, after string) (AffectedLineMap, error) {

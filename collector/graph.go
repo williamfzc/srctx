@@ -2,9 +2,10 @@ package collector
 
 import (
 	"fmt"
-
 	"github.com/dominikbraun/graph"
+	"github.com/opensibyl/sibyl2/pkg/extractor"
 	object2 "github.com/opensibyl/sibyl2/pkg/extractor/object"
+	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/object"
 )
 
@@ -22,6 +23,7 @@ type FuncVertex struct {
 
 func (fv *FuncVertex) DefLine() int {
 	// not always correct
+	// todo: need sibyl2 improvement
 	return fv.Start
 }
 
@@ -33,6 +35,20 @@ func (fv *FuncVertex) PosKey() string {
 	return fmt.Sprintf("%s#%d", fv.Path, fv.Start)
 }
 
+func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *FuncVertex {
+	cur := &FuncVertex{
+		Function: f,
+		FuncPos: &FuncPos{
+			Path: fr.Path,
+			Lang: string(fr.Language),
+			// sync with real lines
+			Start: int(f.GetSpan().Start.Row + 1),
+			End:   int(f.GetSpan().End.Row + 1),
+		},
+	}
+	return cur
+}
+
 type FuncGraph struct {
 	g     graph.Graph[string, *FuncVertex]
 	cache map[string][]*FuncVertex
@@ -40,7 +56,16 @@ type FuncGraph struct {
 
 func (fg *FuncGraph) InfluenceCount(f *FuncVertex) int {
 	ret := 0
-	_ = graph.BFS(fg.g, f.Id(), func(s string) bool {
+	startPoint := f.Id()
+	_ = graph.BFS(fg.g, startPoint, func(s string) bool {
+		if startPoint == s {
+			return false
+		}
+		if _, err := fg.g.Edge(startPoint, s); err != nil {
+			return true
+		}
+
+		log.Infof("direct ref: %s", s)
 		ret++
 		return false
 	})
@@ -56,35 +81,43 @@ func CreateGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGr
 	// add all the nodes
 	for path, file := range fact.cache {
 		for _, eachFunc := range file.Units {
-			cur := &FuncVertex{
-				Function: eachFunc,
-				FuncPos: &FuncPos{
-					Path:  file.Path,
-					Lang:  string(file.Language),
-					Start: int(eachFunc.GetSpan().Start.Row),
-					End:   int(eachFunc.GetSpan().End.Row),
-				},
-			}
+			cur := CreateFuncVertex(eachFunc, file)
 			_ = fg.g.AddVertex(cur)
 			fg.cache[path] = append(fg.cache[path], cur)
 		}
 	}
 
 	// building edges
-	for _, funcs := range fg.cache {
+	for path, funcs := range fg.cache {
 		for _, eachFunc := range funcs {
-			refs, _ := relationship.RefsByLine(eachFunc.Path, eachFunc.DefLine())
+			refs, err := relationship.RefsByLine(path, eachFunc.DefLine())
+			log.Infof("search from %s#%d, ref: %d", path, eachFunc.DefLine(), len(refs))
+			if err != nil {
+				// no refs
+				continue
+			}
 			for _, eachRef := range refs {
 				refFile := relationship.FileName(eachRef.FileId)
 				for _, eachPossibleFunc := range fg.cache[refFile] {
+					log.Infof("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())
 					if eachPossibleFunc.GetSpan().ContainLine(eachRef.LineNumber()) {
-						// build edge
+						// build `referenced by` edge
 						_ = fg.g.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
 					}
 				}
 			}
 		}
 	}
+
+	nodeCount, err := fg.g.Order()
+	if err != nil {
+		return nil, err
+	}
+	edgeCount, err := fg.g.Size()
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("func graph ready. nodes: %d, edges: %d", nodeCount, edgeCount)
 
 	return fg, nil
 }

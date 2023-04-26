@@ -19,10 +19,10 @@ func CreateFact(root string) (*FactStorage, error) {
 	}
 
 	fact := &FactStorage{
-		cache: make(map[string]*extractor.FunctionFileResult),
+		cache: make(map[string]*extractor.FunctionFileResult, len(functionFiles)),
 	}
 	for _, eachFunc := range functionFiles {
-		log.Infof("create func file for: %v", eachFunc.Path)
+		log.Debugf("create func file for: %v", eachFunc.Path)
 		fact.cache[eachFunc.Path] = eachFunc
 	}
 	return fact, nil

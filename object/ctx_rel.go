@@ -2,39 +2,70 @@ package object
 
 import (
 	"fmt"
-
 	"github.com/dominikbraun/graph"
+	log "github.com/sirupsen/logrus"
 )
 
 func (sc *SourceContext) RefsByFileName(fileName string) ([]*RelVertex, error) {
 	// get all the reference points in this file
-	startId := sc.FileId(fileName)
-	if startId == 0 {
+	fileId := sc.FileId(fileName)
+	if fileId == 0 {
 		return nil, fmt.Errorf("no file named: %s", fileName)
 	}
 
-	ret := make([]*RelVertex, 0)
-	err := graph.DFS(sc.RelGraph, startId, func(i int) bool {
+	// collect all the nodes starting from this file
+	startPoints := make([]*RelVertex, 0)
+	err := graph.BFS(sc.FactGraph, fileId, func(i int) bool {
 		// exclude itself
-		if i == startId {
+		if i == fileId {
 			return false
 		}
-		vertex, err := sc.RelGraph.Vertex(i)
-		if err != nil {
+		if _, err := sc.FactGraph.Edge(fileId, i); err != nil {
 			return true
 		}
 
-		if vertex.Kind == FactRef {
-			if _, err := sc.RelGraph.Edge(startId, i); err == nil {
-				ret = append(ret, vertex)
-			}
+		v, err := sc.FactGraph.Vertex(i)
+		if err != nil {
+			log.Warnf("unknown vertex: %d", i)
+			return false
 		}
-
+		startPoints = append(startPoints, v.ToRelVertex())
 		return false
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	ret := make([]*RelVertex, 0)
+	for _, eachPoint := range startPoints {
+		if _, err := sc.RelGraph.Vertex(eachPoint.Id()); err != nil {
+			// hoverResult
+			continue
+		}
+
+		startId := eachPoint.Id()
+		err = graph.BFS(sc.RelGraph, startId, func(i int) bool {
+			// exclude itself
+			if i == startId {
+				return false
+			}
+			if _, err := sc.RelGraph.Edge(startId, i); err != nil {
+				return true
+			}
+
+			v, err := sc.RelGraph.Vertex(i)
+			if err != nil {
+				log.Warnf("unknown vertex: %d", i)
+				return true
+			}
+			ret = append(ret, v)
+			return false
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return ret, nil
 }
 
@@ -54,12 +85,12 @@ func (sc *SourceContext) RefsByDefId(defId int) ([]*FactVertex, error) {
 		}
 		// connected to current?
 		if _, err := sc.RelGraph.Edge(defId, i); err != nil {
-			return false
+			return true
 		}
 
 		vertex, err := sc.FactGraph.Vertex(i)
 		if err != nil {
-			return true
+			return false
 		}
 
 		ret = append(ret, vertex)
@@ -76,6 +107,7 @@ func (sc *SourceContext) RefsByLine(fileName string, lineNum int) ([]*FactVertex
 	if err != nil {
 		return nil, err
 	}
+	log.Infof("file %s refs: %d", fileName, len(allVertexes))
 	startPoints := make([]*RelVertex, 0)
 	for _, each := range allVertexes {
 		if each.LineNumber() == lineNum {
