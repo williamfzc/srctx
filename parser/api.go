@@ -105,98 +105,37 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 	}
 
 	// the fact graph is ready
-	// then real graph
+	// then rel graph
 
 	// refs
-	reverseNextMap := reverseMap(readyParser.Docs.Ranges.NextMap)
-	reverseRefMap := reverseMap(readyParser.Docs.Ranges.TextReferenceMap)
 	log.Infof("def ref map size: %d", len(readyParser.Docs.Ranges.DefRefs))
 	for eachReferenceResultId, eachDef := range readyParser.Docs.Ranges.DefRefs {
-		refFileId := eachDef.DocId
+		defFileId := eachDef.DocId
 		log.Debugf("def %d in file %s line %d",
 			eachReferenceResultId,
-			readyParser.Docs.Entries[refFileId],
+			readyParser.Docs.Entries[defFileId],
 			eachDef.Line)
+		defVertex, err := factGraph.Vertex(int(eachDef.RangeId))
+		if err != nil {
+			return nil, err
+		}
+		defVertexInRel := defVertex.ToRelVertex()
+		_ = relGraph.AddVertex(defVertexInRel)
 
 		refs := readyParser.Docs.Ranges.References.GetItems(eachReferenceResultId)
-		refRanges := make(map[lsif.Id]lsif.Id, 0)
 		for _, eachRef := range refs {
-			log.Debugf("def %d refed in file %s, line %d",
-				eachReferenceResultId,
+			log.Infof("def %v refed in file %s, line %d",
+				defVertexInRel,
 				readyParser.Docs.Entries[eachRef.DocId],
 				eachRef.Line)
 
-			refRanges[eachRef.RangeId] = eachRef.DocId
-		}
-
-		// connect between ranges to ranges
-		// range - next -> resultSet - text/references -> referenceResult - item -> range
-		for eachRefRange := range refRanges {
-			// starts with the ref point
-			resultSetId, ok := readyParser.Docs.Ranges.NextMap[eachRefRange]
-			if !ok {
-				log.Warnf("failed to jump with nextMap: %v", eachRefRange)
-				continue
-			}
-			foundReferenceResultId, ok := readyParser.Docs.Ranges.TextReferenceMap[resultSetId]
-			if !ok {
-				log.Warnf("failed to jump with reference map: %v", resultSetId)
-				continue
-			}
-
-			rawRange := &lsif.Range{}
-			err := readyParser.Docs.Ranges.Cache.Entry(eachRefRange, rawRange)
+			relVertex, err := factGraph.Vertex(int(eachRef.RangeId))
 			if err != nil {
 				return nil, err
 			}
-
-			eachRefVertex := &object.RelVertex{
-				DocId: int(eachRefRange),
-				Kind:  object.FactRef,
-				Range: rawRange,
-			}
-			log.Debugf("ref vertex: %v %v", eachRefVertex, rawRange)
-
-			_ = relGraph.AddVertex(eachRefVertex)
-
-			foundItems, ok := reverseRefMap[foundReferenceResultId]
-			if !ok {
-				log.Warnf("failed to jump with rev ref map: %v", resultSetId)
-				continue
-			}
-			for _, foundItem := range foundItems {
-				foundRanges, ok := reverseNextMap[foundItem]
-				if !ok {
-					log.Warnf("failed to jump with rev next map: %v", resultSetId)
-					continue
-				}
-
-				for _, foundRange := range foundRanges {
-					defRange := &lsif.Range{}
-					err = readyParser.Docs.Ranges.Cache.Entry(foundRange, defRange)
-					if err != nil {
-						return nil, err
-					}
-
-					// find its belonging
-					eachDefVertexInFact, err := factGraph.Vertex(int(foundRange))
-					if err != nil {
-						return nil, err
-					}
-					if eachDefVertexInFact.Kind != object.FactDef {
-						log.Infof("%v kind %s", eachDefVertexInFact, eachDefVertexInFact.Kind)
-						continue
-					}
-					eachDefVertex := eachDefVertexInFact.ToRelVertex()
-
-					// edge between ref and def
-					_ = relGraph.AddVertex(eachDefVertex)
-					err = relGraph.AddEdge(eachRefVertex.Id(), eachDefVertex.Id(), object.EdgeAttrReference)
-					if err != nil {
-						return nil, err
-					}
-				}
-			}
+			relVertexInRel := relVertex.ToRelVertex()
+			_ = relGraph.AddVertex(relVertexInRel)
+			_ = relGraph.AddEdge(defVertexInRel.Id(), relVertexInRel.Id(), object.EdgeAttrReference)
 		}
 	}
 

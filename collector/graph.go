@@ -2,8 +2,6 @@ package collector
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/dominikbraun/graph"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
 	object2 "github.com/opensibyl/sibyl2/pkg/extractor/object"
@@ -100,15 +98,21 @@ func CreateGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGr
 			}
 			for _, eachRef := range refs {
 				refFile := relationship.FileName(eachRef.FileId)
+				refTokens := eachRef.Extras.(*object.DefExtras).RawTokens
+
+				isFuncRef := false
+				for _, eachToken := range refTokens {
+					if eachToken.Value == eachFunc.Name {
+						isFuncRef = true
+					}
+				}
+				if !isFuncRef {
+					continue
+				}
+
 				for _, eachPossibleFunc := range fg.cache[refFile] {
 					if eachPossibleFunc.GetSpan().ContainLine(eachRef.LineNumber()) {
 						// build `referenced by` edge
-						// double check from file
-						lineContent := fileCache.GetLine(refFile, eachRef.LineNumber())
-						if !strings.Contains(lineContent, eachFunc.Name) {
-							log.Infof("%s not refed in %s", lineContent, eachFunc.Name)
-							continue
-						}
 						log.Infof("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())
 						_ = fg.g.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
 					}
