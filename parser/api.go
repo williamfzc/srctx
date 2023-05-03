@@ -11,7 +11,7 @@ import (
 	"github.com/williamfzc/srctx/parser/lsif"
 )
 
-func FromLsifFile(lsifFile string) (*object.SourceContext, error) {
+func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error) {
 	file, err := os.Open(lsifFile)
 	if err != nil {
 		return nil, err
@@ -28,6 +28,21 @@ func FromLsifFile(lsifFile string) (*object.SourceContext, error) {
 		return nil, err
 	}
 	defer newParser.Close()
+
+	// change workdir because srctx needs to access the files
+	// lsif uses relative paths
+	originWorkdir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	err = os.Chdir(srcDir)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = os.Chdir(originWorkdir)
+	}()
+
 	return FromParser(newParser)
 }
 
@@ -65,6 +80,7 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 					return nil, err
 				}
 
+				// access filesystem
 				defExtras := &object.DefExtras{}
 				tokens, err := lexer.File2Tokens(eachFile)
 				if err == nil {

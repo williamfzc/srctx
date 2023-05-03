@@ -1,4 +1,4 @@
-package collector
+package graph
 
 import (
 	"path/filepath"

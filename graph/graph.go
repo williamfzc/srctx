@@ -1,7 +1,8 @@
-package collector
+package graph
 
 import (
 	"fmt"
+
 	"github.com/dominikbraun/graph"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
 	object2 "github.com/opensibyl/sibyl2/pkg/extractor/object"
@@ -54,24 +55,6 @@ type FuncGraph struct {
 	cache map[string][]*FuncVertex
 }
 
-func (fg *FuncGraph) InfluenceCount(f *FuncVertex) int {
-	ret := 0
-	startPoint := f.Id()
-	_ = graph.BFS(fg.g, startPoint, func(s string) bool {
-		if startPoint == s {
-			return false
-		}
-		if _, err := fg.g.Edge(startPoint, s); err != nil {
-			return true
-		}
-
-		log.Infof("direct ref: %s", s)
-		ret++
-		return false
-	})
-	return ret
-}
-
 func CreateGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
 	fg := &FuncGraph{
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
@@ -91,7 +74,7 @@ func CreateGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGr
 	for path, funcs := range fg.cache {
 		for _, eachFunc := range funcs {
 			refs, err := relationship.RefsByLine(path, eachFunc.DefLine())
-			log.Infof("search from %s#%d, ref: %d", path, eachFunc.DefLine(), len(refs))
+			log.Debugf("search from %s#%d, ref: %d", path, eachFunc.DefLine(), len(refs))
 			if err != nil {
 				// no refs
 				continue

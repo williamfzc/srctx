@@ -1,10 +1,12 @@
 package main
 
 import (
+	"path/filepath"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"github.com/williamfzc/srctx/collector"
 	"github.com/williamfzc/srctx/diff"
+	"github.com/williamfzc/srctx/graph"
 	"github.com/williamfzc/srctx/parser"
 )
 
@@ -65,27 +67,36 @@ func AddDiffCmd(app *cli.App) {
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
+			// standardize the path
+			src, err := filepath.Abs(src)
+			if err != nil {
+				return err
+			}
+
 			// prepare
 			lineMap, err := diff.GitDiff(src, before, after)
-			panicIfErr(err)
-			sourceContext, err := parser.FromLsifFile(lsifZip)
+			if err != nil {
+				return err
+			}
+
+			sourceContext, err := parser.FromLsifFile(lsifZip, src)
 			panicIfErr(err)
 
 			// metadata
-			factStorage, err := collector.CreateFact(src)
+			factStorage, err := graph.CreateFact(src)
 			panicIfErr(err)
-			funcGraph, err := collector.CreateGraph(factStorage, sourceContext)
+			funcGraph, err := graph.CreateGraph(factStorage, sourceContext)
 			panicIfErr(err)
 
 			// line offset
-			startPoints := make([]*collector.FuncVertex, 0)
+			startPoints := make([]*graph.FuncVertex, 0)
 			for path, lines := range lineMap {
 				functionFile := factStorage.GetByFile(path)
 				if functionFile != nil {
 					for _, eachUnit := range functionFile.Units {
 						// append these def lines
 						if eachUnit.GetSpan().ContainAnyLine(lines...) {
-							cur := collector.CreateFuncVertex(eachUnit, functionFile)
+							cur := graph.CreateFuncVertex(eachUnit, functionFile)
 							startPoints = append(startPoints, cur)
 						}
 					}
