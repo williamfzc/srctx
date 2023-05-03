@@ -90,6 +90,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 				for _, eachToken := range refTokens {
 					if eachToken.Value == eachFunc.Name {
 						isFuncRef = true
+						break
 					}
 				}
 				if !isFuncRef {
@@ -97,9 +98,9 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 				}
 
 				for _, eachPossibleFunc := range fg.cache[refFile] {
-					if eachPossibleFunc.GetSpan().ContainLine(eachRef.LineNumber()) {
+					if eachPossibleFunc.GetSpan().ContainLine(eachRef.IndexLineNumber()) {
 						// build `referenced by` edge
-						log.Infof("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())
+						log.Debugf("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())
 						_ = fg.g.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
 					}
 				}

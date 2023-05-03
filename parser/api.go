@@ -140,7 +140,7 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 
 		refs := readyParser.Docs.Ranges.References.GetItems(eachReferenceResultId)
 		for _, eachRef := range refs {
-			log.Infof("def %v refed in file %s, line %d",
+			log.Debugf("def %v refed in file %s, line %d",
 				defVertexInRel,
 				readyParser.Docs.Entries[eachRef.DocId],
 				eachRef.Line)

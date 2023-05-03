@@ -14,7 +14,6 @@ const (
 
 	FactFile FactKind = "file"
 	FactDef  FactKind = "def"
-	FactRef  FactKind = "ref"
 
 	RelContains  RelKind = "contains"
 	RelReference RelKind = "reference"
@@ -45,7 +44,11 @@ func (v *FactVertex) Id() int {
 }
 
 func (v *FactVertex) LineNumber() int {
-	return int(v.Range.Line + 1)
+	return v.IndexLineNumber() + 1
+}
+
+func (v *FactVertex) IndexLineNumber() int {
+	return int(v.Range.Line)
 }
 
 func (v *FactVertex) ToRelVertex() *RelVertex {
