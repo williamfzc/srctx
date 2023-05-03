@@ -7,7 +7,6 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx/diff"
 	"github.com/williamfzc/srctx/graph"
-	"github.com/williamfzc/srctx/parser"
 )
 
 func AddDiffCmd(app *cli.App) {
@@ -79,25 +78,19 @@ func AddDiffCmd(app *cli.App) {
 				return err
 			}
 
-			sourceContext, err := parser.FromLsifFile(lsifZip, src)
-			panicIfErr(err)
-
 			// metadata
-			factStorage, err := graph.CreateFact(src)
-			panicIfErr(err)
-			funcGraph, err := graph.CreateGraph(factStorage, sourceContext)
+			funcGraph, err := graph.CreateFuncGraphFromDir(src, lsifZip)
 			panicIfErr(err)
 
 			// line offset
 			startPoints := make([]*graph.FuncVertex, 0)
 			for path, lines := range lineMap {
-				functionFile := factStorage.GetByFile(path)
-				if functionFile != nil {
-					for _, eachUnit := range functionFile.Units {
+				functions := funcGraph.GetFunctionsByFile(path)
+				if functions != nil {
+					for _, eachFunc := range functions {
 						// append these def lines
-						if eachUnit.GetSpan().ContainAnyLine(lines...) {
-							cur := graph.CreateFuncVertex(eachUnit, functionFile)
-							startPoints = append(startPoints, cur)
+						if eachFunc.GetSpan().ContainAnyLine(lines...) {
+							startPoints = append(startPoints, eachFunc)
 						}
 					}
 				}

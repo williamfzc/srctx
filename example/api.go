@@ -8,7 +8,7 @@ import (
 func apiDesc() {
 	yourLsif := "../parser/lsif/testdata/dump.lsif.zip"
 
-	sourceContext, err := parser.FromLsifFile(yourLsif)
+	sourceContext, err := parser.FromLsifFile(yourLsif, "..")
 	if err != nil {
 		panic(err)
 	}

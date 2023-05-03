@@ -8,6 +8,7 @@ import (
 	object2 "github.com/opensibyl/sibyl2/pkg/extractor/object"
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/object"
+	"github.com/williamfzc/srctx/parser"
 )
 
 type FuncPos struct {
@@ -51,11 +52,13 @@ func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *Fu
 }
 
 type FuncGraph struct {
-	g     graph.Graph[string, *FuncVertex]
+	g graph.Graph[string, *FuncVertex]
+
+	// k: file, v: function
 	cache map[string][]*FuncVertex
 }
 
-func CreateGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
+func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
 	fg := &FuncGraph{
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
 		cache: make(map[string][]*FuncVertex),
@@ -115,4 +118,21 @@ func CreateGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGr
 	log.Infof("func graph ready. nodes: %d, edges: %d", nodeCount, edgeCount)
 
 	return fg, nil
+}
+
+func CreateFuncGraphFromDir(src string, lsifFile string) (*FuncGraph, error) {
+	sourceContext, err := parser.FromLsifFile(lsifFile, src)
+	if err != nil {
+		return nil, err
+	}
+
+	factStorage, err := CreateFact(src)
+	if err != nil {
+		return nil, err
+	}
+	funcGraph, err := CreateFuncGraph(factStorage, sourceContext)
+	if err != nil {
+		return nil, err
+	}
+	return funcGraph, nil
 }

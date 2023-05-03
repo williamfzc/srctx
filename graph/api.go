@@ -5,6 +5,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func (fg *FuncGraph) GetFunctionsByFile(f string) []*FuncVertex {
+	return fg.cache[f]
+}
+
 func (fg *FuncGraph) InfluenceCount(f *FuncVertex) int {
 	ret := 0
 	startPoint := f.Id()
