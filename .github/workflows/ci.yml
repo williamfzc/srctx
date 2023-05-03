@@ -26,7 +26,6 @@ jobs:
           chmod +x /usr/local/bin/lsif-go
           lsif-go -v
           make
-          ./srctx diff --outputCsv srctx-diff.csv
-          cat srctx-diff.csv
+          ./srctx diff
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
