@@ -14,10 +14,15 @@ func TestApi(t *testing.T) {
 
 	testFuncs := fg.GetFunctionsByFile("graph/api_test.go")
 	assert.NotEmpty(t, testFuncs)
-	beingRefs := fg.DirectlyReferenced(testFuncs[0])
-	refOut := fg.DirectlyReference(testFuncs[0])
-	assert.Len(t, beingRefs, 0)
-	assert.Len(t, refOut, 4)
+
+	for _, eachFunc := range testFuncs {
+		if eachFunc.Name == "TestApi" {
+			beingRefs := fg.ReferencedIds(eachFunc)
+			refOut := fg.ReferenceIds(eachFunc)
+			assert.Len(t, beingRefs, 0)
+			assert.Len(t, refOut, 4)
+		}
+	}
 }
 
 func TestFuncGraph_DrawDot(t *testing.T) {

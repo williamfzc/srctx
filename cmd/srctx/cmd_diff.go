@@ -99,8 +99,21 @@ func AddDiffCmd(app *cli.App) {
 			// start scan
 			for _, eachPtr := range startPoints {
 				log.Infof("start point: %v", eachPtr.Id())
-				counts := funcGraph.ReferencedCount(eachPtr)
-				log.Infof("counts: %d", counts)
+
+				ids := funcGraph.TransitiveReferencedIds(eachPtr)
+				log.Infof("counts: %d", len(ids))
+				for _, each := range ids {
+					err := funcGraph.Highlight(each)
+					if err != nil {
+						return err
+					}
+				}
+			}
+			for _, eachPtr := range startPoints {
+				err := funcGraph.FillWithRed(eachPtr.Id())
+				if err != nil {
+					return err
+				}
 			}
 
 			log.Infof("diff finished.")
