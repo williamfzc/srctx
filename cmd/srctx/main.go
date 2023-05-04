@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v2"
+	"github.com/williamfzc/srctx/cmd/srctx/diff"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func mainFunc(args []string) {
 	app.Name = "srctx"
 	app.Usage = "source context tool"
 
-	AddDiffCmd(app)
+	diff.AddDiffCmd(app)
 
 	err := app.Run(args)
 	panicIfErr(err)

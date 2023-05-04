@@ -1,4 +1,4 @@
-package main
+package diff
 
 import (
 	"path/filepath"
@@ -80,7 +80,9 @@ func AddDiffCmd(app *cli.App) {
 
 			// metadata
 			funcGraph, err := graph.CreateFuncGraphFromDir(src, lsifZip)
-			panicIfErr(err)
+			if err != nil {
+				return err
+			}
 
 			// line offset
 			startPoints := make([]*graph.FuncVertex, 0)
