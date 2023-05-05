@@ -6,6 +6,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.7.0
 	github.com/bluekeyes/go-gitdiff v0.7.1
 	github.com/dominikbraun/graph v0.20.0
+	github.com/gocarina/gocsv v0.0.0-20230406101422-6445c2b15027
 	github.com/opensibyl/sibyl2 v0.15.4
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.2

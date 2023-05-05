@@ -5,6 +5,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func (fg *FuncGraph) FuncCount() int {
+	ret, _ := fg.g.Order()
+	return ret
+}
+
 func (fg *FuncGraph) ReferencedCount(f *FuncVertex) int {
 	return len(fg.ReferencedIds(f))
 }

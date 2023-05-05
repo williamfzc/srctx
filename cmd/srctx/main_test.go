@@ -7,6 +7,7 @@ func TestDiff(t *testing.T) {
 		"srctx", "diff",
 		"--src", "../..",
 		"--before", "HEAD~1",
-		"--outputDot", "d.dot",
+		"--outputDot", "output.dot",
+		"--outputCsv", "output.csv",
 		"--lsif", "../../dump.lsif"})
 }

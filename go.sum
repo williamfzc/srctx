@@ -15,6 +15,8 @@ github.com/dlclark/regexp2 v1.8.1 h1:6Lcdwya6GjPUNsBct8Lg/yRPwMhABj269AAzdGSiR+0
 github.com/dlclark/regexp2 v1.8.1/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/dominikbraun/graph v0.20.0 h1:a/ReB8JqcIhpo9yx31V1W+OwRnak4lo7QFsj17kpe6c=
 github.com/dominikbraun/graph v0.20.0/go.mod h1:yOjYyogZLY1LSG9E33JWZJiq5k83Qy2C6POAuiViluc=
+github.com/gocarina/gocsv v0.0.0-20230406101422-6445c2b15027 h1:LCGzZb4kMUUjMUzLxxqSJBwo9szUO0tK8cOxnEOT4Jc=
+github.com/gocarina/gocsv v0.0.0-20230406101422-6445c2b15027/go.mod h1:5YoVOkjYAQumqlV356Hj3xeYh4BdZuLE0/nRkf2NKkI=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=

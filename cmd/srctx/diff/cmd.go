@@ -1,8 +1,11 @@
 package diff
 
 import (
+	"bufio"
+	"os"
 	"path/filepath"
 
+	"github.com/gocarina/gocsv"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx/diff"
@@ -18,53 +21,55 @@ func AddDiffCmd(app *cli.App) {
 	var outputCsv string
 	var outputDot string
 
+	flags := []cli.Flag{
+		&cli.StringFlag{
+			Name:        "src",
+			Value:       ".",
+			Usage:       "repo path",
+			Destination: &src,
+		},
+		&cli.StringFlag{
+			Name:        "before",
+			Value:       "HEAD~1",
+			Usage:       "before rev",
+			Destination: &before,
+		},
+		&cli.StringFlag{
+			Name:        "after",
+			Value:       "HEAD",
+			Usage:       "after rev",
+			Destination: &after,
+		},
+		&cli.StringFlag{
+			Name:        "lsif",
+			Value:       "./dump.lsif",
+			Usage:       "lsif path, can be zip or origin file",
+			Destination: &lsifZip,
+		},
+		&cli.StringFlag{
+			Name:        "outputJson",
+			Value:       "",
+			Usage:       "json output",
+			Destination: &outputJson,
+		},
+		&cli.StringFlag{
+			Name:        "outputCsv",
+			Value:       "",
+			Usage:       "csv output",
+			Destination: &outputCsv,
+		},
+		&cli.StringFlag{
+			Name:        "outputDot",
+			Value:       "",
+			Usage:       "reference dot file output",
+			Destination: &outputDot,
+		},
+	}
+
 	diffCmd := &cli.Command{
 		Name:  "diff",
 		Usage: "diff with lsif",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "src",
-				Value:       ".",
-				Usage:       "repo path",
-				Destination: &src,
-			},
-			&cli.StringFlag{
-				Name:        "before",
-				Value:       "HEAD~1",
-				Usage:       "before rev",
-				Destination: &before,
-			},
-			&cli.StringFlag{
-				Name:        "after",
-				Value:       "HEAD",
-				Usage:       "after rev",
-				Destination: &after,
-			},
-			&cli.StringFlag{
-				Name:        "lsif",
-				Value:       "./dump.lsif",
-				Usage:       "lsif path, can be zip or origin file",
-				Destination: &lsifZip,
-			},
-			&cli.StringFlag{
-				Name:        "outputJson",
-				Value:       "",
-				Usage:       "json output",
-				Destination: &outputJson,
-			},
-			&cli.StringFlag{
-				Name:        "outputCsv",
-				Value:       "srctx-diff.csv",
-				Usage:       "csv output",
-				Destination: &outputCsv,
-			},
-			&cli.StringFlag{
-				Name:        "outputDot",
-				Value:       "",
-				Usage:       "reference dot file output",
-				Destination: &outputDot,
-			},
-		},
+		Flags: flags,
 		Action: func(cCtx *cli.Context) error {
 			// standardize the path
 			src, err := filepath.Abs(src)
@@ -92,32 +97,28 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			// start scan
-			visited := make(map[string]struct{})
+			stats := make([]*graph.VertexStat, 0)
 			for _, eachPtr := range startPoints {
-				ids := funcGraph.TransitiveReferencedIds(eachPtr)
-				// also reverse
-				rids := funcGraph.TransitiveReferenceIds(eachPtr)
-
-				log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(ids), len(rids))
-				for _, each := range append(ids, rids...) {
-					visited[each] = struct{}{}
-				}
+				eachStat := funcGraph.Stat(eachPtr)
+				stats = append(stats, eachStat)
+				log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), eachStat.Referenced, eachStat.Reference)
 			}
-
 			log.Infof("diff finished.")
 
 			// output
 			if outputDot != "" {
 				log.Infof("creating dot file: %v", outputDot)
-				// draw this graph
-				for eachVisitedId := range visited {
-					err := funcGraph.Highlight(eachVisitedId)
-					if err != nil {
-						return err
+				// colorful
+				for _, eachStat := range stats {
+					for _, eachVisited := range eachStat.VisitedIds() {
+						err := funcGraph.Highlight(eachVisited)
+						if err != nil {
+							return err
+						}
 					}
 				}
-				for _, eachPtr := range startPoints {
-					err := funcGraph.FillWithRed(eachPtr.Id())
+				for _, eachStat := range stats {
+					err := funcGraph.FillWithRed(eachStat.Root.Id())
 					if err != nil {
 						return err
 					}
@@ -129,9 +130,105 @@ func AddDiffCmd(app *cli.App) {
 				}
 			}
 
+			if outputCsv != "" {
+				log.Infof("creating output csv: %v", outputCsv)
+
+				csvFile, err := os.OpenFile(outputCsv, os.O_RDWR|os.O_CREATE, os.ModePerm)
+				if err != nil {
+					return err
+				}
+				defer csvFile.Close()
+
+				// need to access files
+				originWorkdir, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				err = os.Chdir(src)
+				if err != nil {
+					return err
+				}
+				defer func() {
+					_ = os.Chdir(originWorkdir)
+				}()
+
+				fileMap := make(map[string]*FileVertex)
+				for _, eachStat := range stats {
+					path := eachStat.Root.FuncPos.Path
+
+					if cur, ok := fileMap[path]; ok {
+						cur.AffectedReferenceIds = append(cur.AffectedReferenceIds, eachStat.VisitedIds()...)
+					} else {
+						totalLine, err := lineCounter(path)
+						if err != nil {
+							return err
+						}
+						fileMap[path] = &FileVertex{
+							FileName:             path,
+							AffectedLines:        len(lineMap[path]),
+							TotalLines:           totalLine,
+							AffectedFunctions:    len(funcGraph.GetFunctionsByFileLines(path, lineMap[path])),
+							TotalFunctions:       len(funcGraph.GetFunctionsByFile(path)),
+							AffectedReferenceIds: eachStat.VisitedIds(),
+							TotalReferences:      funcGraph.FuncCount(),
+						}
+					}
+				}
+				fileList := make([]*FileVertex, 0, len(fileMap))
+				for _, v := range fileMap {
+					// calc
+					v.AffectedLinePercent = float32(v.AffectedLines) / float32(v.TotalLines)
+
+					m := make(map[string]struct{})
+					for _, each := range v.AffectedReferenceIds {
+						m[each] = struct{}{}
+					}
+					v.AffectedReferences = len(m)
+					v.AffectedReferencePercent = float32(v.AffectedReferences) / float32(v.TotalReferences)
+					v.AffectedFunctionPercent = float32(v.AffectedFunctions) / float32(v.TotalFunctions)
+
+					fileList = append(fileList, v)
+				}
+
+				if err := gocsv.MarshalFile(&fileList, csvFile); err != nil {
+					return err
+				}
+			}
+
 			log.Infof("everything done.")
 			return nil
 		},
 	}
 	app.Commands = append(app.Commands, diffCmd)
+}
+
+type FileVertex struct {
+	FileName                 string  `csv:"fileName"`
+	AffectedLinePercent      float32 `csv:"affectedLinePercent"`
+	AffectedFunctionPercent  float32 `csv:"affectedFunctionPercent"`
+	AffectedReferencePercent float32 `csv:"affectedReferencePercent"`
+
+	AffectedLines int `csv:"affectedLines"`
+	TotalLines    int `csv:"totalLines"`
+
+	AffectedFunctions int `csv:"affectedFunctions"`
+	TotalFunctions    int `csv:"totalFunctions"`
+
+	AffectedReferences   int      `csv:"affectedReferences"`
+	AffectedReferenceIds []string `csv:"-"`
+	TotalReferences      int      `csv:"totalReferences"`
+}
+
+// https://stackoverflow.com/a/24563853
+func lineCounter(fileName string) (int, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return 0, err
+	}
+	fileScanner := bufio.NewScanner(file)
+	lineCount := 0
+	for fileScanner.Scan() {
+		lineCount++
+	}
+	return lineCount, nil
 }
