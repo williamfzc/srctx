@@ -84,37 +84,23 @@ func AddDiffCmd(app *cli.App) {
 				return err
 			}
 
-			// line offset
+			// look up start points
 			startPoints := make([]*graph.FuncVertex, 0)
 			for path, lines := range lineMap {
-				functions := funcGraph.GetFunctionsByFile(path)
-				if functions != nil {
-					for _, eachFunc := range functions {
-						// append these def lines
-						if eachFunc.GetSpan().ContainAnyLine(lines...) {
-							startPoints = append(startPoints, eachFunc)
-						}
-					}
-				}
+				curPoints := funcGraph.GetFunctionsByFileLines(path, lines)
+				startPoints = append(startPoints, curPoints...)
 			}
 
 			// start scan
+			visited := make(map[string]struct{})
 			for _, eachPtr := range startPoints {
-				log.Infof("start point: %v", eachPtr.Id())
-
 				ids := funcGraph.TransitiveReferencedIds(eachPtr)
-				log.Infof("counts: %d", len(ids))
-				for _, each := range ids {
-					err := funcGraph.Highlight(each)
-					if err != nil {
-						return err
-					}
-				}
-			}
-			for _, eachPtr := range startPoints {
-				err := funcGraph.FillWithRed(eachPtr.Id())
-				if err != nil {
-					return err
+				// also reverse
+				rids := funcGraph.TransitiveReferenceIds(eachPtr)
+
+				log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(ids), len(rids))
+				for _, each := range append(ids, rids...) {
+					visited[each] = struct{}{}
 				}
 			}
 
@@ -122,11 +108,28 @@ func AddDiffCmd(app *cli.App) {
 
 			// output
 			if outputDot != "" {
+				log.Infof("creating dot file: %v", outputDot)
+				// draw this graph
+				for eachVisitedId := range visited {
+					err := funcGraph.Highlight(eachVisitedId)
+					if err != nil {
+						return err
+					}
+				}
+				for _, eachPtr := range startPoints {
+					err := funcGraph.FillWithRed(eachPtr.Id())
+					if err != nil {
+						return err
+					}
+				}
+
 				err := funcGraph.DrawDot(outputDot)
 				if err != nil {
 					return err
 				}
 			}
+
+			log.Infof("everything done.")
 			return nil
 		},
 	}

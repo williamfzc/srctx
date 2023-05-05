@@ -53,3 +53,20 @@ func (fg *FuncGraph) ReferenceIds(f *FuncVertex) []string {
 	}
 	return ret
 }
+
+func (fg *FuncGraph) TransitiveReferenceIds(f *FuncVertex) []string {
+	m := make(map[string]struct{}, 0)
+	start := f.Id()
+	graph.BFS(fg.rg, start, func(cur string) bool {
+		if cur == start {
+			return false
+		}
+		m[cur] = struct{}{}
+		return false
+	})
+	ret := make([]string, 0, len(m))
+	for k := range m {
+		ret = append(ret, k)
+	}
+	return ret
+}

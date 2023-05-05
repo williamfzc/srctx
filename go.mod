@@ -5,8 +5,7 @@ go 1.19
 require (
 	github.com/alecthomas/chroma/v2 v2.7.0
 	github.com/bluekeyes/go-gitdiff v0.7.1
-	github.com/dominikbraun/graph v0.16.2
-	github.com/gocarina/gocsv v0.0.0-20230325173030-9a18a846a479
+	github.com/dominikbraun/graph v0.20.0
 	github.com/opensibyl/sibyl2 v0.15.4
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.2

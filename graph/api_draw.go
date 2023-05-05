@@ -11,7 +11,7 @@ func (fg *FuncGraph) DrawDot(filename string) error {
 	if err != nil {
 		return err
 	}
-	err = draw.DOT(fg.g, file)
+	err = draw.DOT(fg.g, file, draw.GraphAttribute("rankdir", "LR"))
 	if err != nil {
 		return err
 	}

@@ -52,7 +52,8 @@ func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *Fu
 }
 
 type FuncGraph struct {
-	g graph.Graph[string, *FuncVertex]
+	g  graph.Graph[string, *FuncVertex]
+	rg graph.Graph[string, *FuncVertex]
 
 	// k: file, v: function
 	cache map[string][]*FuncVertex
@@ -61,6 +62,7 @@ type FuncGraph struct {
 func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
 	fg := &FuncGraph{
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
+		rg:    graph.New((*FuncVertex).Id, graph.Directed()),
 		cache: make(map[string][]*FuncVertex),
 	}
 
@@ -72,6 +74,13 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 			fg.cache[path] = append(fg.cache[path], cur)
 		}
 	}
+
+	// also reverse graph
+	rg, err := fg.g.Clone()
+	if err != nil {
+		return nil, err
+	}
+	fg.rg = rg
 
 	// building edges
 	for path, funcs := range fg.cache {
@@ -102,6 +111,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 						// build `referenced by` edge
 						log.Debugf("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())
 						_ = fg.g.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
+						_ = fg.rg.AddEdge(eachPossibleFunc.Id(), eachFunc.Id())
 					}
 				}
 			}
