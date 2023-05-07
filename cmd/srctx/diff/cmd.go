@@ -2,6 +2,7 @@ package diff
 
 import (
 	"bufio"
+	"encoding/json"
 	"os"
 	"path/filepath"
 
@@ -130,15 +131,7 @@ func AddDiffCmd(app *cli.App) {
 				}
 			}
 
-			if outputCsv != "" {
-				log.Infof("creating output csv: %v", outputCsv)
-
-				csvFile, err := os.OpenFile(outputCsv, os.O_RDWR|os.O_CREATE, os.ModePerm)
-				if err != nil {
-					return err
-				}
-				defer csvFile.Close()
-
+			if outputCsv != "" || outputJson != "" {
 				// need to access files
 				originWorkdir, err := os.Getwd()
 				if err != nil {
@@ -190,8 +183,27 @@ func AddDiffCmd(app *cli.App) {
 					fileList = append(fileList, v)
 				}
 
-				if err := gocsv.MarshalFile(&fileList, csvFile); err != nil {
-					return err
+				if outputCsv != "" {
+					log.Infof("creating output csv: %v", outputCsv)
+					csvFile, err := os.OpenFile(outputCsv, os.O_RDWR|os.O_CREATE, os.ModePerm)
+					if err != nil {
+						return err
+					}
+					defer csvFile.Close()
+					if err := gocsv.MarshalFile(&fileList, csvFile); err != nil {
+						return err
+					}
+				}
+				if outputJson != "" {
+					log.Infof("creating output json: %s", outputJson)
+					contentBytes, err := json.Marshal(&fileList)
+					if err != nil {
+						return err
+					}
+					err = os.WriteFile(outputJson, contentBytes, os.ModePerm)
+					if err != nil {
+						return err
+					}
 				}
 			}
 
@@ -203,20 +215,20 @@ func AddDiffCmd(app *cli.App) {
 }
 
 type FileVertex struct {
-	FileName                 string  `csv:"fileName"`
-	AffectedLinePercent      float32 `csv:"affectedLinePercent"`
-	AffectedFunctionPercent  float32 `csv:"affectedFunctionPercent"`
-	AffectedReferencePercent float32 `csv:"affectedReferencePercent"`
+	FileName                 string  `csv:"fileName" json:"fileName"`
+	AffectedLinePercent      float32 `csv:"affectedLinePercent" json:"affectedLinePercent"`
+	AffectedFunctionPercent  float32 `csv:"affectedFunctionPercent" json:"affectedFunctionPercent"`
+	AffectedReferencePercent float32 `csv:"affectedReferencePercent" json:"affectedReferencePercent"`
 
-	AffectedLines int `csv:"affectedLines"`
-	TotalLines    int `csv:"totalLines"`
+	AffectedLines int `csv:"affectedLines" json:"affectedLines"`
+	TotalLines    int `csv:"totalLines" json:"totalLines"`
 
-	AffectedFunctions int `csv:"affectedFunctions"`
-	TotalFunctions    int `csv:"totalFunctions"`
+	AffectedFunctions int `csv:"affectedFunctions" json:"affectedFunctions"`
+	TotalFunctions    int `csv:"totalFunctions" json:"totalFunctions"`
 
-	AffectedReferences   int      `csv:"affectedReferences"`
-	AffectedReferenceIds []string `csv:"-"`
-	TotalReferences      int      `csv:"totalReferences"`
+	AffectedReferences   int      `csv:"affectedReferences" json:"affectedReferences"`
+	AffectedReferenceIds []string `csv:"-" json:"-"`
+	TotalReferences      int      `csv:"totalReferences" json:"totalReferences"`
 }
 
 // https://stackoverflow.com/a/24563853
