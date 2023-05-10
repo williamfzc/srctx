@@ -49,29 +49,46 @@ repository, reducing the mental burden on developers.
 
 ## Out-of-box production (Recommendation)
 
-Because LSIF files require dev env heavily, it's really hard to provide a universal solution in a single binary file for all the repos.
+Because LSIF files require dev env heavily, it's really hard to provide a universal solution in a single binary file for
+all the repos.
 
 <img width="697" alt="image" src="https://user-images.githubusercontent.com/13421694/236666915-5d403e4a-9cc1-4364-afbe-363cf82e5e49.png">
 
-We are currently working on [diffctx](https://github.com/williamfzc/diffctx), which will provide a GitHub Actions plugin that allows users to use it directly in a Pull Request.
+We are currently working on [diffctx](https://github.com/williamfzc/diffctx), which will provide a GitHub Actions plugin
+that allows users to use it directly in a Pull Request.
 
-## Usage as Cli
+## Usage as Cli (Recommendation)
 
-A full example can be found in our
-CI: https://github.com/williamfzc/srctx/blob/f2f236872914674d3fdc8c08b0d35e89096a8ff2/.github/workflows/ci.yml#L25
+A short golang example:
+
+```bash
+# indexing
+curl -L  https://github.com/sourcegraph/lsif-go/releases/download/v1.9.3/src_linux_amd64 -o /usr/local/bin/lsif-go
+chmod +x /usr/local/bin/lsif-go
+lsif-go -v
+
+# diff
+wget https://github.com/williamfzc/srctx/releases/download/v0.4.2/srctx-linux-amd64
+chmod +x srctx-linux-amd64
+./srctx-linux-amd64 diff --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
+```
+
+It will produce:
+
+- JSON for processing by other programs
+- CSV for reading
+- graphviz DOT file
 
 ### 1. Generate LSIF file
 
-LSIF is a standard format for persisted code analyzer output.
-Today, several companies are working to support its growth, including Sourcegraph and GitHub/Microsoft.
-The LSIF defines a standard format for language servers or other programming tools to emit their knowledge about a code
-workspace.
+Some official tools we used in `diffctx`:
 
-https://microsoft.github.io/language-server-protocol/overviews/lsif/overview/
-
-You can easily find an existed tool for generating LSIF file for your repo.
-
-https://lsif.dev/
+| Language    | Link                                                                                                | Command                                                                  |
+|-------------|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| Golang      | [lsif-go](https://github.com/sourcegraph/lsif-go)                                                   | `lsif-go -v`                                                             |
+| Python      | [lsif-py](https://github.com/sourcegraph/lsif-py)                                                   | `lsif-py .`                                                              |
+| Java/Kotlin | [scip-java](https://github.com/sourcegraph/scip-java) / [scip](https://github.com/sourcegraph/scip) | see [index.py](https://github.com/williamfzc/diffctx/blob/main/index.py) |
+| JavaScript  | [lsif-node](https://github.com/microsoft/lsif-node)                                                 | see [website](https://github.com/microsoft/lsif-node)                    |
 
 You will get a `dump.lsif` file after that.
 
@@ -79,9 +96,13 @@ You will get a `dump.lsif` file after that.
 
 Download our prebuilt binaries from [release page](https://github.com/williamfzc/srctx/releases).
 
+For example, diff from `HEAD~1` to `HEAD`:
+
 ```bash
-./srctx diff --lsif dump.lsif --outputCsv output.csv
+./srctx diff --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
 ```
+
+See details with `./srctx diff --help`.
 
 ## Usage as Lib
 
@@ -141,8 +162,21 @@ Issues and PRs are always welcome.
 
 # References
 
+LSIF is a standard format for persisted code analyzer output.
+Today, several companies are working to support its growth, including Sourcegraph and GitHub/Microsoft.
+The LSIF defines a standard format for language servers or other programming tools to emit their knowledge about a code
+workspace.
+
 - https://lsif.dev/
+- https://microsoft.github.io/language-server-protocol/overviews/lsif/overview/
 - https://code.visualstudio.com/blogs/2019/02/19/lsif#_how-to-get-started
+
+# Thanks
+
+- SCIP/LSIF toolchains from https://github.com/sourcegraph
+- LSIF from Microsoft
+- LSIF parser from GitLab
+- IDE support from JetBrains
 
 # License
 
