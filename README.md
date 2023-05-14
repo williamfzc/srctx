@@ -47,7 +47,7 @@ repository, reducing the mental burden on developers.
 
 # Usage
 
-## Out-of-box production (Recommendation)
+## Usage as Github Action (Recommendation)
 
 Because LSIF files require dev env heavily, it's really hard to provide a universal solution in a single binary file for
 all the repos.
@@ -59,27 +59,19 @@ that allows users to use it directly in a Pull Request.
 
 ## Usage as Cli (Recommendation)
 
-A short golang example:
+### For Golang
+
+We have embedded the lsif-go indexer in our prebuilt binary files. So all you need is:
 
 ```bash
-# indexing
-curl -L  https://github.com/sourcegraph/lsif-go/releases/download/v1.9.3/src_linux_amd64 -o /usr/local/bin/lsif-go
-chmod +x /usr/local/bin/lsif-go
-lsif-go -v
-
-# diff
 wget https://github.com/williamfzc/srctx/releases/download/v0.4.2/srctx-linux-amd64
 chmod +x srctx-linux-amd64
-./srctx-linux-amd64 diff --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
+./srctx-linux-amd64 diff --withIndex --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
 ```
 
-It will produce:
+### For Other Languages
 
-- JSON for processing by other programs
-- CSV for reading
-- graphviz DOT file
-
-### 1. Generate LSIF file
+#### 1. Generate LSIF file
 
 Some official tools we used in `diffctx`:
 
@@ -92,7 +84,7 @@ Some official tools we used in `diffctx`:
 
 You will get a `dump.lsif` file after that.
 
-### 2. Run `srctx`
+#### 2. Run `srctx`
 
 Download our prebuilt binaries from [release page](https://github.com/williamfzc/srctx/releases).
 
