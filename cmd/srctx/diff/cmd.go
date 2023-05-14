@@ -21,6 +21,7 @@ func AddDiffCmd(app *cli.App) {
 	var outputJson string
 	var outputCsv string
 	var outputDot string
+	var withIndex bool
 
 	flags := []cli.Flag{
 		&cli.StringFlag{
@@ -65,6 +66,12 @@ func AddDiffCmd(app *cli.App) {
 			Usage:       "reference dot file output",
 			Destination: &outputDot,
 		},
+		&cli.BoolFlag{
+			Name:        "withIndex",
+			Value:       false,
+			Usage:       "create indexes first if enabled, currently support golang only",
+			Destination: &withIndex,
+		},
 	}
 
 	diffCmd := &cli.Command{
@@ -77,6 +84,7 @@ func AddDiffCmd(app *cli.App) {
 			if err != nil {
 				return err
 			}
+			log.Infof("start diffing: %v", src)
 
 			// prepare
 			lineMap, err := diff.GitDiff(src, before, after)
@@ -85,7 +93,12 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			// metadata
-			funcGraph, err := graph.CreateFuncGraphFromDir(src, lsifZip)
+			var funcGraph *graph.FuncGraph
+			if withIndex {
+				funcGraph, err = graph.CreateFuncGraphFromGolangDir(src)
+			} else {
+				funcGraph, err = graph.CreateFuncGraphFromDir(src, lsifZip)
+			}
 			if err != nil {
 				return err
 			}

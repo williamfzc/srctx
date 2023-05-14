@@ -6,10 +6,38 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	lsifgo "github.com/sourcegraph/lsif-go/cmd/lsif-go/api"
 	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser/lexer"
 	"github.com/williamfzc/srctx/parser/lsif"
 )
+
+func FromGolangSrc(srcDir string) (*object.SourceContext, error) {
+	// change workdir because lsif needs to access the files
+	originWorkdir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	err = os.Chdir(srcDir)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = os.Chdir(originWorkdir)
+	}()
+	// create indexes
+	log.Infof("creating index for %v", srcDir)
+	err = lsifgo.MainArgs([]string{
+		"-v",
+		"--project-root", srcDir,
+		"--repository-root", srcDir,
+		"--module-root", srcDir,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return FromLsifFile("./dump.lsif", srcDir)
+}
 
 func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error) {
 	file, err := os.Open(lsifFile)

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/dominikbraun/graph"
@@ -62,4 +63,11 @@ func TestApi(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestGen(t *testing.T) {
+	root, err := filepath.Abs("../")
+	assert.Nil(t, err)
+	_, err = FromGolangSrc(root)
+	assert.Nil(t, err)
 }

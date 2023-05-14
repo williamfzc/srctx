@@ -131,12 +131,23 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 	return fg, nil
 }
 
+func CreateFuncGraphFromGolangDir(src string) (*FuncGraph, error) {
+	sourceContext, err := parser.FromGolangSrc(src)
+	if err != nil {
+		return nil, err
+	}
+	return srcctx2graph(src, sourceContext)
+}
+
 func CreateFuncGraphFromDir(src string, lsifFile string) (*FuncGraph, error) {
 	sourceContext, err := parser.FromLsifFile(lsifFile, src)
 	if err != nil {
 		return nil, err
 	}
+	return srcctx2graph(src, sourceContext)
+}
 
+func srcctx2graph(src string, sourceContext *object.SourceContext) (*FuncGraph, error) {
 	factStorage, err := CreateFact(src)
 	if err != nil {
 		return nil, err
