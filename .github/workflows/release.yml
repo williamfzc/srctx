@@ -58,7 +58,8 @@ jobs:
             && ./coursier bootstrap --standalone -o scip-java com.sourcegraph:scip-java_2.13:0.8.18 --main com.sourcegraph.scip_java.ScipJava
           
           # zip for CI/docker
-          zip srctx-linux-amd64-full.zip scip scip-java ./build/srctx-linux-amd64
+          cp ./build/srctx-linux-amd64 ./srctx
+          zip srctx-linux-amd64-full.zip scip scip-java ./srctx
 
       - name: Release
         uses: softprops/action-gh-release@v1
