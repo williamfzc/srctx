@@ -139,8 +139,16 @@ func CreateFuncGraphFromGolangDir(src string) (*FuncGraph, error) {
 	return srcctx2graph(src, sourceContext)
 }
 
-func CreateFuncGraphFromDir(src string, lsifFile string) (*FuncGraph, error) {
+func CreateFuncGraphFromDirWithLSIF(src string, lsifFile string) (*FuncGraph, error) {
 	sourceContext, err := parser.FromLsifFile(lsifFile, src)
+	if err != nil {
+		return nil, err
+	}
+	return srcctx2graph(src, sourceContext)
+}
+
+func CreateFuncGraphFromDirWithSCIP(src string, scipFile string) (*FuncGraph, error) {
+	sourceContext, err := parser.FromScipFile(scipFile, src)
 	if err != nil {
 		return nil, err
 	}

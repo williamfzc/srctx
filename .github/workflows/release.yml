@@ -43,15 +43,6 @@ jobs:
           buildmode: default
       - name: Build Full CI Package
         run: |
-          # scip
-          git clone https://github.com/sourcegraph/scip.git --depth=1
-          cd scip
-          go build -o scip_bin ./cmd
-          mv ./scip_bin ..
-          cd ..
-          rm -rf scip
-          mv ./scip_bin ./scip
-          
           # scip-java
           curl -fLo coursier https://git.io/coursier-cli \
             && chmod +x coursier \
@@ -59,7 +50,7 @@ jobs:
           
           # zip for CI/docker
           cp ./build/srctx-linux-amd64 ./srctx
-          zip srctx-linux-amd64-full.zip scip scip-java ./srctx
+          zip srctx-linux-amd64-full.zip scip-java ./srctx
 
       - name: Release
         uses: softprops/action-gh-release@v1

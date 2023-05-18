@@ -18,6 +18,7 @@ func AddDiffCmd(app *cli.App) {
 	var before string
 	var after string
 	var lsifZip string
+	var scipFile string
 	var outputJson string
 	var outputCsv string
 	var outputDot string
@@ -47,6 +48,12 @@ func AddDiffCmd(app *cli.App) {
 			Value:       "./dump.lsif",
 			Usage:       "lsif path, can be zip or origin file",
 			Destination: &lsifZip,
+		},
+		&cli.StringFlag{
+			Name:        "scip",
+			Value:       "",
+			Usage:       "scip file",
+			Destination: &scipFile,
 		},
 		&cli.StringFlag{
 			Name:        "outputJson",
@@ -94,11 +101,21 @@ func AddDiffCmd(app *cli.App) {
 
 			// metadata
 			var funcGraph *graph.FuncGraph
-			if withIndex {
-				funcGraph, err = graph.CreateFuncGraphFromGolangDir(src)
+
+			if scipFile != "" {
+				// using SCIP
+				log.Infof("using SCIP as index")
+				funcGraph, err = graph.CreateFuncGraphFromDirWithSCIP(src, scipFile)
 			} else {
-				funcGraph, err = graph.CreateFuncGraphFromDir(src, lsifZip)
+				// using LSIF
+				log.Infof("using LSIF as index")
+				if withIndex {
+					funcGraph, err = graph.CreateFuncGraphFromGolangDir(src)
+				} else {
+					funcGraph, err = graph.CreateFuncGraphFromDirWithLSIF(src, lsifZip)
+				}
 			}
+
 			if err != nil {
 				return err
 			}

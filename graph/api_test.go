@@ -8,7 +8,7 @@ import (
 )
 
 func TestApi(t *testing.T) {
-	fg, err := CreateFuncGraphFromDir("../", "../dump.lsif")
+	fg, err := CreateFuncGraphFromDirWithLSIF("../", "../dump.lsif")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fg.cache)
 
@@ -26,7 +26,7 @@ func TestApi(t *testing.T) {
 }
 
 func TestFuncGraph_DrawDot(t *testing.T) {
-	fg, err := CreateFuncGraphFromDir("../", "../dump.lsif")
+	fg, err := CreateFuncGraphFromDirWithLSIF("../", "../dump.lsif")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fg.cache)
 

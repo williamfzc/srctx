@@ -2,14 +2,18 @@ package parser
 
 import (
 	"context"
+	"io"
 	"os"
 	"strings"
 
+	"github.com/cockroachdb/errors"
 	log "github.com/sirupsen/logrus"
 	lsifgo "github.com/sourcegraph/lsif-go/cmd/lsif-go/api"
+	"github.com/sourcegraph/scip/bindings/go/scip"
 	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser/lexer"
 	"github.com/williamfzc/srctx/parser/lsif"
+	"google.golang.org/protobuf/proto"
 )
 
 func FromGolangSrc(srcDir string) (*object.SourceContext, error) {
@@ -37,6 +41,60 @@ func FromGolangSrc(srcDir string) (*object.SourceContext, error) {
 		return nil, err
 	}
 	return FromLsifFile("./dump.lsif", srcDir)
+}
+
+func FromScipFile(scipFile string, srcDir string) (*object.SourceContext, error) {
+	scipIndex, err := readFromOption(scipFile)
+	if err != nil {
+		return nil, err
+	}
+
+	lsifIndex, err := scip.ConvertSCIPToLSIF(scipIndex)
+	if err != nil {
+		return nil, err
+	}
+
+	// still save this file for debug
+	lsifFile := "./dump.lsif"
+	lsifWriter, err := os.OpenFile(lsifFile, os.O_WRONLY|os.O_CREATE, 0666)
+	defer lsifWriter.Close()
+
+	err = scip.WriteNDJSON(scip.ElementsToJsonElements(lsifIndex), lsifWriter)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Infof("scip -> lsif converted")
+	return FromLsifFile(lsifFile, srcDir)
+}
+
+// https://github.com/williamfzc/scip/blob/main/cmd/option_from.go
+func readFromOption(fromPath string) (*scip.Index, error) {
+	var scipReader io.Reader
+	if fromPath == "-" {
+		scipReader = os.Stdin
+	} else if !strings.HasSuffix(fromPath, ".scip") && !strings.HasSuffix(fromPath, ".lsif-typed") {
+		return nil, errors.Newf("expected file with .scip extension but found %s", fromPath)
+	} else {
+		scipFile, err := os.Open(fromPath)
+		defer scipFile.Close()
+		if err != nil {
+			return nil, err
+		}
+		scipReader = scipFile
+	}
+
+	scipBytes, err := io.ReadAll(scipReader)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read SCIP index at path %s", fromPath)
+	}
+
+	scipIndex := scip.Index{}
+	err = proto.Unmarshal(scipBytes, &scipIndex)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse SCIP index at path %s", fromPath)
+	}
+	return &scipIndex, nil
 }
 
 func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error) {
@@ -71,6 +129,7 @@ func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error)
 		_ = os.Chdir(originWorkdir)
 	}()
 
+	log.Infof("parser ready")
 	return FromParser(newParser)
 }
 
