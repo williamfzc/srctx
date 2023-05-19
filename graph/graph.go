@@ -52,7 +52,9 @@ func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *Fu
 }
 
 type FuncGraph struct {
-	g  graph.Graph[string, *FuncVertex]
+	// reference graph
+	g graph.Graph[string, *FuncVertex]
+	// reverse reference graph (call graph)
 	rg graph.Graph[string, *FuncVertex]
 
 	// k: file, v: function
@@ -110,8 +112,9 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 					if eachPossibleFunc.GetSpan().ContainLine(eachRef.IndexLineNumber()) {
 						// build `referenced by` edge
 						log.Debugf("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())
-						_ = fg.g.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
-						_ = fg.rg.AddEdge(eachPossibleFunc.Id(), eachFunc.Id())
+						// eachFunc def, eachPossibleFunc ref
+						_ = fg.rg.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
+						_ = fg.g.AddEdge(eachPossibleFunc.Id(), eachFunc.Id())
 					}
 				}
 			}

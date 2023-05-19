@@ -21,6 +21,7 @@ type Ranges struct {
 	NextMap           map[Id]Id
 	TextReferenceMap  map[Id]Id
 	TextDefinitionMap map[Id]Id
+	RawEdgeMap        map[Id][]RawItem
 }
 
 type Next struct {
@@ -95,6 +96,7 @@ func NewRanges() (*Ranges, error) {
 		NextMap:           make(map[Id]Id),
 		TextReferenceMap:  make(map[Id]Id),
 		TextDefinitionMap: make(map[Id]Id),
+		RawEdgeMap:        map[Id][]RawItem{},
 	}, nil
 }
 
@@ -213,6 +215,11 @@ func (r *Ranges) addItem(line []byte) error {
 	}
 
 	if rawItem.Property != definitions && rawItem.Property != references {
+		if l, ok := r.RawEdgeMap[rawItem.RefId]; ok {
+			l = append(l, rawItem)
+		} else {
+			r.RawEdgeMap[rawItem.RefId] = []RawItem{rawItem}
+		}
 		return nil
 	}
 
