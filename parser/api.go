@@ -2,8 +2,10 @@ package parser
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/cockroachdb/errors"
@@ -55,7 +57,7 @@ func FromScipFile(scipFile string, srcDir string) (*object.SourceContext, error)
 	}
 
 	// still save this file for debug
-	lsifFile := "./dump.lsif"
+	lsifFile := filepath.Join(srcDir, "dump.lsif")
 	lsifWriter, err := os.OpenFile(lsifFile, os.O_WRONLY|os.O_CREATE, 0666)
 	defer lsifWriter.Close()
 
@@ -218,6 +220,20 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 			eachRef.Line)
 
 		refs := readyParser.Docs.Ranges.References.GetItems(eachReferenceResultId)
+		if refs == nil {
+			// eachReferenceResultId is definitionResult
+			// try to search referenceResult
+			// definitionResult -> resultSet -> referenceResult
+			resultSetId, ok := readyParser.Docs.Ranges.NextMap[eachRef.RangeId]
+			if !ok {
+				// should not happen
+				return nil, fmt.Errorf("no result set id found for range: %d", eachRef.RangeId)
+			}
+			// reset and update
+			eachReferenceResultId = readyParser.Docs.Ranges.TextReferenceMap[resultSetId]
+			refs = readyParser.Docs.Ranges.References.GetItems(eachReferenceResultId)
+		}
+
 		refRanges := make(map[lsif.Id]lsif.Id, 0)
 		for _, eachRef := range refs {
 			log.Debugf("reference result %d refed in file %s, line %d",

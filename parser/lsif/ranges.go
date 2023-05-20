@@ -214,12 +214,14 @@ func (r *Ranges) addItem(line []byte) error {
 		return err
 	}
 
+	// store these edges whatever
+	if l, ok := r.RawEdgeMap[rawItem.RefId]; ok {
+		l = append(l, rawItem)
+	} else {
+		r.RawEdgeMap[rawItem.RefId] = []RawItem{rawItem}
+	}
+
 	if rawItem.Property != definitions && rawItem.Property != references {
-		if l, ok := r.RawEdgeMap[rawItem.RefId]; ok {
-			l = append(l, rawItem)
-		} else {
-			r.RawEdgeMap[rawItem.RefId] = []RawItem{rawItem}
-		}
 		return nil
 	}
 
