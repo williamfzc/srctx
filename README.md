@@ -67,23 +67,51 @@ that allows users to use it directly in a Pull Request.
 We have embedded the lsif-go indexer in our prebuilt binary files. So all you need is:
 
 ```bash
-wget https://github.com/williamfzc/srctx/releases/download/v0.4.2/srctx-linux-amd64
+wget https://github.com/williamfzc/srctx/releases/download/v0.6.0/srctx-linux-amd64
 chmod +x srctx-linux-amd64
 ./srctx-linux-amd64 diff --withIndex --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
 ```
+
+### For Python
+
+```bash
+pip3 install --upgrade git+https://github.com/sourcegraph/lsif-py.git
+lsif-py . --file ./dump.lsif
+
+wget https://github.com/williamfzc/srctx/releases/download/v0.6.0/srctx-linux-amd64
+chmod +x srctx-linux-amd64
+./srctx-linux-amd64 diff --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
+```
+
+### For Java/Kotlin
+
+Linux only. If you're using other platforms, please see [scip-java](https://sourcegraph.github.io/scip-java/docs/getting-started.html#run-scip-java-index) for details.
+
+```bash
+wget https://github.com/williamfzc/srctx/releases/download/v0.6.0/srctx-linux-amd64-full.zip
+unzip srctx-linux-amd64-full.zip
+
+# https://sourcegraph.github.io/scip-java/docs/getting-started.html#run-scip-java-index
+./scip-java index -- clean assembleDebug
+```
+
+This bash will create a scip file for you. Then:
+
+```bash
+wget https://github.com/williamfzc/srctx/releases/download/v0.6.0/srctx-linux-amd64
+chmod +x srctx-linux-amd64
+./srctx-linux-amd64 diff --before HEAD~1 --after HEAD --scip index.scip --outputCsv output.csv --outputDot output.dot
+```
+
+### For JavaScript
+
+https://github.com/sourcegraph/scip-typescript
 
 ### For Other Languages
 
 #### 1. Generate LSIF file
 
-Some official tools we used in `diffctx`:
-
-| Language    | Link                                                                                                | Command                                                                  |
-|-------------|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| Golang      | [lsif-go](https://github.com/sourcegraph/lsif-go)                                                   | `lsif-go -v`                                                             |
-| Python      | [lsif-py](https://github.com/sourcegraph/lsif-py)                                                   | `lsif-py .`                                                              |
-| Java/Kotlin | [scip-java](https://github.com/sourcegraph/scip-java) / [scip](https://github.com/sourcegraph/scip) | see [index.py](https://github.com/williamfzc/diffctx/blob/main/index.py) |
-| JavaScript  | [lsif-node](https://github.com/microsoft/lsif-node)                                                 | see [website](https://github.com/microsoft/lsif-node)                    |
+Tools can be found in https://lsif.dev/ .
 
 You will get a `dump.lsif` file after that.
 
