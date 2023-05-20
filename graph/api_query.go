@@ -15,7 +15,7 @@ func (fg *FuncGraph) ReferencedCount(f *FuncVertex) int {
 }
 
 func (fg *FuncGraph) ReferencedIds(f *FuncVertex) []string {
-	adjacencyMap, err := fg.g.AdjacencyMap()
+	adjacencyMap, err := fg.rg.AdjacencyMap()
 	if err != nil {
 		log.Warnf("failed to get adjacency map: %v", f)
 		return nil
@@ -46,7 +46,7 @@ func (fg *FuncGraph) TransitiveReferencedIds(f *FuncVertex) []string {
 }
 
 func (fg *FuncGraph) ReferenceIds(f *FuncVertex) []string {
-	predecessorMap, err := fg.g.PredecessorMap()
+	predecessorMap, err := fg.rg.PredecessorMap()
 	if err != nil {
 		log.Warnf("failed to get predecessor map: %v", f)
 		return nil
