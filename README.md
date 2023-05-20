@@ -11,7 +11,10 @@ A library for converting your codebase into graph data structures. Powered by tr
 
 ## About this tool
 
-This lib processes your code into function level graphs then you can apply some analysis on them.
+This library processes your code into precise function-level graphs, just like an IDE, and then you can apply some
+analysis on them.
+
+<img width="1159" alt="image" src="https://github.com/williamfzc/srctx/assets/13421694/6cfa72c2-787a-4ae6-8cef-e77c1985d307">
 
 This lib originally was designed for monitoring the influence of each commits.
 
@@ -106,7 +109,7 @@ Our built-in diff implementation is a good example. [cmd/srctx/diff/cmd.go](cmd/
 
 Low level API allows developers consuming LSIF file directly.
 
-```go
+```golang
 yourLsif := "../parser/lsif/testdata/dump.lsif.zip"
 sourceContext, _ := parser.FromLsifFile(yourLsif)
 
