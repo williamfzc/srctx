@@ -27,3 +27,12 @@ func TestDiffRaw(t *testing.T) {
 		"--outputJson", "output.json",
 		"--withIndex"})
 }
+
+func TestStat(t *testing.T) {
+	mainFunc([]string{
+		"srctx", "stat",
+		"--src", "../..",
+		"--outputDot", "output.dot",
+		"--lsif", "../../dump.lsif",
+	})
+}
