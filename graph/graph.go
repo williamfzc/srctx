@@ -52,9 +52,9 @@ func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *Fu
 }
 
 type FuncGraph struct {
-	// reference graph (called graph)
+	// reference graph (called graph), ref -> def
 	g graph.Graph[string, *FuncVertex]
-	// reverse reference graph (call graph)
+	// reverse reference graph (call graph), def -> ref
 	rg graph.Graph[string, *FuncVertex]
 
 	// k: file, v: function

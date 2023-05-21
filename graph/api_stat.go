@@ -26,8 +26,8 @@ func (fg *FuncGraph) Stat(f *FuncVertex) *VertexStat {
 	transitiveReferenceIds := fg.TransitiveReferenceIds(f)
 
 	return &VertexStat{
-		Referenced:           len(referenceIds),
-		Reference:            len(referencedIds),
+		Referenced:           len(referencedIds),
+		Reference:            len(referenceIds),
 		TransitiveReferenced: len(transitiveReferencedIds),
 		TransitiveReference:  len(transitiveReferenceIds),
 
