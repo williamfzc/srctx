@@ -1,6 +1,6 @@
 # srctx: source context
 
-A library for converting your codebase into graph data structures. Powered by tree-sitter and LSIF.
+A library for extracting definition/reference graphs from your codebase. Powered by tree-sitter and LSIF/SCIP.
 
 | Name           | Status                                                                                                                                            |
 |----------------|---------------------------------------------------------------------------------------------------------------------------------------------------|

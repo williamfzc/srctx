@@ -131,7 +131,7 @@ func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error)
 		_ = os.Chdir(originWorkdir)
 	}()
 
-	log.Infof("parser ready")
+	log.Infof("index parser ready")
 	return FromParser(newParser)
 }
 
@@ -310,7 +310,7 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Infof("graph ready. fact: %d, rel %d", factSize, relSize)
+	log.Infof("base graph ready. fact: %d, rel %d", factSize, relSize)
 	log.Infof("file count: %d", len(ret.Files()))
 
 	return &ret, nil

@@ -15,6 +15,7 @@ func AddStatCmd(app *cli.App) {
 	var outputJson string
 	var outputCsv string
 	var outputDot string
+	var nodeLevel string
 	var withIndex bool
 
 	flags := []cli.Flag{
@@ -53,6 +54,12 @@ func AddStatCmd(app *cli.App) {
 			Value:       "",
 			Usage:       "reference dot file output",
 			Destination: &outputDot,
+		},
+		&cli.StringFlag{
+			Name:        "nodeLevel",
+			Value:       "func",
+			Usage:       "graph level (file or func)",
+			Destination: &nodeLevel,
 		},
 		&cli.BoolFlag{
 			Name:        "withIndex",
@@ -96,7 +103,19 @@ func AddStatCmd(app *cli.App) {
 			// output
 			if outputDot != "" {
 				log.Infof("creating dot file: %v", outputDot)
-				err := funcGraph.DrawDot(outputDot)
+
+				var err error
+				switch nodeLevel {
+				case "func":
+					err = funcGraph.DrawDot(outputDot)
+				case "file":
+					fileGraph, err := funcGraph.ToFileGraph()
+					if err != nil {
+						return err
+					}
+					err = fileGraph.DrawDot(outputDot)
+				}
+
 				if err != nil {
 					return err
 				}

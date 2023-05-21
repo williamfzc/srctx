@@ -22,6 +22,7 @@ func AddDiffCmd(app *cli.App) {
 	var outputJson string
 	var outputCsv string
 	var outputDot string
+	var nodeLevel string
 	var withIndex bool
 
 	flags := []cli.Flag{
@@ -54,6 +55,12 @@ func AddDiffCmd(app *cli.App) {
 			Value:       "",
 			Usage:       "scip file",
 			Destination: &scipFile,
+		},
+		&cli.StringFlag{
+			Name:        "nodeLevel",
+			Value:       "func",
+			Usage:       "graph level (file or func)",
+			Destination: &nodeLevel,
 		},
 		&cli.StringFlag{
 			Name:        "outputJson",
@@ -139,25 +146,44 @@ func AddDiffCmd(app *cli.App) {
 			// output
 			if outputDot != "" {
 				log.Infof("creating dot file: %v", outputDot)
-				// colorful
-				for _, eachStat := range stats {
-					for _, eachVisited := range eachStat.VisitedIds() {
-						err := funcGraph.Highlight(eachVisited)
+
+				switch nodeLevel {
+				case "func":
+					// colorful
+					for _, eachStat := range stats {
+						for _, eachVisited := range eachStat.VisitedIds() {
+							err := funcGraph.FillWithYellow(eachVisited)
+							if err != nil {
+								return err
+							}
+						}
+					}
+					for _, eachStat := range stats {
+						err := funcGraph.FillWithRed(eachStat.Root.Id())
 						if err != nil {
 							return err
 						}
 					}
-				}
-				for _, eachStat := range stats {
-					err := funcGraph.FillWithRed(eachStat.Root.Id())
+
+					err := funcGraph.DrawDot(outputDot)
 					if err != nil {
 						return err
 					}
-				}
-
-				err := funcGraph.DrawDot(outputDot)
-				if err != nil {
-					return err
+				case "file":
+					fileGraph, err := funcGraph.ToFileGraph()
+					if err != nil {
+						return err
+					}
+					for _, eachStat := range stats {
+						err := fileGraph.FillWithRed(eachStat.Root.Id())
+						if err != nil {
+							return err
+						}
+					}
+					err = fileGraph.DrawDot(outputDot)
+					if err != nil {
+						return err
+					}
 				}
 			}
 

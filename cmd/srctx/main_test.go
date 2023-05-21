@@ -34,5 +34,6 @@ func TestStat(t *testing.T) {
 		"--src", "../..",
 		"--outputDot", "output.dot",
 		"--lsif", "../../dump.lsif",
+		"--nodeLevel", "file",
 	})
 }

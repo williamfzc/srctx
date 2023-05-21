@@ -85,6 +85,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 	fg.rg = rg
 
 	// building edges
+	log.Infof("edges building")
 	for path, funcs := range fg.cache {
 		for _, eachFunc := range funcs {
 			refs, err := relationship.RefsByLine(path, eachFunc.DefLine())
@@ -159,10 +160,12 @@ func CreateFuncGraphFromDirWithSCIP(src string, scipFile string) (*FuncGraph, er
 }
 
 func srcctx2graph(src string, sourceContext *object.SourceContext) (*FuncGraph, error) {
+	log.Infof("createing fact with sibyl2")
 	factStorage, err := CreateFact(src)
 	if err != nil {
 		return nil, err
 	}
+	log.Infof("fact ready. creating func graph ...")
 	funcGraph, err := CreateFuncGraph(factStorage, sourceContext)
 	if err != nil {
 		return nil, err
