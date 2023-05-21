@@ -131,7 +131,9 @@ func (r *Ranges) Read(label string, line []byte) error {
 			}
 			r.TextDefinitionMap[textReference.OutV] = textReference.InV
 		}
-		return r.Hovers.Read(label, line)
+
+		// currently we do not need hover
+		// return r.Hovers.Read(label, line)
 	}
 
 	return nil

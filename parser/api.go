@@ -158,6 +158,7 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 		ret.FileMapping[eachFile] = int(eachFileId)
 	}
 
+	log.Infof("creating fact graph")
 	// contains / defs
 	for eachFileId, eachFile := range readyParser.Docs.Entries {
 		// def ranges in this file
@@ -211,7 +212,7 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 
 	// the fact graph is ready
 	// then rel graph
-	log.Infof("reference result map size: %d", len(readyParser.Docs.Ranges.DefRefs))
+	log.Infof("creating rel graph, reference result map size: %d", len(readyParser.Docs.Ranges.DefRefs))
 	for eachReferenceResultId, eachRef := range readyParser.Docs.Ranges.DefRefs {
 		refFileId := eachRef.DocId
 		log.Debugf("reference result %d in file %s line %d",

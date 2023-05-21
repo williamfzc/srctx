@@ -3,23 +3,22 @@ package lsif
 import (
 	"encoding/binary"
 	"io"
-	"os"
 )
 
 // This cache implementation is using a temp file to provide key-value data storage
 // It allows to avoid storing intermediate calculations in RAM
 // The stored data must be a fixed-size value or a slice of fixed-size values, or a pointer to such data
+
+// 2023/05/21:
+// currently we still move it back to RAM
+// avoid too much IO harming my disk in development ...
 type cache struct {
-	file      *os.File
+	file      *File
 	chunkSize int64
 }
 
 func newCache(filename string, data interface{}) (*cache, error) {
-	f, err := os.CreateTemp("", filename)
-	if err != nil {
-		return nil, err
-	}
-
+	f := New([]byte{})
 	return &cache{file: f, chunkSize: int64(binary.Size(data))}, nil
 }
 
@@ -40,7 +39,8 @@ func (c *cache) Entry(id Id, data interface{}) error {
 }
 
 func (c *cache) Close() error {
-	return c.file.Close()
+	// virtual file needs no `close`
+	return nil
 }
 
 func (c *cache) setOffset(id Id) error {
