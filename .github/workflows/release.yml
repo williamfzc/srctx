@@ -20,14 +20,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.19
-      - name: Prepare test source
-        run: |
-          curl -L  https://github.com/sourcegraph/lsif-go/releases/download/v1.9.3/src_linux_amd64 -o /usr/local/bin/lsif-go
-          chmod +x /usr/local/bin/lsif-go
-          lsif-go -v
-      - name: Test
-        run: |
-          go test -v ./...
       - name: Build
         uses: crazy-max/ghaction-xgo@v2
         with:
@@ -41,20 +33,34 @@ jobs:
           x: false
           ldflags: -s -w
           buildmode: default
-      - name: Build Full CI Package
+      - name: Build Extra Dep
         run: |
           # scip-java
           curl -fLo coursier https://git.io/coursier-cli \
             && chmod +x coursier \
-            && ./coursier bootstrap --standalone -o scip-java com.sourcegraph:scip-java_2.13:0.8.18 --main com.sourcegraph.scip_java.ScipJava
+            && ./coursier bootstrap --standalone --bat=true -o scip-java com.sourcegraph:scip-java_2.13:0.8.18 --main com.sourcegraph.scip_java.ScipJava
+          zip scip-java.zip scip-java scip-java.bat
+      - name: Command Level Test
+        run: |
+          chmod +x ./scip-java
+          chmod +x ./srctx-linux-amd64
           
-          # zip for CI/docker
-          cp ./build/srctx-linux-amd64 ./srctx
-          zip srctx-linux-amd64-full.zip scip-java ./srctx
+          # golang
+          git clone https://github.com/gin-gonic/gin --depth=2
+          cd gin
+          ../srctx-linux-amd64 diff --withIndex
+          cd ..
+          
+          # java/maven
+          git clone https://github.com/williamfzc/sibyl --depth=2
+          cd sibyl
+          ../scip-java index -- clean package -DskipTests
+          ../srctx-linux-amd64 diff --scip ./index.scip
+          cd ..
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             build/srctx-*
-            srctx-linux-amd64-full.zip
+            scip-java.zip
