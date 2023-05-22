@@ -10,6 +10,7 @@ import (
 )
 
 func TestApi(t *testing.T) {
+	UseTempFileCache()
 	srcctxResult, err := FromLsifFile("./lsif/testdata/dump.lsif.zip", ".")
 	assert.Nil(t, err)
 
@@ -66,6 +67,7 @@ func TestApi(t *testing.T) {
 }
 
 func TestGen(t *testing.T) {
+	UseMemCache()
 	root, err := filepath.Abs("../")
 	assert.Nil(t, err)
 	_, err = FromGolangSrc(root)

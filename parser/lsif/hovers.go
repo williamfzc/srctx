@@ -12,7 +12,7 @@ type Offset struct {
 
 type Hovers struct {
 	File          *os.File
-	Offsets       *cache
+	Offsets       Cache
 	CurrentOffset int
 }
 

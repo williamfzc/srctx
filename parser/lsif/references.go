@@ -10,8 +10,8 @@ type ReferencesOffset struct {
 }
 
 type References struct {
-	Items           *cache
-	Offsets         *cache
+	Items           Cache
+	Offsets         Cache
 	CurrentOffsetId Id
 }
 
@@ -40,7 +40,7 @@ func NewReferences() (*References, error) {
 // Store is responsible for keeping track of references that will be used when
 // serializing in `For`.
 //
-// The references are stored in a file to cache them. It is like
+// The references are stored in a file to cacheMem them. It is like
 // `map[Id][]Item` (where `Id` is `refId`) but relies on caching the array and
 // its offset in files for storage to reduce RAM usage. The items can be
 // fetched by calling `GetItems`.

@@ -6,6 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx/graph"
+	"github.com/williamfzc/srctx/parser"
+	"github.com/williamfzc/srctx/parser/lsif"
 )
 
 func AddStatCmd(app *cli.App) {
@@ -17,6 +19,7 @@ func AddStatCmd(app *cli.App) {
 	var outputDot string
 	var nodeLevel string
 	var withIndex bool
+	var cacheType string
 
 	flags := []cli.Flag{
 		&cli.StringFlag{
@@ -67,6 +70,12 @@ func AddStatCmd(app *cli.App) {
 			Usage:       "create indexes first if enabled, currently support golang only",
 			Destination: &withIndex,
 		},
+		&cli.StringFlag{
+			Name:        "cacheType",
+			Value:       lsif.CacheTypeFile,
+			Usage:       "mem or file",
+			Destination: &cacheType,
+		},
 	}
 
 	statCmd := &cli.Command{
@@ -78,6 +87,10 @@ func AddStatCmd(app *cli.App) {
 			src, err := filepath.Abs(src)
 			if err != nil {
 				return err
+			}
+
+			if cacheType != lsif.CacheTypeFile {
+				parser.UseMemCache()
 			}
 
 			// metadata

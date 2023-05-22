@@ -16,7 +16,7 @@ type Ranges struct {
 	DefRefs    map[Id]Item
 	References *References
 	Hovers     *Hovers
-	Cache      *cache
+	Cache      Cache
 
 	NextMap           map[Id]Id
 	TextReferenceMap  map[Id]Id

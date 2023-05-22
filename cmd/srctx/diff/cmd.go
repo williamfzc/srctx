@@ -11,6 +11,8 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx/diff"
 	"github.com/williamfzc/srctx/graph"
+	"github.com/williamfzc/srctx/parser"
+	"github.com/williamfzc/srctx/parser/lsif"
 )
 
 func AddDiffCmd(app *cli.App) {
@@ -24,6 +26,7 @@ func AddDiffCmd(app *cli.App) {
 	var outputDot string
 	var nodeLevel string
 	var withIndex bool
+	var cacheType string
 
 	flags := []cli.Flag{
 		&cli.StringFlag{
@@ -86,6 +89,12 @@ func AddDiffCmd(app *cli.App) {
 			Usage:       "create indexes first if enabled, currently support golang only",
 			Destination: &withIndex,
 		},
+		&cli.StringFlag{
+			Name:        "cacheType",
+			Value:       lsif.CacheTypeFile,
+			Usage:       "mem or file",
+			Destination: &cacheType,
+		},
 	}
 
 	diffCmd := &cli.Command{
@@ -99,6 +108,10 @@ func AddDiffCmd(app *cli.App) {
 				return err
 			}
 			log.Infof("start diffing: %v", src)
+
+			if cacheType != lsif.CacheTypeFile {
+				parser.UseMemCache()
+			}
 
 			// prepare
 			lineMap, err := diff.GitDiff(src, before, after)

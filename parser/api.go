@@ -18,6 +18,14 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+func UseTempFileCache() {
+	lsif.CacheType = lsif.CacheTypeFile
+}
+
+func UseMemCache() {
+	lsif.CacheType = lsif.CacheTypeMem
+}
+
 func FromGolangSrc(srcDir string) (*object.SourceContext, error) {
 	// change workdir because lsif needs to access the files
 	originWorkdir, err := os.Getwd()
@@ -107,10 +115,11 @@ func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error)
 	defer file.Close()
 
 	var newParser *lsif.Parser
+	ctx := context.Background()
 	if strings.HasSuffix(lsifFile, ".zip") {
-		newParser, err = lsif.NewParser(context.Background(), file)
+		newParser, err = lsif.NewParser(ctx, file)
 	} else {
-		newParser, err = lsif.NewParserRaw(context.Background(), file)
+		newParser, err = lsif.NewParserRaw(ctx, file)
 	}
 	if err != nil {
 		return nil, err
@@ -136,6 +145,7 @@ func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error)
 }
 
 func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
+	log.Infof("cache type: %v", lsif.CacheType)
 	ret := object.NewSourceContext()
 	factGraph := ret.FactGraph
 	relGraph := ret.RelGraph
