@@ -8,10 +8,10 @@ import (
 )
 
 func TestApi(t *testing.T) {
-	tokens, err := File2Tokens("./api.go")
+	tokens, err := File2Tokens("./api.go", 12)
 	assert.Nil(t, err)
 
 	for _, each := range tokens {
-		log.Infof("each: %v", each)
+		log.Debugf("each: %v", each)
 	}
 }

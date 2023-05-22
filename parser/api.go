@@ -13,7 +13,6 @@ import (
 	lsifgo "github.com/sourcegraph/lsif-go/cmd/lsif-go/api"
 	"github.com/sourcegraph/scip/bindings/go/scip"
 	"github.com/williamfzc/srctx/object"
-	"github.com/williamfzc/srctx/parser/lexer"
 	"github.com/williamfzc/srctx/parser/lsif"
 	"google.golang.org/protobuf/proto"
 )
@@ -181,26 +180,12 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 				}
 
 				// access filesystem
-				defExtras := &object.DefExtras{}
-				tokens, err := lexer.File2Tokens(eachFile)
-				if err == nil {
-					log.Debugf("file %s, tokens: %d, cur line: %d", eachFile, len(tokens), rawRange.Line)
-					if int(rawRange.Line) >= len(tokens) {
-						log.Warnf("access out of range: %d", rawRange.Line)
-						continue
-					}
-					curLineTokens := tokens[rawRange.Line]
-					defType := lexer.TypeFromTokens(curLineTokens)
-					defExtras.DefType = defType
-					defExtras.RawTokens = curLineTokens
-				}
-
 				eachRangeVertex := &object.FactVertex{
 					DocId:  int(eachRangeId),
 					FileId: int(eachFileId),
 					Kind:   object.FactDef,
 					Range:  rawRange,
-					Extras: defExtras,
+					Extras: &object.DefExtras{},
 				}
 				log.Debugf("file %s range %v", eachFile, rawRange)
 

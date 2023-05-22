@@ -2,6 +2,7 @@ package graph
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/dominikbraun/graph"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
@@ -9,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser"
+	"github.com/williamfzc/srctx/parser/lexer"
 )
 
 type FuncPos struct {
@@ -61,7 +63,7 @@ type FuncGraph struct {
 	cache map[string][]*FuncVertex
 }
 
-func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
+func CreateFuncGraph(src string, fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
 	fg := &FuncGraph{
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
 		rg:    graph.New((*FuncVertex).Id, graph.Directed()),
@@ -96,10 +98,16 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 			}
 			for _, eachRef := range refs {
 				refFile := relationship.FileName(eachRef.FileId)
-				refTokens := eachRef.Extras.(*object.DefExtras).RawTokens
 
+				absRefFile := filepath.Join(src, refFile)
+				tokens, err := lexer.File2Tokens(absRefFile, eachRef.LineNumber())
+				if err != nil {
+					// ok
+					log.Warnf("file %v not existed", absRefFile)
+					continue
+				}
 				isFuncRef := false
-				for _, eachToken := range refTokens {
+				for _, eachToken := range tokens {
 					if eachToken.Value == eachFunc.Name {
 						isFuncRef = true
 						break
@@ -166,7 +174,7 @@ func srcctx2graph(src string, sourceContext *object.SourceContext) (*FuncGraph, 
 		return nil, err
 	}
 	log.Infof("fact ready. creating func graph ...")
-	funcGraph, err := CreateFuncGraph(factStorage, sourceContext)
+	funcGraph, err := CreateFuncGraph(src, factStorage, sourceContext)
 	if err != nil {
 		return nil, err
 	}

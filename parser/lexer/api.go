@@ -1,56 +1,48 @@
 package lexer
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
 	"os"
-	"sync"
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
-	"github.com/williamfzc/srctx/object"
 )
 
-// not good but temp
-var tokenCache = make(map[string][][]chroma.Token)
-var l sync.Mutex
-
-func File2Tokens(fileName string) ([][]chroma.Token, error) {
-	if r, ok := tokenCache[fileName]; ok {
-		return r, nil
-	}
+func File2Tokens(fileName string, line int) ([]chroma.Token, error) {
 	lexer := lexers.Match(fileName)
 	if lexer == nil {
 		return nil, errors.New("no lexer matches " + fileName)
 	}
-	contents, err := os.ReadFile(fileName)
+	contents, err := ReadLine(fileName, line)
 	if err != nil {
 		return nil, err
 	}
-	tokens, err := lexer.Tokenise(nil, string(contents))
+	tokens, err := lexer.Tokenise(nil, contents)
 	if err != nil {
 		return nil, err
 	}
-	ret := chroma.SplitTokensIntoLines(tokens.Tokens())
-
-	l.Lock()
-	defer l.Unlock()
-	tokenCache[fileName] = ret
-	return ret, nil
+	return tokens.Tokens(), nil
 }
 
-func TypeFromTokens(tokens []chroma.Token) object.DefType {
-	for _, token := range tokens {
-		switch token.Type {
-		case chroma.NameFunction:
-			return object.DefFunction
-		case chroma.NameClass:
-			return object.DefClass
-		case chroma.NameNamespace:
-			return object.DefNamespace
+func ReadLine(fileName string, lineNum int) (string, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
 
-		default:
-			continue
+	scanner := bufio.NewScanner(file)
+
+	for i := 1; scanner.Scan(); i++ {
+		if i == lineNum {
+			return scanner.Text(), nil
 		}
 	}
-	return object.DefUnknown
+
+	if err := scanner.Err(); err != nil {
+		return "", err
+	}
+	return "", fmt.Errorf("line %d not found in file %s", lineNum, fileName)
 }
