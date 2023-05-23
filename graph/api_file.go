@@ -43,7 +43,7 @@ func (fg *FuncGraph) ToFileGraph() (*FileGraph, error) {
 		targetFile := &FileVertex{Path: target.Path}
 		_ = fileGraph.rg.AddVertex(sourceFile)
 		_ = fileGraph.rg.AddVertex(targetFile)
-		_ = fileGraph.rg.AddEdge(sourceFile.Path, targetFile.Path)
+		_ = fileGraph.rg.AddEdge(sourceFile.Id(), targetFile.Id())
 	}
 
 	edges, err = fg.g.Edges()
@@ -63,7 +63,7 @@ func (fg *FuncGraph) ToFileGraph() (*FileGraph, error) {
 		targetFile := &FileVertex{Path: target.Path}
 		_ = fileGraph.g.AddVertex(sourceFile)
 		_ = fileGraph.g.AddVertex(targetFile)
-		_ = fileGraph.g.AddEdge(sourceFile.Path, targetFile.Path)
+		_ = fileGraph.g.AddEdge(sourceFile.Id(), targetFile.Id())
 	}
 
 	return fileGraph, nil

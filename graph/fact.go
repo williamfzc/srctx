@@ -17,21 +17,47 @@ func CreateFact(root string) (*FactStorage, error) {
 	if err != nil {
 		return nil, err
 	}
+	symbolFiles, err := sibyl2.ExtractSymbol(abs, sibyl2.DefaultConfig())
+	if err != nil {
+		return nil, err
+	}
 
 	fact := &FactStorage{
-		cache: make(map[string]*extractor.FunctionFileResult, len(functionFiles)),
+		cache:       make(map[string]*extractor.FunctionFileResult, len(functionFiles)),
+		symbolCache: make(map[string]*extractor.SymbolFileResult, len(symbolFiles)),
 	}
 	for _, eachFunc := range functionFiles {
 		log.Debugf("create func file for: %v", eachFunc.Path)
 		fact.cache[eachFunc.Path] = eachFunc
 	}
+	for _, eachSymbol := range symbolFiles {
+		log.Debugf("create symbol file for: %v", eachSymbol.Path)
+		fact.symbolCache[eachSymbol.Path] = eachSymbol
+	}
+
 	return fact, nil
 }
 
 type FactStorage struct {
-	cache map[string]*extractor.FunctionFileResult
+	cache       map[string]*extractor.FunctionFileResult
+	symbolCache map[string]*extractor.SymbolFileResult
 }
 
-func (fs *FactStorage) GetByFile(fileName string) *extractor.FunctionFileResult {
+func (fs *FactStorage) GetFunctionsByFile(fileName string) *extractor.FunctionFileResult {
 	return fs.cache[fileName]
+}
+
+func (fs *FactStorage) GetSymbolsByFileAndLine(fileName string, line int) []*extractor.Symbol {
+	item, ok := fs.symbolCache[fileName]
+	if !ok {
+		log.Warnf("failed to get symbol: %v", fileName)
+		return nil
+	}
+	ret := make([]*extractor.Symbol, 0)
+	for _, eachUnit := range item.Units {
+		if eachUnit.GetSpan().ContainLine(line - 1) {
+			ret = append(ret, eachUnit)
+		}
+	}
+	return ret
 }

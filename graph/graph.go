@@ -2,7 +2,7 @@ package graph
 
 import (
 	"fmt"
-	"path/filepath"
+	"os"
 
 	"github.com/dominikbraun/graph"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
@@ -10,7 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser"
-	"github.com/williamfzc/srctx/parser/lexer"
 )
 
 type FuncPos struct {
@@ -99,16 +98,10 @@ func CreateFuncGraph(src string, fact *FactStorage, relationship *object.SourceC
 			for _, eachRef := range refs {
 				refFile := relationship.FileName(eachRef.FileId)
 
-				absRefFile := filepath.Join(src, refFile)
-				tokens, err := lexer.File2Tokens(absRefFile, eachRef.LineNumber())
-				if err != nil {
-					// ok
-					log.Warnf("file %v not existed", absRefFile)
-					continue
-				}
 				isFuncRef := false
-				for _, eachToken := range tokens {
-					if eachToken.Value == eachFunc.Name {
+				symbols := fact.GetSymbolsByFileAndLine(refFile, eachRef.IndexLineNumber())
+				for _, eachSymbol := range symbols {
+					if eachSymbol.Unit.Content == eachFunc.Name {
 						isFuncRef = true
 						break
 					}
@@ -169,6 +162,20 @@ func CreateFuncGraphFromDirWithSCIP(src string, scipFile string) (*FuncGraph, er
 
 func srcctx2graph(src string, sourceContext *object.SourceContext) (*FuncGraph, error) {
 	log.Infof("createing fact with sibyl2")
+
+	// change workdir because sibyl2 needs to access the files
+	originWorkdir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	err = os.Chdir(src)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = os.Chdir(originWorkdir)
+	}()
+
 	factStorage, err := CreateFact(src)
 	if err != nil {
 		return nil, err
