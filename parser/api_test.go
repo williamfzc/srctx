@@ -2,6 +2,7 @@ package parser
 
 import (
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/dominikbraun/graph"
@@ -68,8 +69,8 @@ func TestApi(t *testing.T) {
 
 func TestGen(t *testing.T) {
 	UseMemCache()
-	root, err := filepath.Abs("../")
-	assert.Nil(t, err)
-	_, err = FromGolangSrc(root)
+	_, curFile, _, _ := runtime.Caller(0)
+	root := filepath.Dir(filepath.Dir(curFile))
+	_, err := FromGolangSrc(root)
 	assert.Nil(t, err)
 }

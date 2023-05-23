@@ -107,6 +107,7 @@ func readFromOption(fromPath string) (*scip.Index, error) {
 }
 
 func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error) {
+	log.Infof("read lsif file: %v", lsifFile)
 	file, err := os.Open(lsifFile)
 	if err != nil {
 		return nil, err
@@ -124,20 +125,6 @@ func FromLsifFile(lsifFile string, srcDir string) (*object.SourceContext, error)
 		return nil, err
 	}
 	defer newParser.Close()
-
-	// change workdir because srctx needs to access the files
-	// lsif uses relative paths
-	originWorkdir, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	err = os.Chdir(srcDir)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = os.Chdir(originWorkdir)
-	}()
 
 	log.Infof("index parser ready")
 	return FromParser(newParser)
