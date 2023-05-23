@@ -2,6 +2,7 @@ package graph
 
 import (
 	"github.com/dominikbraun/graph"
+	log "github.com/sirupsen/logrus"
 )
 
 type FileGraph struct {
@@ -12,7 +13,8 @@ type FileGraph struct {
 }
 
 type FileVertex struct {
-	Path string
+	Path       string
+	Referenced int
 }
 
 func (fv *FileVertex) Id() string {
@@ -26,45 +28,58 @@ func (fg *FuncGraph) ToFileGraph() (*FileGraph, error) {
 		rg: graph.New((*FileVertex).Id, graph.Directed()),
 	}
 	// building edges
-	edges, err := fg.rg.Edges()
+	err := funcGraph2FileGraph(fg.g, fileGraph.g)
 	if err != nil {
 		return nil, err
 	}
-	for _, eachEdge := range edges {
-		source, err := fg.rg.Vertex(eachEdge.Source)
-		if err != nil {
-			return nil, err
-		}
-		target, err := fg.rg.Vertex(eachEdge.Target)
-		if err != nil {
-			return nil, err
-		}
-		sourceFile := &FileVertex{Path: source.Path}
-		targetFile := &FileVertex{Path: target.Path}
-		_ = fileGraph.rg.AddVertex(sourceFile)
-		_ = fileGraph.rg.AddVertex(targetFile)
-		_ = fileGraph.rg.AddEdge(sourceFile.Id(), targetFile.Id())
+	err = funcGraph2FileGraph(fg.rg, fileGraph.rg)
+	if err != nil {
+		return nil, err
 	}
 
-	edges, err = fg.g.Edges()
+	nodeCount, err := fileGraph.g.Order()
 	if err != nil {
 		return nil, err
 	}
-	for _, eachEdge := range edges {
-		source, err := fg.g.Vertex(eachEdge.Source)
-		if err != nil {
-			return nil, err
-		}
-		target, err := fg.g.Vertex(eachEdge.Target)
-		if err != nil {
-			return nil, err
-		}
-		sourceFile := &FileVertex{Path: source.Path}
-		targetFile := &FileVertex{Path: target.Path}
-		_ = fileGraph.g.AddVertex(sourceFile)
-		_ = fileGraph.g.AddVertex(targetFile)
-		_ = fileGraph.g.AddEdge(sourceFile.Id(), targetFile.Id())
+	edgeCount, err := fileGraph.g.Size()
+	if err != nil {
+		return nil, err
 	}
+	log.Infof("file graph ready. nodes: %d, edges: %d", nodeCount, edgeCount)
 
 	return fileGraph, nil
+}
+
+func funcGraph2FileGraph(f graph.Graph[string, *FuncVertex], g graph.Graph[string, *FileVertex]) error {
+	edges, err := f.Edges()
+	if err != nil {
+		return err
+	}
+	for _, eachEdge := range edges {
+		source, err := f.Vertex(eachEdge.Source)
+		if err != nil {
+			log.Warnf("vertex not found: %v", eachEdge.Source)
+			continue
+		}
+		target, err := f.Vertex(eachEdge.Target)
+		if err != nil {
+			log.Warnf("vertex not found: %v", eachEdge.Target)
+			continue
+		}
+		sourceFile := &FileVertex{Path: source.Path}
+		targetFile := &FileVertex{Path: target.Path}
+		if sv, err := g.Vertex(sourceFile.Id()); err == nil {
+			sv.Referenced++
+		} else {
+			_ = g.AddVertex(sourceFile)
+		}
+		if tv, err := g.Vertex(targetFile.Id()); err == nil {
+			tv.Referenced++
+		} else {
+			_ = g.AddVertex(targetFile)
+		}
+		_ = g.AddEdge(sourceFile.Id(), targetFile.Id())
+	}
+
+	return nil
 }
