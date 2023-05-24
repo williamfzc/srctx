@@ -31,7 +31,7 @@ func apiDesc() {
 	_, _ = sourceContext.DefsByLine(files[0], 1)
 
 	// get all the references of a definition
-	refs, err := sourceContext.RefsByDefId(defs[0].Id())
+	refs, err := sourceContext.RefsFromDefId(defs[0].Id())
 	if err != nil {
 		panic(err)
 	}

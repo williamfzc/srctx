@@ -39,7 +39,43 @@ func (sc *SourceContext) RefsByFileName(fileName string) ([]*RelVertex, error) {
 	return startPoints, nil
 }
 
-func (sc *SourceContext) RefsByDefId(defId int) ([]*FactVertex, error) {
+func (sc *SourceContext) RefsByLine(fileName string, lineNum int) ([]*RelVertex, error) {
+	allVertexes, err := sc.RefsByFileName(fileName)
+	if err != nil {
+		return nil, err
+	}
+	log.Debugf("file %s refs: %d", fileName, len(allVertexes))
+	ret := make([]*RelVertex, 0)
+	for _, each := range allVertexes {
+		if each.LineNumber() == lineNum {
+			ret = append(ret, each)
+		}
+	}
+	if len(ret) == 0 {
+		return nil, fmt.Errorf("no ref found in %s %d", fileName, lineNum)
+	}
+	return ret, nil
+}
+
+func (sc *SourceContext) RefsByLineAndChar(fileName string, lineNum int, charNum int) ([]*RelVertex, error) {
+	allVertexes, err := sc.RefsByLine(fileName, lineNum)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make([]*RelVertex, 0)
+	for _, each := range allVertexes {
+		if int(each.Range.Character) == charNum {
+			ret = append(ret, each)
+		}
+	}
+	if len(ret) == 0 {
+		return nil, fmt.Errorf("no ref found in %s %d", fileName, lineNum)
+	}
+	return ret, nil
+}
+
+func (sc *SourceContext) RefsFromDefId(defId int) ([]*FactVertex, error) {
 	// check
 	ret := make([]*FactVertex, 0)
 	_, err := sc.RelGraph.Vertex(defId)
@@ -72,26 +108,16 @@ func (sc *SourceContext) RefsByDefId(defId int) ([]*FactVertex, error) {
 	return ret, nil
 }
 
-func (sc *SourceContext) RefsByLine(fileName string, lineNum int) ([]*FactVertex, error) {
-	allVertexes, err := sc.RefsByFileName(fileName)
+func (sc *SourceContext) RefsFromLine(fileName string, lineNum int) ([]*FactVertex, error) {
+	startPoints, err := sc.RefsByLine(fileName, lineNum)
 	if err != nil {
 		return nil, err
-	}
-	log.Debugf("file %s refs: %d", fileName, len(allVertexes))
-	startPoints := make([]*RelVertex, 0)
-	for _, each := range allVertexes {
-		if each.LineNumber() == lineNum {
-			startPoints = append(startPoints, each)
-		}
-	}
-	if len(startPoints) == 0 {
-		return nil, fmt.Errorf("no ref found in %s %d", fileName, lineNum)
 	}
 
 	// search all the related points
 	ret := make(map[int]*FactVertex, 0)
 	for _, each := range startPoints {
-		curRet, err := sc.RefsByDefId(each.Id())
+		curRet, err := sc.RefsFromDefId(each.Id())
 		if err != nil {
 			return nil, err
 		}

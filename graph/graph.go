@@ -89,7 +89,8 @@ func CreateFuncGraph(src string, fact *FactStorage, relationship *object.SourceC
 	log.Infof("edges building")
 	for path, funcs := range fg.cache {
 		for _, eachFunc := range funcs {
-			refs, err := relationship.RefsByLine(path, eachFunc.DefLine())
+			// there are multi defs happened in this line
+			refs, err := relationship.RefsFromLine(path, eachFunc.DefLine())
 			log.Debugf("search from %s#%d, ref: %d", path, eachFunc.DefLine(), len(refs))
 			if err != nil {
 				// no refs

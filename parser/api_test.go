@@ -53,7 +53,7 @@ func TestApi(t *testing.T) {
 		allDefVertexes, err := srcctxResult.DefsByFileName(fileName)
 		assert.Nil(t, err)
 		for _, each := range allDefVertexes {
-			vertices, err := srcctxResult.RefsByDefId(each.Id())
+			vertices, err := srcctxResult.RefsFromDefId(each.Id())
 			assert.Nil(t, err)
 			for _, eachV := range vertices {
 				log.Infof("def in file %s %d:%d, ref in: %s %d:%d",

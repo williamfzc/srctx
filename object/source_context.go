@@ -75,6 +75,10 @@ func (v *RelVertex) LineNumber() int {
 	return int(v.Range.Line + 1)
 }
 
+func (v *RelVertex) CharNumber() int {
+	return int(v.Range.Character + 1)
+}
+
 type SourceContext struct {
 	FileMapping map[string]int
 	FactGraph   graph.Graph[int, *FactVertex]
