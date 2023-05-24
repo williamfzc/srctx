@@ -108,7 +108,8 @@ func (sc *SourceContext) RefsFromDefId(defId int) ([]*FactVertex, error) {
 	return ret, nil
 }
 
-func (sc *SourceContext) RefsFromLine(fileName string, lineNum int) ([]*FactVertex, error) {
+// RefsFromLine todo: need some rename ...
+func (sc *SourceContext) RefsFromLine(fileName string, lineNum int, charLength int) ([]*FactVertex, error) {
 	startPoints, err := sc.RefsByLine(fileName, lineNum)
 	if err != nil {
 		return nil, err
@@ -117,6 +118,11 @@ func (sc *SourceContext) RefsFromLine(fileName string, lineNum int) ([]*FactVert
 	// search all the related points
 	ret := make(map[int]*FactVertex, 0)
 	for _, each := range startPoints {
+		// optimize
+		if int(each.Range.Length) != charLength {
+			continue
+		}
+
 		curRet, err := sc.RefsFromDefId(each.Id())
 		if err != nil {
 			return nil, err

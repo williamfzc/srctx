@@ -43,11 +43,13 @@ type TextReference struct {
 type RawRange struct {
 	Id   Id    `json:"id"`
 	Data Range `json:"start"`
+	End  Range `json:"end"`
 }
 
 type Range struct {
 	Line      int32 `json:"line"`
 	Character int32 `json:"character"`
+	Length    int32 `json:"length"`
 	RefId     Id
 }
 
@@ -205,6 +207,11 @@ func (r *Ranges) addRange(line []byte) error {
 	var rg RawRange
 	if err := json.Unmarshal(line, &rg); err != nil {
 		return err
+	}
+
+	length := rg.End.Character - rg.Data.Character
+	if length > 0 {
+		rg.Data.Length = length
 	}
 
 	return r.Cache.SetEntry(rg.Id, &rg.Data)
