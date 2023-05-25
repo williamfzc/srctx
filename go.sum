@@ -70,6 +70,8 @@ github.com/dgryski/trifles v0.0.0-20200323201526-dd97f9abfb48 h1:fRzb/w+pyskVMQ+
 github.com/dgryski/trifles v0.0.0-20200323201526-dd97f9abfb48/go.mod h1:if7Fbed8SFyPtHLHbg49SI7NAdJiC5WIA09pe59rfAA=
 github.com/dlclark/regexp2 v1.8.1 h1:6Lcdwya6GjPUNsBct8Lg/yRPwMhABj269AAzdGSiR+0=
 github.com/dlclark/regexp2 v1.8.1/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
+github.com/dominikbraun/graph v0.22.0 h1:2YGQsN8+g1y/c+i7HPEbMqfW3W84sTpQsuiFpBwJWzY=
+github.com/dominikbraun/graph v0.22.0/go.mod h1:yOjYyogZLY1LSG9E33JWZJiq5k83Qy2C6POAuiViluc=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/efritz/pentimento v0.0.0-20190429011147-ade47d831101 h1:RylpU+KNJJNEJIk3o8gZ70uPTlutxaYnikKNPko39LA=
 github.com/efritz/pentimento v0.0.0-20190429011147-ade47d831101/go.mod h1:5ALWO82UZwfAtNRUtwzsWimcrcuYzyieTyyXOXrP6EQ=
@@ -345,8 +347,6 @@ github.com/valyala/fasthttp v1.6.0/go.mod h1:FstJa9V+Pj9vQ7OJie2qMHdwemEDaDiSdBn
 github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPUpymEIMZ47gx8=
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/valyala/tcplisten v0.0.0-20161114210144-ceec8f93295a/go.mod h1:v3UYOV9WzVtRmSR+PDvWpU/qWl4Wa5LApYYX4ZtKbio=
-github.com/williamfzc/graph v0.0.0-20230516144207-a9f566a4165f h1:BgG2Sn8XqPsLkMGQ1vBWN0W5B3yfed52gabEd9KYDNQ=
-github.com/williamfzc/graph v0.0.0-20230516144207-a9f566a4165f/go.mod h1:yOjYyogZLY1LSG9E33JWZJiq5k83Qy2C6POAuiViluc=
 github.com/williamfzc/lsif-go v0.0.0-20230513083129-11728402abf2 h1:qet6U/X9C5c4cnK/IUGkY8oTxEmKUTUq4jfbQv7dVRY=
 github.com/williamfzc/lsif-go v0.0.0-20230513083129-11728402abf2/go.mod h1:q6/2imBY9OuYqqOAgav3J2BHTPYcvt6vqjvNxorfhXA=
 github.com/williamfzc/scip v0.0.0-20230518120517-4d9044d8f05b h1:yEBWtepx+UHjbGZavkLBshtMmBMbeu7kEMP3lJPdnVk=

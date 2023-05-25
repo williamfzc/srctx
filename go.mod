@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.7.0
 	github.com/bluekeyes/go-gitdiff v0.7.1
 	github.com/cockroachdb/errors v1.8.9
-	github.com/dominikbraun/graph v0.20.0
+	github.com/dominikbraun/graph v0.22.0
 	github.com/gocarina/gocsv v0.0.0-20230406101422-6445c2b15027
 	github.com/opensibyl/sibyl2 v0.15.4
 	github.com/sirupsen/logrus v1.9.0
@@ -93,9 +93,6 @@ require (
 replace github.com/sourcegraph/lsif-go => github.com/williamfzc/lsif-go v0.0.0-20230513083129-11728402abf2
 
 replace mvdan.cc/gofumpt => github.com/mvdan/gofumpt v0.5.0
-
-// graph
-replace github.com/dominikbraun/graph => github.com/williamfzc/graph v0.0.0-20230516144207-a9f566a4165f
 
 // scip
 replace github.com/sourcegraph/scip => github.com/williamfzc/scip v0.0.0-20230518120517-4d9044d8f05b
