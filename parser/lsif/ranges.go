@@ -1,10 +1,11 @@
 package lsif
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"strconv"
+
+	"github.com/goccy/go-json"
 )
 
 const (

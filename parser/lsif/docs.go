@@ -3,10 +3,11 @@ package lsif
 import (
 	"archive/zip"
 	"bufio"
-	"encoding/json"
 	"io"
 	"path/filepath"
 	"strings"
+
+	"github.com/goccy/go-json"
 )
 
 const maxScanTokenSize = 1024 * 1024

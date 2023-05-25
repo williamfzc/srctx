@@ -8,9 +8,10 @@ require (
 	github.com/cockroachdb/errors v1.8.9
 	github.com/dominikbraun/graph v0.22.0
 	github.com/gocarina/gocsv v0.0.0-20230406101422-6445c2b15027
+	github.com/goccy/go-json v0.10.2
 	github.com/opensibyl/sibyl2 v0.15.4
 	github.com/sirupsen/logrus v1.9.0
-	github.com/sourcegraph/lsif-go v1.9.3
+	github.com/sourcegraph/lsif-go v0.0.0-00010101000000-000000000000
 	github.com/sourcegraph/scip v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.8.2
 	github.com/urfave/cli/v2 v2.25.1
