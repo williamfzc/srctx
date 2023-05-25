@@ -3,7 +3,9 @@ package main
 import (
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/williamfzc/srctx"
 	"github.com/williamfzc/srctx/cmd/srctx/diff"
 	"github.com/williamfzc/srctx/cmd/srctx/stat"
 )
@@ -20,6 +22,7 @@ func mainFunc(args []string) {
 	diff.AddDiffCmd(app)
 	stat.AddStatCmd(app)
 
+	log.Infof("srctx version %v", srctx.Version)
 	err := app.Run(args)
 	panicIfErr(err)
 }
