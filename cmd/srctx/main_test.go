@@ -37,3 +37,16 @@ func TestStat(t *testing.T) {
 		"--nodeLevel", "file",
 	})
 }
+
+func TestDiffDir(t *testing.T) {
+	mainFunc([]string{
+		"srctx", "diff",
+		"--src", "../..",
+		"--before", "HEAD~1",
+		"--outputDot", "output.dot",
+		"--outputCsv", "output.csv",
+		"--outputJson", "output.json",
+		"--lsif", "../../dump.lsif",
+		"--nodeLevel", "file",
+	})
+}

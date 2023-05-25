@@ -62,7 +62,7 @@ func AddDiffCmd(app *cli.App) {
 		&cli.StringFlag{
 			Name:        "nodeLevel",
 			Value:       "func",
-			Usage:       "graph level (file or func)",
+			Usage:       "graph level (file or func or dir)",
 			Destination: &nodeLevel,
 		},
 		&cli.StringFlag{
@@ -187,13 +187,16 @@ func AddDiffCmd(app *cli.App) {
 					if err != nil {
 						return err
 					}
-					for _, eachStat := range stats {
-						err := fileGraph.FillWithRed(eachStat.Root.Id())
-						if err != nil {
-							return err
-						}
-					}
 					err = fileGraph.DrawDot(outputDot)
+					if err != nil {
+						return err
+					}
+				case "dir":
+					dirGraph, err := funcGraph.ToDirGraph()
+					if err != nil {
+						return err
+					}
+					err = dirGraph.DrawDot(outputDot)
 					if err != nil {
 						return err
 					}

@@ -20,4 +20,9 @@ func TestFuncGraph_ToFileGraph(t *testing.T) {
 	size, err := fileGraph.g.Size()
 	assert.Nil(t, err)
 	assert.NotEqual(t, size, 0)
+
+	// dir level
+	dirGraph, err := fileGraph.ToDirGraph()
+	assert.Nil(t, err)
+	assert.NotEqual(t, dirGraph, 0)
 }

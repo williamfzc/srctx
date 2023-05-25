@@ -127,6 +127,15 @@ func AddStatCmd(app *cli.App) {
 						return err
 					}
 					err = fileGraph.DrawDot(outputDot)
+				case "dir":
+					dirGraph, err := funcGraph.ToDirGraph()
+					if err != nil {
+						return err
+					}
+					err = dirGraph.DrawDot(outputDot)
+					if err != nil {
+						return err
+					}
 				}
 
 				if err != nil {
