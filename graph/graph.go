@@ -24,12 +24,6 @@ type FuncVertex struct {
 	*FuncPos
 }
 
-func (fv *FuncVertex) DefLine() int {
-	// not always correct
-	// todo: need sibyl2 improvement
-	return fv.Start
-}
-
 func (fv *FuncVertex) Id() string {
 	return fmt.Sprintf("%v:#%d-#%d:%s", fv.Path, fv.Start, fv.End, fv.GetSignature())
 }
@@ -90,8 +84,8 @@ func CreateFuncGraph(src string, fact *FactStorage, relationship *object.SourceC
 	for path, funcs := range fg.cache {
 		for _, eachFunc := range funcs {
 			// there are multi defs happened in this line
-			refs, err := relationship.RefsFromLine(path, eachFunc.DefLine(), len(eachFunc.Name))
-			log.Debugf("search from %s#%d, ref: %d", path, eachFunc.DefLine(), len(refs))
+			refs, err := relationship.RefsFromLine(path, eachFunc.DefLine, len(eachFunc.Name))
+			log.Debugf("search from %s#%d, ref: %d", path, eachFunc.DefLine, len(refs))
 			if err != nil {
 				// no refs
 				continue

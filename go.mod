@@ -9,13 +9,13 @@ require (
 	github.com/dominikbraun/graph v0.22.0
 	github.com/gocarina/gocsv v0.0.0-20230406101422-6445c2b15027
 	github.com/goccy/go-json v0.10.2
-	github.com/opensibyl/sibyl2 v0.15.4
+	github.com/opensibyl/sibyl2 v0.16.3
 	github.com/sirupsen/logrus v1.9.0
 	github.com/sourcegraph/lsif-go v0.0.0-00010101000000-000000000000
 	github.com/sourcegraph/scip v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.8.2
 	github.com/urfave/cli/v2 v2.25.1
-	google.golang.org/protobuf v1.28.1
+	google.golang.org/protobuf v1.30.0
 )
 
 require (
@@ -39,7 +39,7 @@ require (
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/huandu/xstrings v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
