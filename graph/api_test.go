@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"github.com/opensibyl/sibyl2/pkg/core"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -12,7 +13,7 @@ import (
 func TestFuncGraph(t *testing.T) {
 	_, curFile, _, _ := runtime.Caller(0)
 	src := filepath.Dir(filepath.Dir(curFile))
-	fg, err := CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"))
+	fg, err := CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"), core.LangGo)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fg.cache)
 
@@ -41,7 +42,7 @@ func TestFuncGraph(t *testing.T) {
 	t.Run("RemoveNode", func(t *testing.T) {
 		before, err := fg.g.Order()
 		assert.Nil(t, err)
-		err = fg.RemoveNodeById("graph/api_test.go:#12-#50:graph||TestFuncGraph|*testing.T|")
+		err = fg.RemoveNodeById("graph/api_test.go:#13-#51:graph||TestFuncGraph|*testing.T|")
 		assert.Nil(t, err)
 		after, err := fg.g.Order()
 		assert.Nil(t, err)
