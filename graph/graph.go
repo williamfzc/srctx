@@ -2,6 +2,7 @@ package graph
 
 import (
 	"fmt"
+	"github.com/opensibyl/sibyl2/pkg/core"
 	"os"
 
 	"github.com/dominikbraun/graph"
@@ -56,7 +57,7 @@ type FuncGraph struct {
 	cache map[string][]*FuncVertex
 }
 
-func CreateFuncGraph(src string, fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
+func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
 	fg := &FuncGraph{
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
 		rg:    graph.New((*FuncVertex).Id, graph.Directed()),
@@ -131,31 +132,31 @@ func CreateFuncGraph(src string, fact *FactStorage, relationship *object.SourceC
 	return fg, nil
 }
 
-func CreateFuncGraphFromGolangDir(src string) (*FuncGraph, error) {
+func CreateFuncGraphFromGolangDir(src string, lang core.LangType) (*FuncGraph, error) {
 	sourceContext, err := parser.FromGolangSrc(src)
 	if err != nil {
 		return nil, err
 	}
-	return srcctx2graph(src, sourceContext)
+	return srcctx2graph(src, sourceContext, lang)
 }
 
-func CreateFuncGraphFromDirWithLSIF(src string, lsifFile string) (*FuncGraph, error) {
+func CreateFuncGraphFromDirWithLSIF(src string, lsifFile string, lang core.LangType) (*FuncGraph, error) {
 	sourceContext, err := parser.FromLsifFile(lsifFile, src)
 	if err != nil {
 		return nil, err
 	}
-	return srcctx2graph(src, sourceContext)
+	return srcctx2graph(src, sourceContext, lang)
 }
 
-func CreateFuncGraphFromDirWithSCIP(src string, scipFile string) (*FuncGraph, error) {
+func CreateFuncGraphFromDirWithSCIP(src string, scipFile string, lang core.LangType) (*FuncGraph, error) {
 	sourceContext, err := parser.FromScipFile(scipFile, src)
 	if err != nil {
 		return nil, err
 	}
-	return srcctx2graph(src, sourceContext)
+	return srcctx2graph(src, sourceContext, lang)
 }
 
-func srcctx2graph(src string, sourceContext *object.SourceContext) (*FuncGraph, error) {
+func srcctx2graph(src string, sourceContext *object.SourceContext, lang core.LangType) (*FuncGraph, error) {
 	log.Infof("createing fact with sibyl2")
 
 	// change workdir because sibyl2 needs to access the files
@@ -171,12 +172,12 @@ func srcctx2graph(src string, sourceContext *object.SourceContext) (*FuncGraph, 
 		_ = os.Chdir(originWorkdir)
 	}()
 
-	factStorage, err := CreateFact(src)
+	factStorage, err := CreateFact(src, lang)
 	if err != nil {
 		return nil, err
 	}
 	log.Infof("fact ready. creating func graph ...")
-	funcGraph, err := CreateFuncGraph(src, factStorage, sourceContext)
+	funcGraph, err := CreateFuncGraph(factStorage, sourceContext)
 	if err != nil {
 		return nil, err
 	}

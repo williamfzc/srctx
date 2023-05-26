@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"github.com/opensibyl/sibyl2/pkg/core"
 	"path/filepath"
 
 	"github.com/opensibyl/sibyl2"
@@ -8,16 +9,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateFact(root string) (*FactStorage, error) {
+func CreateFact(root string, lang core.LangType) (*FactStorage, error) {
 	abs, err := filepath.Abs(root)
 	if err != nil {
 		return nil, err
 	}
-	functionFiles, err := sibyl2.ExtractFunction(abs, sibyl2.DefaultConfig())
+	conf := sibyl2.DefaultConfig()
+	conf.LangType = lang
+	functionFiles, err := sibyl2.ExtractFunction(abs, conf)
 	if err != nil {
 		return nil, err
 	}
-	symbolFiles, err := sibyl2.ExtractSymbol(abs, sibyl2.DefaultConfig())
+	symbolFiles, err := sibyl2.ExtractSymbol(abs, conf)
 	if err != nil {
 		return nil, err
 	}

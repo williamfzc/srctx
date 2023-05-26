@@ -1,6 +1,7 @@
 package stat
 
 import (
+	"github.com/opensibyl/sibyl2/pkg/core"
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
@@ -20,6 +21,7 @@ func AddStatCmd(app *cli.App) {
 	var nodeLevel string
 	var withIndex bool
 	var cacheType string
+	var lang string
 
 	flags := []cli.Flag{
 		&cli.StringFlag{
@@ -76,6 +78,12 @@ func AddStatCmd(app *cli.App) {
 			Usage:       "mem or file",
 			Destination: &cacheType,
 		},
+		&cli.StringFlag{
+			Name:        "lang",
+			Value:       string(core.LangUnknown),
+			Usage:       "language of repo",
+			Destination: &lang,
+		},
 	}
 
 	statCmd := &cli.Command{
@@ -93,20 +101,22 @@ func AddStatCmd(app *cli.App) {
 				parser.UseMemCache()
 			}
 
+			lang := core.LangType(lang)
+
 			// metadata
 			var funcGraph *graph.FuncGraph
 
 			if scipFile != "" {
 				// using SCIP
 				log.Infof("using SCIP as index")
-				funcGraph, err = graph.CreateFuncGraphFromDirWithSCIP(src, scipFile)
+				funcGraph, err = graph.CreateFuncGraphFromDirWithSCIP(src, scipFile, lang)
 			} else {
 				// using LSIF
 				log.Infof("using LSIF as index")
 				if withIndex {
-					funcGraph, err = graph.CreateFuncGraphFromGolangDir(src)
+					funcGraph, err = graph.CreateFuncGraphFromGolangDir(src, lang)
 				} else {
-					funcGraph, err = graph.CreateFuncGraphFromDirWithLSIF(src, lsifZip)
+					funcGraph, err = graph.CreateFuncGraphFromDirWithLSIF(src, lsifZip, lang)
 				}
 			}
 

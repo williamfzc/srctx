@@ -3,6 +3,8 @@ package diff
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
+	"github.com/opensibyl/sibyl2/pkg/core"
 	"os"
 	"path/filepath"
 
@@ -27,6 +29,7 @@ func AddDiffCmd(app *cli.App) {
 	var nodeLevel string
 	var withIndex bool
 	var cacheType string
+	var lang string
 
 	flags := []cli.Flag{
 		&cli.StringFlag{
@@ -95,6 +98,12 @@ func AddDiffCmd(app *cli.App) {
 			Usage:       "mem or file",
 			Destination: &cacheType,
 		},
+		&cli.StringFlag{
+			Name:        "lang",
+			Value:       string(core.LangUnknown),
+			Usage:       "language of repo",
+			Destination: &lang,
+		},
 	}
 
 	diffCmd := &cli.Command{
@@ -113,6 +122,8 @@ func AddDiffCmd(app *cli.App) {
 				parser.UseMemCache()
 			}
 
+			lang := core.LangType(lang)
+
 			// prepare
 			lineMap, err := diff.GitDiff(src, before, after)
 			if err != nil {
@@ -125,14 +136,19 @@ func AddDiffCmd(app *cli.App) {
 			if scipFile != "" {
 				// using SCIP
 				log.Infof("using SCIP as index")
-				funcGraph, err = graph.CreateFuncGraphFromDirWithSCIP(src, scipFile)
+				funcGraph, err = graph.CreateFuncGraphFromDirWithSCIP(src, scipFile, lang)
 			} else {
 				// using LSIF
 				log.Infof("using LSIF as index")
 				if withIndex {
-					funcGraph, err = graph.CreateFuncGraphFromGolangDir(src)
+					switch lang {
+					case core.LangGo:
+						funcGraph, err = graph.CreateFuncGraphFromGolangDir(src, lang)
+					default:
+						return errors.New("did not specify `--lang`")
+					}
 				} else {
-					funcGraph, err = graph.CreateFuncGraphFromDirWithLSIF(src, lsifZip)
+					funcGraph, err = graph.CreateFuncGraphFromDirWithLSIF(src, lsifZip, lang)
 				}
 			}
 
