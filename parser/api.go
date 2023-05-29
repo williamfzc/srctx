@@ -151,6 +151,9 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		// this file path can be relative
+		eachFile = filepath.ToSlash(filepath.Clean(eachFile))
 		ret.FileMapping[eachFile] = int(eachFileId)
 	}
 
