@@ -3,6 +3,7 @@ package lsif
 import (
 	"archive/zip"
 	"bufio"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"path/filepath"
 	"strings"
@@ -68,6 +69,11 @@ func (d *Docs) Parse(r io.Reader) error {
 func (d *Docs) process(line []byte) error {
 	l := Line{}
 	if err := json.Unmarshal(line, &l); err != nil {
+		if _, ok := err.(*json.SyntaxError); ok {
+			log.Warnf("invalid json format: %s", string(line))
+			return nil
+		}
+
 		return err
 	}
 
