@@ -6,10 +6,12 @@ func TestDiff(t *testing.T) {
 	mainFunc([]string{
 		"srctx", "diff",
 		"--src", "../..",
+		"--repoRoot", "../..",
 		"--before", "HEAD~1",
 		"--outputDot", "output.dot",
 		"--outputCsv", "output.csv",
 		"--outputJson", "output.json",
+		"--cacheType", "mem",
 		"--lsif", "../../dump.lsif"})
 }
 

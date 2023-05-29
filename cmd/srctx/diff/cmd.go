@@ -19,6 +19,7 @@ import (
 
 func AddDiffCmd(app *cli.App) {
 	var src string
+	var repoRoot string
 	var before string
 	var after string
 	var lsifZip string
@@ -35,8 +36,14 @@ func AddDiffCmd(app *cli.App) {
 		&cli.StringFlag{
 			Name:        "src",
 			Value:       ".",
-			Usage:       "repo path",
+			Usage:       "project path",
 			Destination: &src,
+		},
+		&cli.StringFlag{
+			Name:        "repoRoot",
+			Value:       "",
+			Usage:       "root path of your repo",
+			Destination: &repoRoot,
 		},
 		&cli.StringFlag{
 			Name:        "before",
@@ -128,6 +135,27 @@ func AddDiffCmd(app *cli.App) {
 			lineMap, err := diff.GitDiff(src, before, after)
 			if err != nil {
 				return err
+			}
+
+			// git diff will always start from the root of repo
+			// src will always start from the root of project
+			if repoRoot != "" {
+				repoRoot, err := filepath.Abs(repoRoot)
+				if err != nil {
+					return err
+				}
+
+				log.Infof("path sync from %s to %s", repoRoot, src)
+				modifiedLineMap := make(map[string][]int)
+				for file, lines := range lineMap {
+					absFile := filepath.Join(repoRoot, file)
+					relPath, err := filepath.Rel(src, absFile)
+					if err != nil {
+						return err
+					}
+					modifiedLineMap[relPath] = lines
+				}
+				lineMap = modifiedLineMap
 			}
 
 			// metadata

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/opensibyl/sibyl2/pkg/core"
 	"os"
+	"path/filepath"
 
 	"github.com/dominikbraun/graph"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
@@ -93,6 +94,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 			}
 			for _, eachRef := range refs {
 				refFile := relationship.FileName(eachRef.FileId)
+				refFile = filepath.ToSlash(filepath.Clean(refFile))
 
 				isFuncRef := false
 				symbols := fact.GetSymbolsByFileAndLine(refFile, eachRef.IndexLineNumber())
