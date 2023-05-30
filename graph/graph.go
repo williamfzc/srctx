@@ -15,10 +15,10 @@ import (
 )
 
 type FuncPos struct {
-	Path  string
-	Lang  string
-	Start int
-	End   int
+	Path  string `json:"path,omitempty"`
+	Lang  string `json:"lang,omitempty"`
+	Start int    `json:"start,omitempty"`
+	End   int    `json:"end,omitempty"`
 }
 
 type FuncVertex struct {
