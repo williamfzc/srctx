@@ -39,6 +39,13 @@ func TestFuncGraph(t *testing.T) {
 		assert.FileExists(t, dotFile)
 	})
 
+	t.Run("DrawHtml", func(t *testing.T) {
+		htmlFile := "a.html"
+		defer os.Remove(htmlFile)
+		err = fg.DrawG6Html(htmlFile)
+		assert.Nil(t, err)
+	})
+
 	t.Run("RemoveNode", func(t *testing.T) {
 		before, err := fg.g.Order()
 		assert.Nil(t, err)
