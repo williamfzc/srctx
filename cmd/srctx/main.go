@@ -20,7 +20,7 @@ func mainFunc(args []string) {
 
 	diff.AddDiffCmd(app)
 
-	log.Infof("srctx version %v", srctx.Version)
+	log.Infof("srctx version %v (%s)", srctx.Version, srctx.RepoUrl)
 	err := app.Run(args)
 	panicIfErr(err)
 }
