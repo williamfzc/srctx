@@ -1,11 +1,11 @@
 package graph
 
 import (
-	"github.com/opensibyl/sibyl2/pkg/core"
 	"path/filepath"
 	"runtime"
 	"testing"
 
+	"github.com/opensibyl/sibyl2/pkg/core"
 	"github.com/stretchr/testify/assert"
 )
 

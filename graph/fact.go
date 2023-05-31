@@ -1,10 +1,10 @@
 package graph
 
 import (
-	"github.com/opensibyl/sibyl2/pkg/core"
 	"path/filepath"
 
 	"github.com/opensibyl/sibyl2"
+	"github.com/opensibyl/sibyl2/pkg/core"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
 	log "github.com/sirupsen/logrus"
 )
@@ -41,6 +41,10 @@ func CreateFact(root string, lang core.LangType) (*FactStorage, error) {
 	return fact, nil
 }
 
+// FactStorage
+// fact is some extra metadata extracted from source code
+// something like: function definitions with their annotations/params/receiver ...
+// these data can be used for enhancing relationship
 type FactStorage struct {
 	cache       map[string]*extractor.FunctionFileResult
 	symbolCache map[string]*extractor.SymbolFileResult
