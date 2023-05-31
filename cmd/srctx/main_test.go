@@ -32,16 +32,6 @@ func TestDiffRaw(t *testing.T) {
 	})
 }
 
-func TestStat(t *testing.T) {
-	mainFunc([]string{
-		"srctx", "stat",
-		"--src", "../..",
-		"--outputDot", "output.dot",
-		"--lsif", "../../dump.lsif",
-		"--nodeLevel", "file",
-	})
-}
-
 func TestDiffDir(t *testing.T) {
 	mainFunc([]string{
 		"srctx", "diff",
@@ -65,5 +55,17 @@ func TestDiffSpecificLang(t *testing.T) {
 		"--outputJson", "output.json",
 		"--lsif", "../../dump.lsif",
 		"--lang", "GOLANG",
+	})
+}
+
+func TestDiffNoDiff(t *testing.T) {
+	mainFunc([]string{
+		"srctx", "diff",
+		"--src", "../..",
+		"--outputDot", "output.dot",
+		"--outputCsv", "output.csv",
+		"--outputJson", "output.json",
+		"--lsif", "../../dump.lsif",
+		"--noDiff",
 	})
 }

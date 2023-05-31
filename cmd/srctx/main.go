@@ -7,7 +7,6 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx"
 	"github.com/williamfzc/srctx/cmd/srctx/diff"
-	"github.com/williamfzc/srctx/cmd/srctx/stat"
 )
 
 func main() {
@@ -20,7 +19,6 @@ func mainFunc(args []string) {
 	app.Usage = "source context tool"
 
 	diff.AddDiffCmd(app)
-	stat.AddStatCmd(app)
 
 	log.Infof("srctx version %v", srctx.Version)
 	err := app.Run(args)

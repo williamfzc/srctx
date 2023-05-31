@@ -31,6 +31,7 @@ func AddDiffCmd(app *cli.App) {
 	var withIndex bool
 	var cacheType string
 	var lang string
+	var noDiff bool
 
 	flags := []cli.Flag{
 		&cli.StringFlag{
@@ -111,6 +112,12 @@ func AddDiffCmd(app *cli.App) {
 			Usage:       "language of repo",
 			Destination: &lang,
 		},
+		&cli.BoolFlag{
+			Name:        "noDiff",
+			Value:       false,
+			Usage:       "will not calc git diff if enabled",
+			Destination: &noDiff,
+		},
 	}
 
 	diffCmd := &cli.Command{
@@ -131,31 +138,37 @@ func AddDiffCmd(app *cli.App) {
 
 			lang := core.LangType(lang)
 
-			// prepare
-			lineMap, err := diff.GitDiff(src, before, after)
-			if err != nil {
-				return err
-			}
-
-			// git diff will always start from the root of repo
-			// src will always start from the root of project
-			if repoRoot != "" {
-				repoRoot, err := filepath.Abs(repoRoot)
+			var lineMap diff.AffectedLineMap
+			if !noDiff {
+				// prepare
+				lineMap, err := diff.GitDiff(src, before, after)
 				if err != nil {
 					return err
 				}
 
-				log.Infof("path sync from %s to %s", repoRoot, src)
-				modifiedLineMap := make(map[string][]int)
-				for file, lines := range lineMap {
-					absFile := filepath.Join(repoRoot, file)
-					relPath, err := filepath.Rel(src, absFile)
+				// git diff will always start from the root of repo
+				// src will always start from the root of project
+				if repoRoot != "" {
+					repoRoot, err := filepath.Abs(repoRoot)
 					if err != nil {
 						return err
 					}
-					modifiedLineMap[relPath] = lines
+
+					log.Infof("path sync from %s to %s", repoRoot, src)
+					modifiedLineMap := make(map[string][]int)
+					for file, lines := range lineMap {
+						absFile := filepath.Join(repoRoot, file)
+						relPath, err := filepath.Rel(src, absFile)
+						if err != nil {
+							return err
+						}
+						modifiedLineMap[relPath] = lines
+					}
+					lineMap = modifiedLineMap
 				}
-				lineMap = modifiedLineMap
+			} else {
+				log.Infof("noDiff enabled")
+				lineMap = make(diff.AffectedLineMap)
 			}
 
 			// metadata
