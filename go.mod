@@ -15,6 +15,7 @@ require (
 	github.com/sourcegraph/scip v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.8.2
 	github.com/urfave/cli/v2 v2.25.1
+	github.com/vmihailenco/msgpack/v5 v5.3.5
 	google.golang.org/protobuf v1.30.0
 )
 
@@ -69,6 +70,7 @@ require (
 	github.com/sourcegraph/sourcegraph/lib v0.0.0-20220511160847-5a43d3ea24eb // indirect
 	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect

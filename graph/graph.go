@@ -2,11 +2,11 @@ package graph
 
 import (
 	"fmt"
-	"github.com/opensibyl/sibyl2/pkg/core"
 	"os"
 	"path/filepath"
 
 	"github.com/dominikbraun/graph"
+	"github.com/opensibyl/sibyl2/pkg/core"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
 	object2 "github.com/opensibyl/sibyl2/pkg/extractor/object"
 	log "github.com/sirupsen/logrus"
@@ -58,12 +58,16 @@ type FuncGraph struct {
 	cache map[string][]*FuncVertex
 }
 
-func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
-	fg := &FuncGraph{
+func NewEmptyFuncGraph() *FuncGraph {
+	return &FuncGraph{
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
 		rg:    graph.New((*FuncVertex).Id, graph.Directed()),
 		cache: make(map[string][]*FuncVertex),
 	}
+}
+
+func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
+	fg := NewEmptyFuncGraph()
 
 	// add all the nodes
 	for path, file := range fact.cache {
