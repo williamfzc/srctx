@@ -1,9 +1,9 @@
 package stat
 
 import (
-	"github.com/opensibyl/sibyl2/pkg/core"
 	"path/filepath"
 
+	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx/graph"

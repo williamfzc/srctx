@@ -12,7 +12,8 @@ func TestDiff(t *testing.T) {
 		"--outputCsv", "output.csv",
 		"--outputJson", "output.json",
 		"--cacheType", "mem",
-		"--lsif", "../../dump.lsif"})
+		"--lsif", "../../dump.lsif",
+	})
 }
 
 func TestDiffRaw(t *testing.T) {
@@ -27,7 +28,8 @@ func TestDiffRaw(t *testing.T) {
 		"--outputDot", "output.dot",
 		"--outputCsv", "output.csv",
 		"--outputJson", "output.json",
-		"--withIndex"})
+		"--withIndex",
+	})
 }
 
 func TestStat(t *testing.T) {

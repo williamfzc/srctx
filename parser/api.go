@@ -65,7 +65,7 @@ func FromScipFile(scipFile string, srcDir string) (*object.SourceContext, error)
 
 	// still save this file for debug
 	lsifFile := filepath.Join(srcDir, "dump.lsif")
-	lsifWriter, err := os.OpenFile(lsifFile, os.O_WRONLY|os.O_CREATE, 0666)
+	lsifWriter, err := os.OpenFile(lsifFile, os.O_WRONLY|os.O_CREATE, 0o666)
 	defer lsifWriter.Close()
 
 	err = scip.WriteNDJSON(scip.ElementsToJsonElements(lsifIndex), lsifWriter)

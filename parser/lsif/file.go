@@ -43,6 +43,7 @@ func (fb *File) ReadAt(b []byte, offset int64) (int, error) {
 	defer fb.m.Unlock()
 	return fb.readAt(b, offset)
 }
+
 func (fb *File) readAt(b []byte, off int64) (int, error) {
 	if off < 0 || int64(int(off)) < off {
 		return 0, errInvalid
@@ -123,6 +124,7 @@ func (fb *File) Truncate(n int64) error {
 	defer fb.m.Unlock()
 	return fb.truncate(n)
 }
+
 func (fb *File) truncate(n int64) error {
 	switch {
 	case n < 0 || int64(int(n)) < n:

@@ -6,8 +6,10 @@ import (
 	"github.com/williamfzc/srctx/parser/lsif"
 )
 
-type FactKind = string
-type RelKind = string
+type (
+	FactKind = string
+	RelKind  = string
+)
 
 const (
 	EdgeTypeName = "label"
@@ -19,8 +21,10 @@ const (
 	RelReference RelKind = "reference"
 )
 
-var EdgeAttrContains = graph.EdgeAttribute(EdgeTypeName, RelContains)
-var EdgeAttrReference = graph.EdgeAttribute(EdgeTypeName, RelReference)
+var (
+	EdgeAttrContains  = graph.EdgeAttribute(EdgeTypeName, RelContains)
+	EdgeAttrReference = graph.EdgeAttribute(EdgeTypeName, RelReference)
+)
 
 type FactVertex struct {
 	DocId  int

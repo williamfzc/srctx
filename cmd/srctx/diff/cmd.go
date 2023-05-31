@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
-	"github.com/opensibyl/sibyl2/pkg/core"
 	"os"
 	"path/filepath"
 
 	"github.com/gocarina/gocsv"
+	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx/diff"

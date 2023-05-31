@@ -9,9 +9,7 @@ import (
 	"os"
 )
 
-var (
-	Lsif = "lsif"
-)
+var Lsif = "lsif"
 
 type Parser struct {
 	Docs *Docs
