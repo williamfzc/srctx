@@ -8,6 +8,9 @@ GOTEST = $(GOCMD) test
 default:
 	go build ./cmd/srctx
 
+fmt:
+	gofumpt -l -w .
+
 # linux
 build_linux_amd64:
 	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 ${GOCMD} build -o srctx_linux_amd64 ./cmd/srctx
