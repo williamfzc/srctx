@@ -49,7 +49,7 @@ func TestFuncGraph(t *testing.T) {
 	t.Run("RemoveNode", func(t *testing.T) {
 		before, err := fg.g.Order()
 		assert.Nil(t, err)
-		err = fg.RemoveNodeById("graph/api_test.go:#13-#51:graph||TestFuncGraph|*testing.T|")
+		err = fg.RemoveNodeById("graph/api_test.go:#13-#58:graph||TestFuncGraph|*testing.T|")
 		assert.Nil(t, err)
 		after, err := fg.g.Order()
 		assert.Nil(t, err)
