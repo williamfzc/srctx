@@ -2,9 +2,10 @@ package graph
 
 import (
 	"fmt"
-	"github.com/goccy/go-json"
 	"os"
 	"strconv"
+
+	"github.com/goccy/go-json"
 )
 
 const g6template = `
@@ -23,13 +24,32 @@ const g6template = `
 
     const graph = new G6.Graph({
         container: 'mountNode',
-        width: 800,
-        height: 600,
+        width: window.innerWidth,
+        height: window.innerHeight,
 		layout: {
-			type: 'gForce'
+			type: 'gForce',
+            preventOverlap: true,
+            linkDistance: 100,
+            nodeSize: 100
 		},
 		modes: {
-            default: ['drag-canvas', 'zoom-canvas', 'drag-node'],
+            default: ['drag-canvas', 'zoom-canvas', 'drag-node', 'activate-relations'],
+        },
+        defaultNode: {
+            size: 60,
+            style: {
+                lineWidth: 1,
+            },
+        },
+        defaultEdge: {
+            style: {
+                opacity: 0.6,
+                stroke: 'black',
+                startArrow: true,
+            },
+            labelCfg: {
+                autoRotate: true,
+            },
         },
     });
     graph.data(data);

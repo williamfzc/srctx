@@ -62,7 +62,7 @@ func path2vertex(fp string) *FileVertex {
 }
 
 func fileGraph2FileGraph(f graph.Graph[string, *FileVertex], g graph.Graph[string, *FileVertex]) error {
-	m, err := f.PredecessorMap()
+	m, err := f.AdjacencyMap()
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func fileGraph2FileGraph(f graph.Graph[string, *FileVertex], g graph.Graph[strin
 }
 
 func funcGraph2FileGraph(f graph.Graph[string, *FuncVertex], g graph.Graph[string, *FileVertex]) error {
-	m, err := f.PredecessorMap()
+	m, err := f.AdjacencyMap()
 	if err != nil {
 		return err
 	}

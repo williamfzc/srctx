@@ -40,4 +40,11 @@ func TestFuncGraph_ToFileGraph(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, before, after+1)
 	})
+
+	t.Run("DrawG6", func(t *testing.T) {
+		fileGraph, err := fg.ToFileGraph()
+		assert.Nil(t, err)
+		err = fileGraph.DrawG6Html("b.html")
+		assert.Nil(t, err)
+	})
 }
