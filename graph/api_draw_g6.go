@@ -59,52 +59,25 @@ const g6template = `
 </html>
 `
 
-type g6node struct {
+type G6Node struct {
 	Id    string `json:"id"`
 	Label string `json:"label,omitempty"`
 }
 
-type g6edge struct {
+type G6Edge struct {
 	Source string `json:"source"`
 	Target string `json:"target"`
 }
 
-// https://g6.antv.antgroup.com/api/graph-func/data
-type g6data struct {
-	Nodes []*g6node `json:"nodes"`
-	Edges []*g6edge `json:"edges"`
+// G6Data https://g6.antv.antgroup.com/api/graph-func/data
+type G6Data struct {
+	Nodes []*G6Node `json:"nodes"`
+	Edges []*G6Edge `json:"edges"`
 }
 
-func (fg *FuncGraph) DrawG6Html(filename string) error {
-	storage, err := fg.Dump()
-	if err != nil {
-		return err
-	}
-
-	data := &g6data{
-		Nodes: make([]*g6node, 0, len(storage.VertexIds)),
-		Edges: make([]*g6edge, 0),
-	}
-	// Nodes
-	for nodeId, funcId := range storage.VertexIds {
-		curNode := &g6node{
-			Id:    strconv.Itoa(nodeId),
-			Label: funcId,
-		}
-		data.Nodes = append(data.Nodes, curNode)
-	}
-	// Edges
-	for src, targets := range storage.GEdges {
-		for _, target := range targets {
-			curEdge := &g6edge{
-				Source: strconv.Itoa(src),
-				Target: strconv.Itoa(target),
-			}
-			data.Edges = append(data.Edges, curEdge)
-		}
-	}
+func (g *G6Data) RenderHtml(filename string) error {
 	// render
-	dataRaw, err := json.Marshal(data)
+	dataRaw, err := json.Marshal(g)
 	if err != nil {
 		return nil
 	}
@@ -114,5 +87,49 @@ func (fg *FuncGraph) DrawG6Html(filename string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (fg *FuncGraph) ToG6Data() (*G6Data, error) {
+	storage, err := fg.Dump()
+	if err != nil {
+		return nil, err
+	}
+
+	data := &G6Data{
+		Nodes: make([]*G6Node, 0, len(storage.VertexIds)),
+		Edges: make([]*G6Edge, 0),
+	}
+	// Nodes
+	for nodeId, funcId := range storage.VertexIds {
+		curNode := &G6Node{
+			Id:    strconv.Itoa(nodeId),
+			Label: funcId,
+		}
+		data.Nodes = append(data.Nodes, curNode)
+	}
+	// Edges
+	for src, targets := range storage.GEdges {
+		for _, target := range targets {
+			curEdge := &G6Edge{
+				Source: strconv.Itoa(src),
+				Target: strconv.Itoa(target),
+			}
+			data.Edges = append(data.Edges, curEdge)
+		}
+	}
+	return data, nil
+}
+
+func (fg *FuncGraph) DrawG6Html(filename string) error {
+	g6data, err := fg.ToG6Data()
+	if err != nil {
+		return err
+	}
+
+	err = g6data.RenderHtml(filename)
+	if err != nil {
+		return err
+	}
 	return nil
 }

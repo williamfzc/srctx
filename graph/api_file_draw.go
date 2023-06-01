@@ -1,12 +1,10 @@
 package graph
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/dominikbraun/graph/draw"
-	"github.com/goccy/go-json"
 )
 
 func (fg *FileGraph) DrawDot(filename string) error {
@@ -55,15 +53,15 @@ func (fg *FileGraph) setProperty(vertexHash string, propertyK string, propertyV 
 	return nil
 }
 
-func (fg *FileGraph) DrawG6Html(filename string) error {
-	data := &g6data{
-		Nodes: make([]*g6node, 0),
-		Edges: make([]*g6edge, 0),
+func (fg *FileGraph) ToG6Data() (*G6Data, error) {
+	data := &G6Data{
+		Nodes: make([]*G6Node, 0),
+		Edges: make([]*G6Edge, 0),
 	}
 
 	adjacencyMap, err := fg.g.AdjacencyMap()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// mapping
 	mapping := make(map[string]int)
@@ -73,10 +71,10 @@ func (fg *FileGraph) DrawG6Html(filename string) error {
 	for nodeId := range adjacencyMap {
 		node, err := fg.g.Vertex(nodeId)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		mapping[node.Id()] = curId
-		curNode := &g6node{
+		curNode := &G6Node{
 			Id:    strconv.Itoa(curId),
 			Label: node.Path,
 		}
@@ -89,20 +87,22 @@ func (fg *FileGraph) DrawG6Html(filename string) error {
 			srcId := mapping[src]
 			targetId := mapping[target]
 
-			curEdge := &g6edge{
+			curEdge := &G6Edge{
 				Source: strconv.Itoa(srcId),
 				Target: strconv.Itoa(targetId),
 			}
 			data.Edges = append(data.Edges, curEdge)
 		}
 	}
-	// render
-	dataRaw, err := json.Marshal(data)
+	return data, nil
+}
+
+func (fg *FileGraph) DrawG6Html(filename string) error {
+	data, err := fg.ToG6Data()
 	if err != nil {
-		return nil
+		return err
 	}
-	htmlContent := fmt.Sprintf(g6template, dataRaw)
-	err = os.WriteFile(filename, []byte(htmlContent), 0o666)
+	err = data.RenderHtml(filename)
 	if err != nil {
 		return err
 	}
