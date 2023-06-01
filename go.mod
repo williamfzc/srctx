@@ -9,7 +9,7 @@ require (
 	github.com/dominikbraun/graph v0.22.0
 	github.com/gocarina/gocsv v0.0.0-20230406101422-6445c2b15027
 	github.com/goccy/go-json v0.10.2
-	github.com/opensibyl/sibyl2 v0.16.3
+	github.com/opensibyl/sibyl2 v0.16.4
 	github.com/sirupsen/logrus v1.9.0
 	github.com/sourcegraph/lsif-go v0.0.0-00010101000000-000000000000
 	github.com/sourcegraph/scip v0.0.0-00010101000000-000000000000
@@ -66,19 +66,19 @@ require (
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/slimsag/godocmd v0.0.0-20161025000126-a1005ad29fe3 // indirect
-	github.com/smacker/go-tree-sitter v0.0.0-20230113054119-af7e2ef5fed6 // indirect
+	github.com/smacker/go-tree-sitter v0.0.0-20230501083651-a7d92773b3aa // indirect
 	github.com/sourcegraph/sourcegraph/lib v0.0.0-20220511160847-5a43d3ea24eb // indirect
 	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/goleak v1.2.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.23.0 // indirect
+	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
-	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
