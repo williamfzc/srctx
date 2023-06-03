@@ -12,7 +12,7 @@ import (
 type AffectedLineMap = map[string][]int
 
 func GitDiff(rootDir string, before string, after string) (AffectedLineMap, error) {
-	// about why I use cmd rather than some libs
+	// about why, I use cmd rather than some libs
 	// because go-git 's patch has some bugs ...
 	gitDiffCmd := exec.Command("git", "diff", before, after)
 	gitDiffCmd.Dir = rootDir
