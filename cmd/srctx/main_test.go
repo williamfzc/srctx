@@ -69,3 +69,13 @@ func TestDiffNoDiff(t *testing.T) {
 		"--noDiff",
 	})
 }
+
+func TestRenderHtml(t *testing.T) {
+	mainFunc([]string{
+		"srctx", "diff",
+		"--src", "../..",
+		"--outputHtml", "output.html",
+		"--lsif", "../../dump.lsif",
+		"--noDiff",
+	})
+}

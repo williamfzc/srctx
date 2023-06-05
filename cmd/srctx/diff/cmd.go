@@ -17,17 +17,29 @@ import (
 	"github.com/williamfzc/srctx/parser/lsif"
 )
 
+const (
+	nodeLevelFunc = "func"
+	nodeLevelFile = "file"
+	nodeLevelDir  = "dir"
+)
+
 func AddDiffCmd(app *cli.App) {
+	// required
 	var src string
 	var repoRoot string
 	var before string
 	var after string
 	var lsifZip string
 	var scipFile string
+
+	// output
 	var outputJson string
 	var outputCsv string
 	var outputDot string
+	var outputHtml string
 	var nodeLevel string
+
+	// options
 	var withIndex bool
 	var cacheType string
 	var lang string
@@ -72,7 +84,7 @@ func AddDiffCmd(app *cli.App) {
 		},
 		&cli.StringFlag{
 			Name:        "nodeLevel",
-			Value:       "func",
+			Value:       nodeLevelFunc,
 			Usage:       "graph level (file or func or dir)",
 			Destination: &nodeLevel,
 		},
@@ -93,6 +105,12 @@ func AddDiffCmd(app *cli.App) {
 			Value:       "",
 			Usage:       "reference dot file output",
 			Destination: &outputDot,
+		},
+		&cli.StringFlag{
+			Name:        "outputHtml",
+			Value:       "",
+			Usage:       "render html report with g6",
+			Destination: &outputHtml,
 		},
 		&cli.BoolFlag{
 			Name:        "withIndex",
@@ -218,7 +236,7 @@ func AddDiffCmd(app *cli.App) {
 				log.Infof("creating dot file: %v", outputDot)
 
 				switch nodeLevel {
-				case "func":
+				case nodeLevelFunc:
 					// colorful
 					for _, eachStat := range stats {
 						for _, eachVisited := range eachStat.VisitedIds() {
@@ -239,7 +257,7 @@ func AddDiffCmd(app *cli.App) {
 					if err != nil {
 						return err
 					}
-				case "file":
+				case nodeLevelFile:
 					fileGraph, err := funcGraph.ToFileGraph()
 					if err != nil {
 						return err
@@ -248,7 +266,7 @@ func AddDiffCmd(app *cli.App) {
 					if err != nil {
 						return err
 					}
-				case "dir":
+				case nodeLevelDir:
 					dirGraph, err := funcGraph.ToDirGraph()
 					if err != nil {
 						return err
@@ -262,6 +280,7 @@ func AddDiffCmd(app *cli.App) {
 
 			if outputCsv != "" || outputJson != "" {
 				// need to access files
+				// todo: should be removed
 				originWorkdir, err := os.Getwd()
 				if err != nil {
 					return err
@@ -323,6 +342,7 @@ func AddDiffCmd(app *cli.App) {
 						return err
 					}
 				}
+
 				if outputJson != "" {
 					log.Infof("creating output json: %s", outputJson)
 					contentBytes, err := json.Marshal(&fileList)
@@ -333,6 +353,30 @@ func AddDiffCmd(app *cli.App) {
 					if err != nil {
 						return err
 					}
+				}
+			}
+
+			if outputHtml != "" {
+				log.Infof("createing output html: %s", outputHtml)
+
+				var g6data *graph.G6Data
+				if nodeLevel != nodeLevelFunc {
+					fileGraph, err := funcGraph.ToFileGraph()
+					if err != nil {
+						return err
+					}
+					g6data, err = fileGraph.ToG6Data()
+				} else {
+					g6data, err = funcGraph.ToG6Data()
+				}
+				if err != nil {
+					return err
+				}
+
+				// todo: colorful
+				err = g6data.RenderHtml(outputHtml)
+				if err != nil {
+					return err
 				}
 			}
 
