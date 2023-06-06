@@ -77,6 +77,7 @@ func (fg *FileGraph) ToG6Data() (*G6Data, error) {
 		curNode := &G6Node{
 			Id:    strconv.Itoa(curId),
 			Label: node.Path,
+			Style: &G6NodeStyle{},
 		}
 		curId++
 		data.Nodes = append(data.Nodes, curNode)

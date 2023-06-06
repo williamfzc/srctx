@@ -159,7 +159,7 @@ func AddDiffCmd(app *cli.App) {
 			var lineMap diff.AffectedLineMap
 			if !noDiff {
 				// prepare
-				lineMap, err := diff.GitDiff(src, before, after)
+				lineMap, err = diff.GitDiff(src, before, after)
 				if err != nil {
 					return err
 				}
@@ -366,14 +366,20 @@ func AddDiffCmd(app *cli.App) {
 						return err
 					}
 					g6data, err = fileGraph.ToG6Data()
+					if err != nil {
+						return err
+					}
+					// todo: colorful
 				} else {
 					g6data, err = funcGraph.ToG6Data()
-				}
-				if err != nil {
-					return err
+					if err != nil {
+						return err
+					}
+					for _, eachStat := range stats {
+						g6data.FillWithRed(eachStat.Root.Id())
+					}
 				}
 
-				// todo: colorful
 				err = g6data.RenderHtml(outputHtml)
 				if err != nil {
 					return err

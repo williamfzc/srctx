@@ -74,8 +74,8 @@ func TestRenderHtml(t *testing.T) {
 	mainFunc([]string{
 		"srctx", "diff",
 		"--src", "../..",
+		"--before", "HEAD~1",
 		"--outputHtml", "output.html",
 		"--lsif", "../../dump.lsif",
-		"--noDiff",
 	})
 }

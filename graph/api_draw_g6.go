@@ -104,11 +104,15 @@ const g6template = `
 </html>
 `
 
-// G6Node https://g6.antv.antgroup.com/api/shape-properties
 type G6Node struct {
-	Id    string `json:"id"`
-	Label string `json:"label,omitempty"`
-	Fill  string `json:"fill,omitempty"`
+	Id    string       `json:"id"`
+	Label string       `json:"label,omitempty"`
+	Style *G6NodeStyle `json:"style"`
+}
+
+// G6NodeStyle https://g6.antv.antgroup.com/api/shape-properties
+type G6NodeStyle struct {
+	Fill string `json:"fill,omitempty"`
 }
 
 type G6Edge struct {
@@ -137,6 +141,24 @@ func (g *G6Data) RenderHtml(filename string) error {
 	return nil
 }
 
+func (g *G6Data) FillWithYellow(label string) {
+	for _, each := range g.Nodes {
+		if each.Label == label {
+			each.Style.Fill = "yellow"
+			break
+		}
+	}
+}
+
+func (g *G6Data) FillWithRed(label string) {
+	for _, each := range g.Nodes {
+		if each.Label == label {
+			each.Style.Fill = "red"
+			break
+		}
+	}
+}
+
 func (fg *FuncGraph) ToG6Data() (*G6Data, error) {
 	storage, err := fg.Dump()
 	if err != nil {
@@ -152,6 +174,7 @@ func (fg *FuncGraph) ToG6Data() (*G6Data, error) {
 		curNode := &G6Node{
 			Id:    strconv.Itoa(nodeId),
 			Label: funcId,
+			Style: &G6NodeStyle{},
 		}
 		data.Nodes = append(data.Nodes, curNode)
 	}
