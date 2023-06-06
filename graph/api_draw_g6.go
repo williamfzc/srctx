@@ -14,12 +14,46 @@ const g6template = `
 <head>
     <meta charset="UTF-8" />
     <title>srctx report</title>
+	<style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #mountNode {
+            width: 100%%;
+            height: 100vh;
+        }
+        #toggleLayoutButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #toggleLayoutButton:hover {
+            background-color: #3e8e41;
+        }
+    </style>
 </head>
 <body>
+<button id="toggleLayoutButton">Change Layout</button>
 <div id="mountNode"></div>
 <script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.3.11/dist/g6.min.js"></script>
 
 <script>
+	const grid = new G6.Grid()
+	const toolbar = new G6.ToolBar()
+	const edgeBundling = new G6.Bundling({
+      bundleThreshold: 0.6,
+      K: 100,
+    })
+
     const data = %s
 
     const graph = new G6.Graph({
@@ -51,17 +85,30 @@ const g6template = `
                 autoRotate: true,
             },
         },
+		plugins: [grid, toolbar, edgeBundling]
     });
     graph.data(data);
     graph.render();
+
+	const toggleLayoutButton = document.getElementById('toggleLayoutButton');
+    const layoutTypes = ['gForce', 'circular', 'dagre', 'radial', 'random', 'concentric'];
+
+    let currentLayoutIndex = 0;
+    toggleLayoutButton.addEventListener('click', function() {
+        currentLayoutIndex = (currentLayoutIndex + 1) %% layoutTypes.length;
+        const layoutType = layoutTypes[currentLayoutIndex];
+        graph.updateLayout({ type: layoutType });
+    });
 </script>
 </body>
 </html>
 `
 
+// G6Node https://g6.antv.antgroup.com/api/shape-properties
 type G6Node struct {
 	Id    string `json:"id"`
 	Label string `json:"label,omitempty"`
+	Fill  string `json:"fill,omitempty"`
 }
 
 type G6Edge struct {
