@@ -77,5 +77,6 @@ func TestRenderHtml(t *testing.T) {
 		"--before", "HEAD~1",
 		"--outputHtml", "output.html",
 		"--lsif", "../../dump.lsif",
+		"--nodeLevel", "file",
 	})
 }

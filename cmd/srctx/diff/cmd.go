@@ -369,11 +369,28 @@ func AddDiffCmd(app *cli.App) {
 					if err != nil {
 						return err
 					}
-					// todo: colorful
+
+					for _, eachStat := range stats {
+						for _, eachId := range eachStat.VisitedIds() {
+							f, err := funcGraph.GetById(eachId)
+							if err != nil {
+								return err
+							}
+							g6data.FillWithYellow(f.Path)
+						}
+					}
+					for _, eachStat := range stats {
+						g6data.FillWithRed(eachStat.Root.Path)
+					}
 				} else {
 					g6data, err = funcGraph.ToG6Data()
 					if err != nil {
 						return err
+					}
+					for _, eachStat := range stats {
+						for _, eachId := range eachStat.VisitedIds() {
+							g6data.FillWithYellow(eachId)
+						}
 					}
 					for _, eachStat := range stats {
 						g6data.FillWithRed(eachStat.Root.Id())
