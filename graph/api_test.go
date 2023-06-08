@@ -15,7 +15,7 @@ func TestFuncGraph(t *testing.T) {
 	src := filepath.Dir(filepath.Dir(curFile))
 	fg, err := CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"), core.LangGo)
 	assert.Nil(t, err)
-	assert.NotEmpty(t, fg.cache)
+	assert.NotEmpty(t, fg.Cache)
 
 	t.Run("GetFunctionsByFile", func(t *testing.T) {
 		testFuncs := fg.GetFunctionsByFile("graph/api_test.go")

@@ -39,7 +39,7 @@ func (fg *FuncGraph) Dump() (*FgStorage, error) {
 		RGEdges:   make(map[int][]int),
 		Cache:     nil,
 	}
-	ret.Cache = fg.cache
+	ret.Cache = fg.Cache
 
 	allVertices := make([]*FuncVertex, 0)
 	for _, vertices := range ret.Cache {
@@ -86,8 +86,8 @@ func Load(fgs *FgStorage) (*FuncGraph, error) {
 	ret := NewEmptyFuncGraph()
 
 	// vertex building
-	ret.cache = fgs.Cache
-	for _, eachFile := range ret.cache {
+	ret.Cache = fgs.Cache
+	for _, eachFile := range ret.Cache {
 		for _, eachFunc := range eachFile {
 			_ = ret.g.AddVertex(eachFunc)
 			_ = ret.rg.AddVertex(eachFunc)

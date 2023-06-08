@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/williamfzc/srctx/graph/visual/g6"
+
 	"github.com/gocarina/gocsv"
 	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
@@ -359,7 +361,7 @@ func AddDiffCmd(app *cli.App) {
 			if outputHtml != "" {
 				log.Infof("createing output html: %s", outputHtml)
 
-				var g6data *graph.G6Data
+				var g6data *g6.G6Data
 				if nodeLevel != nodeLevelFunc {
 					fileGraph, err := funcGraph.ToFileGraph()
 					if err != nil {

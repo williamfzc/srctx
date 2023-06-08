@@ -14,7 +14,7 @@ func TestStorage(t *testing.T) {
 	src := filepath.Dir(filepath.Dir(curFile))
 	fg, err := CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"), core.LangGo)
 	assert.Nil(t, err)
-	assert.NotEmpty(t, fg.cache)
+	assert.NotEmpty(t, fg.Cache)
 
 	temp := "./temp.msgpack"
 	err = fg.DumpFile(temp)

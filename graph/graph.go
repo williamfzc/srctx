@@ -55,14 +55,14 @@ type FuncGraph struct {
 	rg graph.Graph[string, *FuncVertex]
 
 	// k: file, v: function
-	cache map[string][]*FuncVertex
+	Cache map[string][]*FuncVertex
 }
 
 func NewEmptyFuncGraph() *FuncGraph {
 	return &FuncGraph{
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
 		rg:    graph.New((*FuncVertex).Id, graph.Directed()),
-		cache: make(map[string][]*FuncVertex),
+		Cache: make(map[string][]*FuncVertex),
 	}
 }
 
@@ -74,7 +74,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 		for _, eachFunc := range file.Units {
 			cur := CreateFuncVertex(eachFunc, file)
 			_ = fg.g.AddVertex(cur)
-			fg.cache[path] = append(fg.cache[path], cur)
+			fg.Cache[path] = append(fg.Cache[path], cur)
 		}
 	}
 
@@ -87,7 +87,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 
 	// building edges
 	log.Infof("edges building")
-	for path, funcs := range fg.cache {
+	for path, funcs := range fg.Cache {
 		for _, eachFunc := range funcs {
 			// there are multi defs happened in this line
 			refs, err := relationship.RefsFromLine(path, eachFunc.DefLine, len(eachFunc.Name))
@@ -112,7 +112,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 					continue
 				}
 
-				for _, eachPossibleFunc := range fg.cache[refFile] {
+				for _, eachPossibleFunc := range fg.Cache[refFile] {
 					if eachPossibleFunc.GetSpan().ContainLine(eachRef.IndexLineNumber()) {
 						// build `referenced by` edge
 						log.Debugf("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())

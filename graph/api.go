@@ -1,7 +1,7 @@
 package graph
 
 func (fg *FuncGraph) GetFunctionsByFile(fileName string) []*FuncVertex {
-	if item, ok := fg.cache[fileName]; ok {
+	if item, ok := fg.Cache[fileName]; ok {
 		return item
 	}
 	return make([]*FuncVertex, 0)
@@ -9,7 +9,7 @@ func (fg *FuncGraph) GetFunctionsByFile(fileName string) []*FuncVertex {
 
 func (fg *FuncGraph) GetFunctionsByFileLines(fileName string, lines []int) []*FuncVertex {
 	ret := make([]*FuncVertex, 0)
-	functions := fg.cache[fileName]
+	functions := fg.Cache[fileName]
 	if len(functions) == 0 {
 		return ret
 	}
