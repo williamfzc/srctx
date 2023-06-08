@@ -54,10 +54,7 @@ func (fg *FileGraph) setProperty(vertexHash string, propertyK string, propertyV 
 }
 
 func (fg *FileGraph) ToG6Data() (*G6Data, error) {
-	data := &G6Data{
-		Nodes: make([]*G6Node, 0),
-		Edges: make([]*G6Edge, 0),
-	}
+	data := EmptyG6Data()
 
 	adjacencyMap, err := fg.g.AdjacencyMap()
 	if err != nil {

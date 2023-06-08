@@ -371,7 +371,7 @@ func AddDiffCmd(app *cli.App) {
 					}
 
 					for _, eachStat := range stats {
-						for _, eachId := range eachStat.VisitedIds() {
+						for _, eachId := range eachStat.TransitiveReferencedIds {
 							f, err := funcGraph.GetById(eachId)
 							if err != nil {
 								return err
@@ -388,7 +388,7 @@ func AddDiffCmd(app *cli.App) {
 						return err
 					}
 					for _, eachStat := range stats {
-						for _, eachId := range eachStat.VisitedIds() {
+						for _, eachId := range eachStat.TransitiveReferencedIds {
 							g6data.FillWithYellow(eachId)
 						}
 					}

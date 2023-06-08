@@ -44,7 +44,7 @@ const g6template = `
 <body>
 <button id="toggleLayoutButton">Change Layout</button>
 <div id="mountNode"></div>
-<script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.3.11/dist/g6.min.js"></script>
+<script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.8.7/dist/g6.min.js"></script>
 
 <script>
 	const grid = new G6.Grid()
@@ -61,13 +61,18 @@ const g6template = `
         width: window.innerWidth,
         height: window.innerHeight,
 		layout: {
-			type: 'gForce',
-            preventOverlap: true,
-            linkDistance: 100,
-            nodeSize: 100
-		},
+            type: 'comboCombined',
+			preventOverlap: true,
+            spacing: 5,
+			linkDistance: 100,
+            nodeSize: 100,
+            outerLayout: new G6.Layout['forceAtlas2']({
+                kr: 50,
+                factor: 10,
+            })
+        },
 		modes: {
-            default: ['drag-canvas', 'zoom-canvas', 'drag-node', 'activate-relations'],
+            default: ['drag-canvas', 'zoom-canvas', 'drag-node', 'activate-relations', 'collapse-expand-combo'],
         },
         defaultNode: {
             size: 60,
@@ -85,13 +90,21 @@ const g6template = `
                 autoRotate: true,
             },
         },
+		defaultCombo: {
+            type: 'rect',
+            collapse: true,
+            style: {
+                stroke: 'black',
+            }
+        },
+		groupByTypes: false,
 		plugins: [grid, toolbar, edgeBundling]
     });
     graph.data(data);
     graph.render();
 
 	const toggleLayoutButton = document.getElementById('toggleLayoutButton');
-    const layoutTypes = ['gForce', 'circular', 'dagre', 'radial', 'random', 'concentric'];
+    const layoutTypes = ['comboCombined'];
 
     let currentLayoutIndex = 0;
     toggleLayoutButton.addEventListener('click', function() {
@@ -105,9 +118,10 @@ const g6template = `
 `
 
 type G6Node struct {
-	Id    string       `json:"id"`
-	Label string       `json:"label,omitempty"`
-	Style *G6NodeStyle `json:"style"`
+	Id      string       `json:"id"`
+	Label   string       `json:"label,omitempty"`
+	ComboId string       `json:"comboId,omitempty"`
+	Style   *G6NodeStyle `json:"style"`
 }
 
 // G6NodeStyle https://g6.antv.antgroup.com/api/shape-properties
@@ -120,10 +134,25 @@ type G6Edge struct {
 	Target string `json:"target"`
 }
 
+type G6Combo struct {
+	Id        string `json:"id"`
+	Label     string `json:"label"`
+	Collapsed bool   `json:"collapsed,omitempty"`
+}
+
 // G6Data https://g6.antv.antgroup.com/api/graph-func/data
 type G6Data struct {
-	Nodes []*G6Node `json:"nodes"`
-	Edges []*G6Edge `json:"edges"`
+	Nodes  []*G6Node  `json:"nodes"`
+	Edges  []*G6Edge  `json:"edges"`
+	Combos []*G6Combo `json:"combos"`
+}
+
+func EmptyG6Data() *G6Data {
+	return &G6Data{
+		Nodes:  make([]*G6Node, 0),
+		Edges:  make([]*G6Edge, 0),
+		Combos: make([]*G6Combo, 0),
+	}
 }
 
 func (g *G6Data) RenderHtml(filename string) error {
@@ -165,16 +194,28 @@ func (fg *FuncGraph) ToG6Data() (*G6Data, error) {
 		return nil, err
 	}
 
-	data := &G6Data{
-		Nodes: make([]*G6Node, 0, len(storage.VertexIds)),
-		Edges: make([]*G6Edge, 0),
+	data := EmptyG6Data()
+	// cache
+	cache := make(map[string]*FuncVertex)
+	for eachFile, fs := range fg.cache {
+		for _, eachF := range fs {
+			cache[eachF.Id()] = eachF
+		}
+
+		data.Combos = append(data.Combos, &G6Combo{
+			Id:        eachFile,
+			Label:     eachFile,
+			Collapsed: false,
+		})
 	}
+
 	// Nodes
 	for nodeId, funcId := range storage.VertexIds {
 		curNode := &G6Node{
-			Id:    strconv.Itoa(nodeId),
-			Label: funcId,
-			Style: &G6NodeStyle{},
+			Id:      strconv.Itoa(nodeId),
+			Label:   funcId,
+			Style:   &G6NodeStyle{},
+			ComboId: cache[funcId].Path,
 		}
 		data.Nodes = append(data.Nodes, curNode)
 	}
