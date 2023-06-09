@@ -1,4 +1,4 @@
-package graph
+package function
 
 import (
 	"github.com/dominikbraun/graph"

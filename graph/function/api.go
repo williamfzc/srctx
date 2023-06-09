@@ -1,4 +1,4 @@
-package graph
+package function
 
 func (fg *FuncGraph) GetFunctionsByFile(fileName string) []*FuncVertex {
 	if item, ok := fg.Cache[fileName]; ok {

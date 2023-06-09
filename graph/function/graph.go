@@ -1,4 +1,4 @@
-package graph
+package function
 
 import (
 	"fmt"
@@ -56,6 +56,9 @@ type FuncGraph struct {
 
 	// k: file, v: function
 	Cache map[string][]*FuncVertex
+
+	// source context ptr
+	Sc *object.SourceContext
 }
 
 func NewEmptyFuncGraph() *FuncGraph {
@@ -63,6 +66,7 @@ func NewEmptyFuncGraph() *FuncGraph {
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
 		rg:    graph.New((*FuncVertex).Id, graph.Directed()),
 		Cache: make(map[string][]*FuncVertex),
+		Sc:    nil,
 	}
 }
 

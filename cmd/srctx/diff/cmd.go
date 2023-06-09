@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/williamfzc/srctx/graph/function"
+
 	"github.com/williamfzc/srctx/graph/visual/g6"
 
 	"github.com/gocarina/gocsv"
@@ -14,7 +16,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx/diff"
-	"github.com/williamfzc/srctx/graph"
 	"github.com/williamfzc/srctx/parser"
 	"github.com/williamfzc/srctx/parser/lsif"
 )
@@ -192,24 +193,24 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			// metadata
-			var funcGraph *graph.FuncGraph
+			var funcGraph *function.FuncGraph
 
 			if scipFile != "" {
 				// using SCIP
 				log.Infof("using SCIP as index")
-				funcGraph, err = graph.CreateFuncGraphFromDirWithSCIP(src, scipFile, lang)
+				funcGraph, err = function.CreateFuncGraphFromDirWithSCIP(src, scipFile, lang)
 			} else {
 				// using LSIF
 				log.Infof("using LSIF as index")
 				if withIndex {
 					switch lang {
 					case core.LangGo:
-						funcGraph, err = graph.CreateFuncGraphFromGolangDir(src, lang)
+						funcGraph, err = function.CreateFuncGraphFromGolangDir(src, lang)
 					default:
 						return errors.New("did not specify `--lang`")
 					}
 				} else {
-					funcGraph, err = graph.CreateFuncGraphFromDirWithLSIF(src, lsifZip, lang)
+					funcGraph, err = function.CreateFuncGraphFromDirWithLSIF(src, lsifZip, lang)
 				}
 			}
 
@@ -218,14 +219,14 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			// look up start points
-			startPoints := make([]*graph.FuncVertex, 0)
+			startPoints := make([]*function.FuncVertex, 0)
 			for path, lines := range lineMap {
 				curPoints := funcGraph.GetFunctionsByFileLines(path, lines)
 				startPoints = append(startPoints, curPoints...)
 			}
 
 			// start scan
-			stats := make([]*graph.VertexStat, 0)
+			stats := make([]*function.VertexStat, 0)
 			for _, eachPtr := range startPoints {
 				eachStat := funcGraph.Stat(eachPtr)
 				stats = append(stats, eachStat)

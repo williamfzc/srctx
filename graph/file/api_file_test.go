@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/williamfzc/srctx/graph"
+	"github.com/williamfzc/srctx/graph/function"
 
 	"github.com/opensibyl/sibyl2/pkg/core"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ import (
 func TestFuncGraph_ToFileGraph(t *testing.T) {
 	_, curFile, _, _ := runtime.Caller(0)
 	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
-	fg, err := graph.CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"), core.LangGo)
+	fg, err := function.CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"), core.LangGo)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fg.Cache)
 	fileGraph, err := fg.ToFileGraph()

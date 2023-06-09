@@ -1,4 +1,4 @@
-package graph
+package function
 
 import (
 	"os"
@@ -12,13 +12,13 @@ import (
 
 func TestFuncGraph(t *testing.T) {
 	_, curFile, _, _ := runtime.Caller(0)
-	src := filepath.Dir(filepath.Dir(curFile))
+	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
 	fg, err := CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"), core.LangGo)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fg.Cache)
 
 	t.Run("GetFunctionsByFile", func(t *testing.T) {
-		testFuncs := fg.GetFunctionsByFile("graph/api_test.go")
+		testFuncs := fg.GetFunctionsByFile("graph/function/api_test.go")
 		assert.NotEmpty(t, testFuncs)
 
 		for _, eachFunc := range testFuncs {
@@ -49,7 +49,7 @@ func TestFuncGraph(t *testing.T) {
 	t.Run("RemoveNode", func(t *testing.T) {
 		before, err := fg.g.Order()
 		assert.Nil(t, err)
-		err = fg.RemoveNodeById("graph/api_test.go:#13-#58:graph||TestFuncGraph|*testing.T|")
+		err = fg.RemoveNodeById("graph/function/api_test.go:#13-#58:function||TestFuncGraph|*testing.T|")
 		assert.Nil(t, err)
 		after, err := fg.g.Order()
 		assert.Nil(t, err)

@@ -1,4 +1,4 @@
-package graph
+package function
 
 type VertexStat struct {
 	Referenced           int `json:"referenced" csv:"referenced"`
