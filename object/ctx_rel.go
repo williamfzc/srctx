@@ -108,8 +108,7 @@ func (sc *SourceContext) RefsFromDefId(defId int) ([]*FactVertex, error) {
 	return ret, nil
 }
 
-// RefsFromLine todo: need some rename ...
-func (sc *SourceContext) RefsFromLine(fileName string, lineNum int, charLength int) ([]*FactVertex, error) {
+func (sc *SourceContext) RefsFromLineWithLimit(fileName string, lineNum int, charLength int) ([]*FactVertex, error) {
 	startPoints, err := sc.RefsByLine(fileName, lineNum)
 	if err != nil {
 		return nil, err

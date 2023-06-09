@@ -39,7 +39,7 @@ type FileExtras struct {
 }
 
 type DefExtras struct {
-	DefType   DefType
+	DefType   string
 	RawTokens []chroma.Token
 }
 
@@ -99,12 +99,3 @@ func NewSourceContext() SourceContext {
 		RelGraph:    relGraph,
 	}
 }
-
-type DefType = string
-
-const (
-	DefFunction  DefType = "function"
-	DefClass     DefType = "class"
-	DefNamespace DefType = "namespace"
-	DefUnknown   DefType = ""
-)

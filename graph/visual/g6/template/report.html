@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>srctx report</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #mountNode {
+            width: 100%;
+            height: 100vh;
+        }
+
+        #toggleLayoutButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #toggleLayoutButton:hover {
+            background-color: #3e8e41;
+        }
+    </style>
+</head>
+<body>
+<button id="toggleLayoutButton">Change Layout</button>
+<div id="mountNode"></div>
+<script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.8.7/dist/g6.min.js"></script>
+
+<script>
+    const grid = new G6.Grid()
+    const toolbar = new G6.ToolBar()
+    const edgeBundling = new G6.Bundling({
+        bundleThreshold: 0.6,
+        K: 100,
+    })
+
+    const data = {{ . }}
+
+    const graph = new G6.Graph({
+        container: 'mountNode',
+        width: window.innerWidth,
+        height: window.innerHeight,
+        layout: {
+            type: 'comboCombined',
+            preventOverlap: true,
+            spacing: 5,
+            linkDistance: 100,
+            nodeSize: 100,
+            outerLayout: new G6.Layout['forceAtlas2']({
+                kr: 50,
+                factor: 10,
+            })
+        },
+        modes: {
+            default: ['drag-canvas', 'zoom-canvas', 'drag-combo', 'activate-relations', 'collapse-expand-combo'],
+        },
+        defaultNode: {
+            size: 60,
+            style: {
+                lineWidth: 1,
+            },
+        },
+        defaultEdge: {
+            style: {
+                opacity: 0.6,
+                stroke: 'black',
+                startArrow: true,
+            },
+            labelCfg: {
+                autoRotate: true,
+            },
+        },
+        defaultCombo: {
+            collapse: true,
+            style: {
+                stroke: 'black',
+            }
+        },
+        groupByTypes: false,
+        plugins: [grid, toolbar, edgeBundling]
+    });
+    graph.data(data);
+    graph.render();
+
+    const toggleLayoutButton = document.getElementById('toggleLayoutButton');
+    const layoutTypes = ['comboCombined'];
+
+    let currentLayoutIndex = 0;
+    toggleLayoutButton.addEventListener('click', function () {
+        currentLayoutIndex = (currentLayoutIndex + 1) % layoutTypes.length;
+        const layoutType = layoutTypes[currentLayoutIndex];
+        graph.updateLayout({type: layoutType});
+    });
+</script>
+</body>
+</html>

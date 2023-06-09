@@ -362,7 +362,7 @@ func AddDiffCmd(app *cli.App) {
 			if outputHtml != "" {
 				log.Infof("createing output html: %s", outputHtml)
 
-				var g6data *g6.G6Data
+				var g6data *g6.Data
 				if nodeLevel != nodeLevelFunc {
 					fileGraph, err := funcGraph.ToFileGraph()
 					if err != nil {

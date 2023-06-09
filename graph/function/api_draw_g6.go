@@ -6,7 +6,7 @@ import (
 	"github.com/williamfzc/srctx/graph/visual/g6"
 )
 
-func (fg *FuncGraph) ToG6Data() (*g6.G6Data, error) {
+func (fg *FuncGraph) ToG6Data() (*g6.Data, error) {
 	storage, err := fg.Dump()
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func (fg *FuncGraph) ToG6Data() (*g6.G6Data, error) {
 			cache[eachF.Id()] = eachF
 		}
 
-		data.Combos = append(data.Combos, &g6.G6Combo{
+		data.Combos = append(data.Combos, &g6.Combo{
 			Id:        eachFile,
 			Label:     eachFile,
 			Collapsed: false,
@@ -29,10 +29,10 @@ func (fg *FuncGraph) ToG6Data() (*g6.G6Data, error) {
 
 	// Nodes
 	for nodeId, funcId := range storage.VertexIds {
-		curNode := &g6.G6Node{
+		curNode := &g6.Node{
 			Id:      strconv.Itoa(nodeId),
 			Label:   funcId,
-			Style:   &g6.G6NodeStyle{},
+			Style:   &g6.NodeStyle{},
 			ComboId: cache[funcId].Path,
 		}
 		data.Nodes = append(data.Nodes, curNode)
@@ -40,7 +40,7 @@ func (fg *FuncGraph) ToG6Data() (*g6.G6Data, error) {
 	// Edges
 	for src, targets := range storage.GEdges {
 		for _, target := range targets {
-			curEdge := &g6.G6Edge{
+			curEdge := &g6.Edge{
 				Source: strconv.Itoa(src),
 				Target: strconv.Itoa(target),
 			}

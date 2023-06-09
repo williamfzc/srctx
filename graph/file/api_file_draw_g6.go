@@ -6,7 +6,7 @@ import (
 	"github.com/williamfzc/srctx/graph/visual/g6"
 )
 
-func (fg *FileGraph) ToG6Data() (*g6.G6Data, error) {
+func (fg *FileGraph) ToG6Data() (*g6.Data, error) {
 	data := g6.EmptyG6Data()
 
 	adjacencyMap, err := fg.G.AdjacencyMap()
@@ -24,10 +24,10 @@ func (fg *FileGraph) ToG6Data() (*g6.G6Data, error) {
 			return nil, err
 		}
 		mapping[node.Id()] = curId
-		curNode := &g6.G6Node{
+		curNode := &g6.Node{
 			Id:    strconv.Itoa(curId),
 			Label: node.Path,
-			Style: &g6.G6NodeStyle{},
+			Style: &g6.NodeStyle{},
 		}
 		curId++
 		data.Nodes = append(data.Nodes, curNode)
@@ -38,7 +38,7 @@ func (fg *FileGraph) ToG6Data() (*g6.G6Data, error) {
 			srcId := mapping[src]
 			targetId := mapping[target]
 
-			curEdge := &g6.G6Edge{
+			curEdge := &g6.Edge{
 				Source: strconv.Itoa(srcId),
 				Target: strconv.Itoa(targetId),
 			}
