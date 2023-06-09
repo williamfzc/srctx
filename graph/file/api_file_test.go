@@ -13,7 +13,7 @@ import (
 
 func TestFuncGraph_ToFileGraph(t *testing.T) {
 	_, curFile, _, _ := runtime.Caller(0)
-	src := filepath.Dir(filepath.Dir(curFile))
+	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
 	fg, err := graph.CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"), core.LangGo)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fg.Cache)
@@ -36,7 +36,7 @@ func TestFuncGraph_ToFileGraph(t *testing.T) {
 		assert.Nil(t, err)
 		before, err := fileGraph.G.Order()
 		assert.Nil(t, err)
-		err = fileGraph.RemoveNodeById("graph/api_file_test.go")
+		err = fileGraph.RemoveNodeById("graph/file/api_file_test.go")
 		assert.Nil(t, err)
 		after, err := fileGraph.G.Order()
 		assert.Nil(t, err)
