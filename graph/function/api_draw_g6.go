@@ -1,6 +1,7 @@
 package function
 
 import (
+	"path/filepath"
 	"strconv"
 
 	"github.com/williamfzc/srctx/graph/visual/g6"
@@ -15,14 +16,27 @@ func (fg *FuncGraph) ToG6Data() (*g6.Data, error) {
 	data := g6.EmptyG6Data()
 	// cache
 	cache := make(map[string]*FuncVertex)
+	// dir combos (#35)
+	dirCombos := make(map[string]struct{})
 	for eachFile, fs := range fg.Cache {
 		for _, eachF := range fs {
 			cache[eachF.Id()] = eachF
 		}
 
+		eachDir := filepath.Dir(eachFile)
+		dirCombos[eachDir] = struct{}{}
 		data.Combos = append(data.Combos, &g6.Combo{
 			Id:        eachFile,
 			Label:     eachFile,
+			Collapsed: false,
+			ParentId:  eachDir,
+		})
+	}
+
+	for eachDir := range dirCombos {
+		data.Combos = append(data.Combos, &g6.Combo{
+			Id:        eachDir,
+			Label:     eachDir,
 			Collapsed: false,
 		})
 	}

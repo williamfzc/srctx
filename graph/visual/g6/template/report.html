@@ -33,8 +33,9 @@
         }
     </style>
 </head>
+
 <body>
-<button id="toggleLayoutButton">Change Layout</button>
+<button id="toggleLayoutButton">Toggle Collapse</button>
 <div id="mountNode"></div>
 <script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.8.7/dist/g6.min.js"></script>
 
@@ -59,9 +60,9 @@
             linkDistance: 100,
             nodeSize: 100,
             outerLayout: new G6.Layout['forceAtlas2']({
-                kr: 50,
-                factor: 10,
-            })
+                kr: 10000,
+            }),
+            innerLayout: new G6.Layout["grid"]()
         },
         modes: {
             default: ['drag-canvas', 'zoom-canvas', 'drag-combo', 'activate-relations', 'collapse-expand-combo'],
@@ -93,16 +94,52 @@
     });
     graph.data(data);
     graph.render();
+    graph.on('afterlayout', function () {
+        toggleLayoutButton.click();
+        graph.fitView();
+    });
 
     const toggleLayoutButton = document.getElementById('toggleLayoutButton');
-    const layoutTypes = ['comboCombined'];
-
-    let currentLayoutIndex = 0;
     toggleLayoutButton.addEventListener('click', function () {
-        currentLayoutIndex = (currentLayoutIndex + 1) % layoutTypes.length;
-        const layoutType = layoutTypes[currentLayoutIndex];
-        graph.updateLayout({type: layoutType});
+        const combos = graph.getCombos();
+        combos.forEach(function (combo) {
+            if (combo.getModel().parentId) {
+                const color = getComboColor(combo);
+                graph.collapseExpandCombo(combo);
+                if (combo.getModel().collapsed) {
+                    combo.update({
+                        style: {
+                            fill: color
+                        }
+                    });
+                } else {
+                    combo.update({
+                        style: {
+                            fill: null
+                        }
+                    });
+                }
+            }
+        });
     });
+
+    function getComboColor(combo) {
+        let hasColoredNode = false;
+        const nodes = combo.getNodes();
+        nodes.forEach(function (node) {
+            if (node.getModel().style.fill) {
+                hasColoredNode = true;
+            }
+        });
+        if (hasColoredNode) {
+            const coloredNode = nodes.find(function (node) {
+                return node.getModel().style.fill;
+            });
+            return coloredNode.getModel().style.fill;
+        } else {
+            return null;
+        }
+    }
 </script>
 </body>
 </html>

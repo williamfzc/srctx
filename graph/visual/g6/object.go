@@ -33,6 +33,7 @@ type Combo struct {
 	Id        string `json:"id"`
 	Label     string `json:"label"`
 	Collapsed bool   `json:"collapsed,omitempty"`
+	ParentId  string `json:"parentId,omitempty"`
 }
 
 // Data https://g6.antv.antgroup.com/api/graph-func/data
