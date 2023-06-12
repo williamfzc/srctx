@@ -3,7 +3,7 @@
 set -e
 
 # Set version number and base url
-version="0.7.1"
+version="0.9.0"
 base_url="https://github.com/williamfzc/srctx/releases/download"
 
 echo "Starting SRCTX..."
@@ -11,7 +11,8 @@ echo "Starting SRCTX..."
 # Download and unpack scip-java.zip
 if [[ ! -f "scip-java.zip" ]]; then
   echo "Downloading scip-java.zip..."
-  wget "${base_url}/v${version}/scip-java.zip"
+  # we do not always ship this zip
+  wget "${base_url}/v0.8.0/scip-java.zip"
 fi
 echo "Extracting scip-java.zip..."
 unzip -o scip-java.zip
