@@ -6,6 +6,8 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/williamfzc/srctx"
+
 	"github.com/goccy/go-json"
 )
 
@@ -51,6 +53,12 @@ func EmptyG6Data() *Data {
 	}
 }
 
+type renderData struct {
+	Version string
+	Url     string
+	Data    string
+}
+
 func (g *Data) RenderHtml(filename string) error {
 	// render
 	dataRaw, err := json.Marshal(g)
@@ -63,7 +71,11 @@ func (g *Data) RenderHtml(filename string) error {
 		return err
 	}
 	var buf bytes.Buffer
-	err = parsed.Execute(&buf, string(dataRaw))
+	err = parsed.Execute(&buf, &renderData{
+		Version: srctx.Version,
+		Url:     srctx.RepoUrl,
+		Data:    string(dataRaw),
+	})
 	if err != nil {
 		return err
 	}

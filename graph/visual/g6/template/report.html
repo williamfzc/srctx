@@ -48,6 +48,16 @@
             text-align: left;
             border: 1px solid black;
         }
+
+        #footer {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            padding: 10px;
+            background-color: gray;
+            color: white;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -85,6 +95,11 @@
 </table>
 <button id="toggleLayoutButton">Toggle Collapse</button>
 <div id="mountNode"></div>
+
+<div id="footer">
+    srctx {{ .Version }} | <a href="{{ .Url }}">{{ .Url }}</a>
+</div>
+
 <script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.8.7/dist/g6.min.js"></script>
 
 <script>
@@ -95,7 +110,7 @@
         K: 100,
     })
 
-    const data = {{ . }}
+    const data = {{ .Data }}
 
     const graph = new G6.Graph({
         container: 'mountNode',
