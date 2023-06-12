@@ -53,8 +53,10 @@ jobs:
           chmod +x ./srctx-linux-amd64
           
           # golang
-          # can not work in CI, do not know why
-          # ./srctx-linux-amd64 diff --withIndex --outputHtml ../golang.html
+          git clone https://github.com/gin-gonic/gin --depth=2
+          cd gin
+          ../srctx-linux-amd64 diff --withIndex --outputHtml ../golang.html
+          cd ..
           
           # java/maven
           git clone https://github.com/williamfzc/sibyl --depth=2
