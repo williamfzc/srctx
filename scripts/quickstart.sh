@@ -8,15 +8,6 @@ base_url="https://github.com/williamfzc/srctx/releases/download"
 
 echo "Starting SRCTX..."
 
-# Download and unpack scip-java.zip
-if [[ ! -f "scip-java.zip" ]]; then
-  echo "Downloading scip-java.zip..."
-  # we do not always ship this zip
-  wget "${base_url}/v0.8.0/scip-java.zip"
-fi
-echo "Extracting scip-java.zip..."
-unzip -o scip-java.zip
-
 # Determine the filename of the srctx executable based on the OS type and architecture
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # Mac OS
@@ -58,6 +49,15 @@ if [[ "$SRCTX_LANG" == "GOLANG" ]]; then
   ./srctx_bin diff --lang GOLANG --withIndex --src "$SRCTX_SRC"
 elif [[ "$SRCTX_LANG" == "JAVA" ]]; then
   echo "Running srctx for Java..."
+  # Download and unpack scip-java.zip
+  if [[ ! -f "scip-java.zip" ]]; then
+    echo "Downloading scip-java.zip..."
+    # we do not always ship this zip
+    wget "${base_url}/v0.8.0/scip-java.zip"
+  fi
+  echo "Extracting scip-java.zip..."
+  unzip -o scip-java.zip
+
   ./scip-java index "$SRCTX_BUILD_CMD"
   ./srctx_bin diff --lang JAVA --src "$SRCTX_SRC"
 elif [[ "$SRCTX_LANG" == "KOTLIN" ]]; then
