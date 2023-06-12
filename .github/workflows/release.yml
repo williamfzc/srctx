@@ -54,13 +54,13 @@ jobs:
           
           # golang
           # can not work in CI, do not know why
-          # ./srctx-linux-amd64 diff --withIndex
+          # ./srctx-linux-amd64 diff --withIndex --outputHtml golang.html
           
           # java/maven
           git clone https://github.com/williamfzc/sibyl --depth=2
           cd sibyl
           ../scip-java index -- clean package -DskipTests
-          ../srctx-linux-amd64 diff --scip ./index.scip
+          ../srctx-linux-amd64 diff --scip ./index.scip --outputHtml java.html
           cd ..
 
       - name: Release
@@ -68,3 +68,5 @@ jobs:
         with:
           files: |
             build/srctx-*
+            java.html
+            golang.html
