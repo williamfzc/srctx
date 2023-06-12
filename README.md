@@ -1,6 +1,6 @@
 # srctx: source context
 
-A library for extracting definition/reference graphs from your codebase. Powered by tree-sitter and LSIF/SCIP.
+A library for extracting and analyzing definition/reference graphs from your codebase. Powered by tree-sitter and LSIF/SCIP.
 
 | Name           | Status                                                                                                                                            |
 |----------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -14,51 +14,33 @@ A library for extracting definition/reference graphs from your codebase. Powered
 This library processes your code into precise function-level graphs, just like an IDE, and then you can apply some
 analysis on them.
 
-<img width="1159" alt="image" src="https://github.com/williamfzc/srctx/assets/13421694/6cfa72c2-787a-4ae6-8cef-e77c1985d307">
+<img width="1064" alt="image" src="https://github.com/williamfzc/srctx/assets/13421694/aa3a37ed-b7b8-4703-90f7-d61b34065994">
 
-This lib originally was designed for monitoring the influence of each commits.
+This lib originally was designed for monitoring the impacts of each commits.
 
-With the raw diff, we can only get something like:
-
-```text
-@@ -19,6 +20,7 @@ func AddDiffCmd(app *cli.App) {
-        var lsifZip string
-        var outputJson string
-        var outputCsv string
-+       var outputDot string
- 
-        diffCmd := &cli.Command{
-                Name:  "diff",
-:
-```
-
-If we need to know the impact of these line changes on the entire repository, we can only rely on manual reading of the
+If we need to know the impact of git line changes on the entire repository, we can only rely on manual reading of the
 code to evaluate.
 
 With this lib developers can know exactly what happened in every lines of your code. Such as definition, reference.
 
 ```bash
-./srctx diff --outputDot diff.dot
+./srctx diff --outputHtml output.html
 ```
 
-![display](https://user-images.githubusercontent.com/13421694/236665125-4968558b-8601-43d0-9618-97e146f93749.svg)
-
 Some "dangerous" line changes can be found automatically.
+
+<img width="843" alt="image" src="https://github.com/williamfzc/srctx/assets/13421694/e6e48e67-35b1-4c52-aa6a-99b1ba2f02db">
+
+You can see a dangerous change in file `cmd/srctx/diff/cmd.go#L29-#143`, .
+
+![](https://user-images.githubusercontent.com/13421694/236666915-5d403e4a-9cc1-4364-afbe-363cf82e5e49.png)
+
+Or you prefer a text report?
 
 We hope to utilize the powerful indexing capabilities of LSIF to quantify and evaluate the impact of text changes on the
 repository, reducing the mental burden on developers.
 
 # Usage
-
-## Usage as Github Action (Recommendation)
-
-Because LSIF files require dev env heavily, it's really hard to provide a universal solution in a single binary file for
-all the repos.
-
-<img width="697" alt="image" src="https://user-images.githubusercontent.com/13421694/236666915-5d403e4a-9cc1-4364-afbe-363cf82e5e49.png">
-
-We are currently working on [diffctx](https://github.com/williamfzc/diffctx), which will provide a GitHub Actions plugin
-that allows users to use it directly in a Pull Request.
 
 ## Usage as Cli (Recommendation)
 
@@ -127,6 +109,16 @@ For example, diff from `HEAD~1` to `HEAD`:
 
 See details with `./srctx diff --help`.
 
+## Usage as Github Action (Recommendation)
+
+Because LSIF files require dev env heavily, it's really hard to provide a universal solution in a single binary file for
+all the repos.
+
+<img width="697" alt="image" src="https://user-images.githubusercontent.com/13421694/236666915-5d403e4a-9cc1-4364-afbe-363cf82e5e49.png">
+
+We are currently working on [diffctx](https://github.com/williamfzc/diffctx), which will provide a GitHub Actions plugin
+that allows users to use it directly in a Pull Request.
+
 ## Usage as Lib
 
 ### API
@@ -173,11 +165,15 @@ for _, eachRef := range refs {
 
 Or see [cmd/srctx/cmd_diff.go](cmd/srctx/cmd_diff.go) for a real example with git diff.
 
+# Correctness / Accuracy
+
+<img width="1159" alt="image" src="https://github.com/williamfzc/srctx/assets/13421694/6cfa72c2-787a-4ae6-8cef-e77c1985d307">
+
+We wanted it to provide detection capabilities as accurate as an IDE.
+
 # Roadmap
 
-- Simpler installation
-- Full support LSIF
-- Better API
+See [Roadmap Issue](https://github.com/williamfzc/srctx/issues/31).
 
 # Contribution
 
