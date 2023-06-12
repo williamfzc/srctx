@@ -72,6 +72,11 @@
             style: {
                 lineWidth: 1,
             },
+            labelCfg: {
+                style: {
+                    opacity: 0,
+                }
+            }
         },
         defaultEdge: {
             style: {
@@ -94,10 +99,6 @@
     });
     graph.data(data);
     graph.render();
-    graph.on('afterlayout', function () {
-        toggleLayoutButton.click();
-        graph.fitView();
-    });
 
     const toggleLayoutButton = document.getElementById('toggleLayoutButton');
     toggleLayoutButton.addEventListener('click', function () {
@@ -119,6 +120,7 @@
                         }
                     });
                 }
+                graph.updateCombo(combo, combo.getModel());
             }
         });
     });
@@ -140,6 +142,22 @@
             return null;
         }
     }
+
+    graph.on('afterlayout', function () {
+        graph.fitView();
+        toggleLayoutButton.click();
+    });
+
+    graph.on('node:mouseenter', evt => {
+        const node = evt.item;
+        graph.updateItem(node, { labelCfg: { style: { opacity: 1 } } });
+    });
+
+    graph.on('node:mouseleave', evt => {
+        const node = evt.item;
+        graph.updateItem(node, { labelCfg: { style: { opacity: 0 } } });
+    });
+
 </script>
 </body>
 </html>

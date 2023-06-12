@@ -222,7 +222,11 @@ func AddDiffCmd(app *cli.App) {
 			startPoints := make([]*function.FuncVertex, 0)
 			for path, lines := range lineMap {
 				curPoints := funcGraph.GetFunctionsByFileLines(path, lines)
-				startPoints = append(startPoints, curPoints...)
+				if len(curPoints) == 0 {
+					log.Infof("file %s line %v hit no func", path, lines)
+				} else {
+					startPoints = append(startPoints, curPoints...)
+				}
 			}
 
 			// start scan
@@ -393,6 +397,11 @@ func AddDiffCmd(app *cli.App) {
 					for _, eachStat := range stats {
 						for _, eachId := range eachStat.TransitiveReferencedIds {
 							g6data.FillWithYellow(eachId)
+						}
+					}
+					for _, eachStat := range stats {
+						for _, eachId := range eachStat.ReferencedIds {
+							g6data.FillWithOrange(eachId)
 						}
 					}
 					for _, eachStat := range stats {
