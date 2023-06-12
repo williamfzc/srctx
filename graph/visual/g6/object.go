@@ -79,7 +79,7 @@ func (g *Data) RenderHtml(filename string) error {
 func (g *Data) FillWithOrange(label string) {
 	for _, each := range g.Nodes {
 		if each.Label == label {
-			each.Style.Fill = "#ffa940"
+			each.Style.Fill = "orange"
 			break
 		}
 	}
@@ -97,7 +97,7 @@ func (g *Data) FillWithYellow(label string) {
 func (g *Data) FillWithRed(label string) {
 	for _, each := range g.Nodes {
 		if each.Label == label {
-			each.Style.Fill = "#ff4d4f"
+			each.Style.Fill = "red"
 			break
 		}
 	}

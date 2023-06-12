@@ -31,10 +31,58 @@
         #toggleLayoutButton:hover {
             background-color: #3e8e41;
         }
+
+        #dataTable {
+            position: absolute;
+            z-index: 1;
+            background-color: white;
+            opacity: 0.9;
+            top: 40px;
+            left: 10px;
+            width: 400px;
+            height: 100px;
+            overflow: auto;
+        }
+
+        #dataTable td, #dataTable th {
+            text-align: left;
+            border: 1px solid black;
+        }
     </style>
 </head>
 
 <body>
+<table id="dataTable">
+    <tr>
+        <th>Category</th>
+        <th>Count</th>
+    </tr>
+    <tr>
+        <td>Total Impacts</td>
+        <td id="totalNodesCount"></td>
+    </tr>
+    <tr>
+        <td>
+            <span style="display: inline-block; width: 10px; height: 10px; background-color: red; margin-right: 5px;"></span>
+            Direct Impacts
+        </td>
+        <td id="redNodesCount"></td>
+    </tr>
+    <tr>
+        <td>
+            <span style="display: inline-block; width: 10px; height: 10px; background-color: orange; margin-right: 5px;"></span>
+            In-Direct Impacts
+        </td>
+        <td id="orangeNodesCount"></td>
+    </tr>
+    <tr>
+        <td>
+            <span style="display: inline-block; width: 10px; height: 10px; background-color: yellow; margin-right: 5px;"></span>
+            Potential Impacts
+        </td>
+        <td id="yellowNodesCount"></td>
+    </tr>
+</table>
 <button id="toggleLayoutButton">Toggle Collapse</button>
 <div id="mountNode"></div>
 <script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.8.7/dist/g6.min.js"></script>
@@ -150,13 +198,41 @@
 
     graph.on('node:mouseenter', evt => {
         const node = evt.item;
-        graph.updateItem(node, { labelCfg: { style: { opacity: 1 } } });
+        graph.updateItem(node, {labelCfg: {style: {opacity: 1}}});
     });
 
     graph.on('node:mouseleave', evt => {
         const node = evt.item;
-        graph.updateItem(node, { labelCfg: { style: { opacity: 0 } } });
+        graph.updateItem(node, {labelCfg: {style: {opacity: 0}}});
     });
+
+    const totalNodesCount = data.nodes.length;
+
+    let redNodesCount = 0;
+    data.nodes.forEach(function (node) {
+        if (node.style && node.style.fill && node.style.fill.toLowerCase() === 'red') {
+            redNodesCount++;
+        }
+    });
+    document.getElementById('redNodesCount').innerHTML = `${redNodesCount} / ${totalNodesCount} (${(redNodesCount / totalNodesCount * 100).toFixed(2)} %)`;
+
+    let orangeNodesCount = 0;
+    data.nodes.forEach(function (node) {
+        if (node.style && node.style.fill && node.style.fill.toLowerCase() === 'orange') {
+            orangeNodesCount++;
+        }
+    });
+    document.getElementById('orangeNodesCount').innerHTML = `${orangeNodesCount} / ${totalNodesCount} (${(orangeNodesCount / totalNodesCount * 100).toFixed(2)} %)`;
+
+    let yellowNodesCount = 0;
+    data.nodes.forEach(function (node) {
+        if (node.style && node.style.fill && node.style.fill.toLowerCase() === 'yellow') {
+            yellowNodesCount++;
+        }
+    });
+    document.getElementById('yellowNodesCount').innerHTML = `${yellowNodesCount} / ${totalNodesCount} (${(yellowNodesCount / totalNodesCount * 100).toFixed(2)} %)`;
+
+    document.getElementById('totalNodesCount').innerHTML = `${redNodesCount + yellowNodesCount + orangeNodesCount} / ${totalNodesCount} (${((redNodesCount + yellowNodesCount + orangeNodesCount) / totalNodesCount * 100).toFixed(2)} %)`;
 
 </script>
 </body>
