@@ -55,7 +55,7 @@ jobs:
           # golang
           git clone https://github.com/gin-gonic/gin --depth=2
           cd gin
-          ../srctx-linux-amd64 diff --withIndex --outputHtml ../golang.html
+          ../srctx-linux-amd64 diff --lang GOLANG --withIndex --outputHtml ../golang.html
           cd ..
           
           # java/maven
