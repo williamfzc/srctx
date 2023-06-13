@@ -14,18 +14,9 @@ A library for extracting and analyzing definition/reference graphs from your cod
 This library processes your code into precise function-level graphs, just like an IDE, and then you can apply some
 analysis on them.
 
-<img width="1064" alt="image" src="https://github.com/williamfzc/srctx/assets/13421694/aa3a37ed-b7b8-4703-90f7-d61b34065994">
+<img width="1389" alt="image" src="https://github.com/williamfzc/srctx/assets/13421694/e48a51c7-e95b-4da7-994f-f5fe1f461477">
 
-This lib originally was designed for monitoring the impacts of each commits.
-
-If we need to know the impact of git line changes on the entire repository, we can only rely on manual reading of the
-code to evaluate.
-
-With this lib developers can know exactly what happened in every lines of your code. Such as definition, reference.
-
-```bash
-./srctx diff --outputHtml output.html
-```
+With this lib developers can know exactly what happened in every lines of your code. Such as definition, reference. And understand the actual impacts of your git commits.
 
 Some "dangerous" line changes can be found automatically.
 
@@ -33,81 +24,68 @@ Some "dangerous" line changes can be found automatically.
 
 You can see a dangerous change in file `cmd/srctx/diff/cmd.go#L29-#143`, .
 
-![](https://user-images.githubusercontent.com/13421694/236666915-5d403e4a-9cc1-4364-afbe-363cf82e5e49.png)
-
-Or you prefer a text report?
-
 We hope to utilize the powerful indexing capabilities of LSIF to quantify and evaluate the impact of text changes on the
 repository, reducing the mental burden on developers.
 
 # Usage
 
-## Usage as Cli (Recommendation)
+## Quick Start
+
+We provide a one-click script for quickly deploying srctx anywhere. Common parameters include:
+
+- SRCTX_LANG: Required, specifies the language, such as GOLANG/JAVA/KOTLIN.
+- SRCTX_BUILD_CMD: Optional, specifies the compilation command.
 
 ### For Golang
 
-We have embedded the lsif-go indexer in our prebuilt binary files. So all you need is:
-
 ```bash
-wget https://github.com/williamfzc/srctx/releases/download/v0.6.0/srctx-linux-amd64
-chmod +x srctx-linux-amd64
-./srctx-linux-amd64 diff --withIndex --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
-```
-
-### For Python
-
-```bash
-pip3 install --upgrade git+https://github.com/sourcegraph/lsif-py.git
-lsif-py . --file ./dump.lsif
-
-wget https://github.com/williamfzc/srctx/releases/download/v0.6.0/srctx-linux-amd64
-chmod +x srctx-linux-amd64
-./srctx-linux-amd64 diff --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
+curl https://raw.githubusercontent.com/williamfzc/srctx/main/scripts/quickstart.sh \
+| SRCTX_LANG=GOLANG bash
 ```
 
 ### For Java/Kotlin
 
-Linux only. If you're using other platforms, please see [scip-java](https://sourcegraph.github.io/scip-java/docs/getting-started.html#run-scip-java-index) for details.
+As there is no unique compilation toolchain for Java (it could be Maven or Gradle, for example), 
+so at the most time, you also need to specify the compilation command to obtain the invocation information.
+
+You should replace the `SRCTX_BUILD_CMD` with your own one.
+
+Java:
 
 ```bash
-wget https://github.com/williamfzc/srctx/releases/download/v0.6.0/srctx-linux-amd64-full.zip
-unzip srctx-linux-amd64-full.zip
-
-# https://sourcegraph.github.io/scip-java/docs/getting-started.html#run-scip-java-index
-./scip-java index -- clean assembleDebug
+curl https://raw.githubusercontent.com/williamfzc/srctx/main/scripts/quickstart.sh \
+| SRCTX_LANG=JAVA SRCTX_BUILD_CMD="clean package -DskipTests" bash
 ```
 
-This bash will create a scip file for you. Then:
+Kotlin:
 
-```bash
-wget https://github.com/williamfzc/srctx/releases/download/v0.6.0/srctx-linux-amd64
-chmod +x srctx-linux-amd64
-./srctx-linux-amd64 diff --before HEAD~1 --after HEAD --scip index.scip --outputCsv output.csv --outputDot output.dot
-```
+Change the `SRCTX_LANG=JAVA` to `SRCTX_LANG=KOTLIN`.
 
-### For JavaScript
+## In Production
 
-https://github.com/sourcegraph/scip-typescript
+In proudction, it is generally recommended to separate the indexing process from the analysis process, rather than using a one-click script to complete the entire process. This can make the entire process easier to maintain.
 
-### For Other Languages
-
-#### 1. Generate LSIF file
+### 1. Generate LSIF file
 
 Tools can be found in https://lsif.dev/ .
 
 You will get a `dump.lsif` file after that.
 
-#### 2. Run `srctx`
+### 2. Run `srctx`
 
 Download our prebuilt binaries from [release page](https://github.com/williamfzc/srctx/releases).
 
 For example, diff from `HEAD~1` to `HEAD`:
 
 ```bash
-./srctx diff --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot
+./srctx diff --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot --outputHtml output.html
 ```
 
 See details with `./srctx diff --help`.
+
+### Prefer a real world sample?
+
+[Our CI](https://github.com/williamfzc/srctx/blob/main/.github/workflows/ci.yml) is a good start.
 
 ## Usage as Github Action (Recommendation)
 
