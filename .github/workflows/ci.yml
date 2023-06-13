@@ -14,21 +14,33 @@ jobs:
         with:
           # at least support HEAD~1 for testing
           fetch-depth: 2
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: 1.19
+
       - name: Prepare test source
         run: |
           curl -L  https://github.com/sourcegraph/lsif-go/releases/download/v1.9.3/src_linux_amd64 -o /usr/local/bin/lsif-go
           chmod +x /usr/local/bin/lsif-go
           lsif-go -v
+
       - name: Test
         run: go test -v ./... -coverprofile=coverage.txt -coverpkg=./...
+
       - name: Cmd Test
         run: |
           make
-          ./srctx diff --outputCsv output.csv
-          cat output.csv
+          ./srctx diff --outputHtml output.html
+
+      - name: Third Party Test (Golang)
+        run: |
+          git clone https://github.com/gin-gonic/gin --depth=2
+          cd gin
+          lsif-go -v
+          ../srctx diff --outputHtml ../golang.html
+          cd ..
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
