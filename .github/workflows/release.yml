@@ -46,22 +46,26 @@ jobs:
           # pack
           zip scip-java.zip ./scip-java ./scip-java.bat
 
-      - name: Command Level Test
+      - name: Command Level Test Prepare
         run: |
           cp build/srctx-linux-amd64 .
           chmod +x ./scip-java
           chmod +x ./srctx-linux-amd64
-          
-          # golang
-          # still do not work in CI... do not know why
-          # git clone https://github.com/gin-gonic/gin --depth=2
-          # cd gin
-          # ../srctx-linux-amd64 diff --lang GOLANG --withIndex --outputHtml ../golang.html
-          # cd ..
-          
-          # java/maven
-          git clone https://github.com/williamfzc/sibyl --depth=2
-          cd sibyl
+
+      - name: Command Level Test (Golang)
+        run: |
+          curl -L  https://github.com/sourcegraph/lsif-go/releases/download/v1.9.3/src_linux_amd64 -o /usr/local/bin/lsif-go
+          chmod +x /usr/local/bin/lsif-go
+          git clone https://github.com/gin-gonic/gin --depth=2
+          cd gin
+          lsif-go -v
+          ../srctx-linux-amd64 diff --outputHtml ../golang.html
+          cd ..
+
+      - name: Command Level Test (Java)
+        run: |
+          git clone https://github.com/junit-team/junit4 --depth=2
+          cd junit4
           ../scip-java index -- clean package -DskipTests
           ../srctx-linux-amd64 diff --scip ./index.scip --outputHtml ../java.html
           cd ..
