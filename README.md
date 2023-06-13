@@ -11,8 +11,7 @@ A library for extracting and analyzing definition/reference graphs from your cod
 
 ## About this tool
 
-This library processes your code into precise function-level graphs, just like an IDE, and then you can apply some
-analysis on them.
+This library processes your code into precise function-level graphs, seamlessly integrated with Git, and then you can apply some analysis to them.
 
 <img width="1389" alt="image" src="https://github.com/williamfzc/srctx/assets/13421694/e48a51c7-e95b-4da7-994f-f5fe1f461477">
 
@@ -78,7 +77,13 @@ Download our prebuilt binaries from [release page](https://github.com/williamfzc
 For example, diff from `HEAD~1` to `HEAD`:
 
 ```bash
-./srctx diff --before HEAD~1 --after HEAD --lsif dump.lsif --outputCsv output.csv --outputDot output.dot --outputHtml output.html
+./srctx diff \
+  --before HEAD~1 \
+  --after HEAD \
+  --lsif dump.lsif \
+  --outputCsv output.csv \
+  --outputDot output.dot \
+  --outputHtml output.html
 ```
 
 See details with `./srctx diff --help`.
