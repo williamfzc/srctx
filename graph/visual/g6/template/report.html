@@ -109,6 +109,18 @@
         bundleThreshold: 0.6,
         K: 100,
     })
+    const tooltip = new G6.Tooltip({
+        offsetX: 10,
+        offsetY: 20,
+        getContent(e) {
+            const outDiv = document.createElement('div');
+            outDiv.style.width = '180px';
+            outDiv.innerHTML = `
+      ${e.item.getModel().label || e.item.getModel().id}`
+            return outDiv
+        },
+        itemTypes: ['node']
+    });
 
     const data = {{ .Data }}
 
@@ -158,7 +170,7 @@
             }
         },
         groupByTypes: false,
-        plugins: [grid, toolbar, edgeBundling]
+        plugins: [grid, toolbar, edgeBundling, tooltip]
     });
     graph.data(data);
     graph.render();
