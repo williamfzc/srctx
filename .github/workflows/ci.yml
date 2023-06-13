@@ -34,12 +34,28 @@ jobs:
           make
           ./srctx diff --outputHtml output.html
 
+      - name: Build Extra Dep
+        run: |
+          # scip-java
+          curl -fL "https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz" | gzip -d > coursier \
+            && chmod +x coursier \
+            && ./coursier setup -y \
+            && ./coursier bootstrap --standalone --bat=true -o scip-java com.sourcegraph:scip-java_2.13:0.8.18 --main com.sourcegraph.scip_java.ScipJava
+
       - name: Third Party Test (Golang)
         run: |
           git clone https://github.com/gin-gonic/gin --depth=2
           cd gin
           lsif-go -v
           ../srctx diff --outputHtml ../golang.html
+          cd ..
+
+      - name: Third Party Test (Java)
+        run: |
+          git clone https://github.com/junit-team/junit4 --depth=2
+          cd junit4
+          ../scip-java index -- package -DskipTests --batch-mode --errors --settings .github/workflows/settings.xml
+          ../srctx diff --scip ./index.scip --outputHtml ../java.html
           cd ..
 
       - name: Upload coverage to Codecov
