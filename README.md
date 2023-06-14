@@ -1,6 +1,11 @@
-# srctx: source context
+<h1 align="center">
+  <img src="https://github.com/williamfzc/srctx/assets/13421694/e99b5cf6-07d7-49fb-a70a-862deab83e49" width="400" height="300">
+</h1>
 
-A library for extracting and analyzing definition/reference graphs from your codebase. Powered by tree-sitter and LSIF/SCIP.
+<h3 align="center">srctx: source context</h3>
+<p align="center">
+    <em>A library for extracting and analyzing definition/reference graphs from your codebase. Powered by tree-sitter and LSIF/SCIP.</em>
+</p>
 
 | Name           | Status                                                                                                                                            |
 |----------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
