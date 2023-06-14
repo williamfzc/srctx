@@ -23,8 +23,8 @@ Some "dangerous" line changes can be found automatically.
 
 You can see a dangerous change in file `cmd/srctx/diff/cmd.go#L29-#143`, .
 
-We hope to utilize the powerful indexing capabilities of LSIF to quantify and evaluate the impact of text changes on the
-repository, reducing the mental burden on developers.
+> Currently, srctx is still in an active development phase. 
+> If you're interested in its iteration direction and vision, you can check out [our roadmap page](https://github.com/williamfzc/srctx/issues/31).
 
 # Usage
 
@@ -160,7 +160,7 @@ See [Roadmap Issue](https://github.com/williamfzc/srctx/issues/31).
 
 # Contribution
 
-Issues and PRs are always welcome.
+[Issues and PRs](https://github.com/williamfzc/srctx/issues) are always welcome.
 
 # References
 
