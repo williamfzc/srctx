@@ -181,13 +181,13 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 
 				err = factGraph.AddVertex(eachRangeVertex)
 				if err != nil {
-					return nil, err
+					log.Warnf("range already existed: %v", eachRangeVertex)
 				}
 
 				// and edge
 				err = factGraph.AddEdge(int(eachFileId), eachRangeVertex.Id(), object.EdgeAttrContains)
 				if err != nil {
-					return nil, err
+					log.Warnf("edge already existed: %v -> %v", eachFileId, eachRangeVertex.Id())
 				}
 			}
 		} else {
