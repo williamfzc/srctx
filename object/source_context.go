@@ -3,6 +3,7 @@ package object
 import (
 	"github.com/alecthomas/chroma/v2"
 	"github.com/dominikbraun/graph"
+	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/parser/lsif"
 )
 
@@ -76,7 +77,12 @@ func (v *RelVertex) Id() int {
 }
 
 func (v *RelVertex) LineNumber() int {
-	return int(v.Range.Line + 1)
+	rangeObj := v.Range
+	if rangeObj == nil {
+		log.Warnf("range is nil: %v", v)
+		return -1
+	}
+	return int(rangeObj.Line + 1)
 }
 
 func (v *RelVertex) CharNumber() int {
