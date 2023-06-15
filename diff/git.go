@@ -3,6 +3,7 @@ package diff
 import (
 	"bytes"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
 	log "github.com/sirupsen/logrus"
@@ -27,6 +28,19 @@ func GitDiff(rootDir string, before string, after string) (AffectedLineMap, erro
 		return nil, err
 	}
 	return affected, nil
+}
+
+func PathOffset(repoRoot string, srcRoot string, origin AffectedLineMap) (AffectedLineMap, error) {
+	modifiedLineMap := make(map[string][]int)
+	for file, lines := range origin {
+		absFile := filepath.Join(repoRoot, file)
+		relPath, err := filepath.Rel(srcRoot, absFile)
+		if err != nil {
+			return nil, err
+		}
+		modifiedLineMap[relPath] = lines
+	}
+	return modifiedLineMap, nil
 }
 
 func Unified2Affected(patch []byte) (AffectedLineMap, error) {

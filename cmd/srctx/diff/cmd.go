@@ -167,8 +167,8 @@ func AddDiffCmd(app *cli.App) {
 					return err
 				}
 
-				// git diff will always start from the root of repo
-				// src will always start from the root of project
+				// Maybe the src does not start from the root of repo.
+				// But the lineMap will start from the root of repo.
 				if repoRoot != "" {
 					repoRoot, err := filepath.Abs(repoRoot)
 					if err != nil {
@@ -176,16 +176,10 @@ func AddDiffCmd(app *cli.App) {
 					}
 
 					log.Infof("path sync from %s to %s", repoRoot, src)
-					modifiedLineMap := make(map[string][]int)
-					for file, lines := range lineMap {
-						absFile := filepath.Join(repoRoot, file)
-						relPath, err := filepath.Rel(src, absFile)
-						if err != nil {
-							return err
-						}
-						modifiedLineMap[relPath] = lines
+					lineMap, err = diff.PathOffset(repoRoot, src, lineMap)
+					if err != nil {
+						return err
 					}
-					lineMap = modifiedLineMap
 				}
 			} else {
 				log.Infof("noDiff enabled")
