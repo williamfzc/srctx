@@ -60,7 +60,7 @@ elif [[ "$SRCTX_LANG" == "JAVA" ]]; then
   unzip -o scip-java.zip
 
   ./scip-java index "$SRCTX_BUILD_CMD"
-  ./srctx_bin diff --lang JAVA --src "$SRCTX_SRC" --outputHtml ./output.html
+  ./srctx_bin diff --lang JAVA --src "$SRCTX_SRC" --scip ./index.scip --outputHtml ./output.html
 
 elif [[ "$SRCTX_LANG" == "KOTLIN" ]]; then
   echo "Running srctx for Kotlin..."
@@ -74,7 +74,7 @@ elif [[ "$SRCTX_LANG" == "KOTLIN" ]]; then
     unzip -o scip-java.zip
 
   ./scip-java index "$SRCTX_BUILD_CMD"
-  ./srctx_bin diff --lang KOTLIN --src "$SRCTX_SRC" --outputHtml ./output.html
+  ./srctx_bin diff --lang KOTLIN --src "$SRCTX_SRC" --scip ./index.scip --outputHtml ./output.html
 
 else
   echo "Unsupported language: $SRCTX_LANG"
