@@ -1,11 +1,13 @@
 package example
 
 import (
+	"testing"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/parser"
 )
 
-func apiDesc() {
+func TestBase(t *testing.T) {
 	yourLsif := "../parser/lsif/testdata/dump.lsif.zip"
 
 	sourceContext, err := parser.FromLsifFile(yourLsif, "..")

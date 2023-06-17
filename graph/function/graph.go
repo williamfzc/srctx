@@ -21,6 +21,10 @@ type FuncPos struct {
 	End   int    `json:"end,omitempty"`
 }
 
+func (f *FuncPos) Repr() string {
+	return fmt.Sprintf("%s#%d-%d", f.Path, f.Start, f.End)
+}
+
 type FuncVertex struct {
 	*object2.Function
 	*FuncPos
@@ -58,7 +62,7 @@ type FuncGraph struct {
 	Cache map[string][]*FuncVertex
 
 	// source context ptr
-	Sc *object.SourceContext
+	sc *object.SourceContext
 }
 
 func NewEmptyFuncGraph() *FuncGraph {
@@ -66,7 +70,7 @@ func NewEmptyFuncGraph() *FuncGraph {
 		g:     graph.New((*FuncVertex).Id, graph.Directed()),
 		rg:    graph.New((*FuncVertex).Id, graph.Directed()),
 		Cache: make(map[string][]*FuncVertex),
-		Sc:    nil,
+		sc:    nil,
 	}
 }
 
@@ -142,12 +146,12 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 	return fg, nil
 }
 
-func CreateFuncGraphFromGolangDir(src string, lang core.LangType) (*FuncGraph, error) {
+func CreateFuncGraphFromGolangDir(src string) (*FuncGraph, error) {
 	sourceContext, err := parser.FromGolangSrc(src)
 	if err != nil {
 		return nil, err
 	}
-	return srcctx2graph(src, sourceContext, lang)
+	return srcctx2graph(src, sourceContext, core.LangGo)
 }
 
 func CreateFuncGraphFromDirWithLSIF(src string, lsifFile string, lang core.LangType) (*FuncGraph, error) {

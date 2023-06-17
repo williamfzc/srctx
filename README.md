@@ -28,6 +28,32 @@ Some "dangerous" line changes can be found automatically.
 
 You can see a dangerous change in file `cmd/srctx/diff/cmd.go#L29-#143`, .
 
+In addition, as a library, it also provides convenient APIs for secondary development, allowing you to freely access the content in the graph.
+
+```golang
+src := filepath.Dir(filepath.Dir(curFile))
+lsif := "../dump.lsif"
+lang := core.LangGo
+
+funcGraph, _ := function.CreateFuncGraphFromDirWithLSIF(src, lsif, lang)
+
+functions := funcGraph.GetFunctionsByFile("cmd/srctx/main.go")
+for _, each := range functions {
+    // about this function
+    log.Infof("func: %v", each.Id())
+    log.Infof("decl location: %v", each.FuncPos.Repr())
+    log.Infof("func name: %v", each.Name)
+
+    // context of this function
+    outVs := funcGraph.DirectReferencedIds(each)
+    log.Infof("this function reach %v other functions", len(outVs))
+    for _, eachOutV := range outVs {
+        outV, _ := funcGraph.GetById(eachOutV)
+        log.Infof("%v directly reached by %v", each.Name, outV.Name)
+    }
+}
+```
+
 > Currently, srctx is still in an active development phase. 
 > If you're interested in its iteration direction and vision, you can check out [our roadmap page](https://github.com/williamfzc/srctx/issues/31).
 
@@ -111,47 +137,16 @@ that allows users to use it directly in a Pull Request.
 
 ### API
 
-Our built-in diff implementation is a good example. [cmd/srctx/diff/cmd.go](cmd/srctx/diff/cmd.go)
+This API allows developers accessing the data of FuncGraph.
+
+- Start up example: [example/api_test.go](example/api_test.go)
+- Real world example: [cmd/srctx/diff/cmd.go](cmd/srctx/diff/cmd.go)
 
 ### Low level API
 
 Low level API allows developers consuming LSIF file directly.
 
-```golang
-yourLsif := "../parser/lsif/testdata/dump.lsif.zip"
-sourceContext, _ := parser.FromLsifFile(yourLsif)
-
-// all files?
-files := sourceContext.Files()
-log.Infof("files in lsif: %d", len(files))
-
-// search definition in a specific file
-defs, _ := sourceContext.DefsByFileName(files[0])
-log.Infof("there are %d def happend in %s", len(defs), files[0])
-
-for _, eachDef := range defs {
-    log.Infof("happened in %d:%d", eachDef.LineNumber(), eachDef.Range.Character)
-}
-
-// or specific line?
-_, _ = sourceContext.DefsByLine(files[0], 1)
-
-// get all the references of a definition
-refs, err := sourceContext.RefsByDefId(defs[0].Id())
-if err != nil {
-    panic(err)
-}
-log.Infof("there are %d refs", len(refs))
-
-for _, eachRef := range refs {
-    log.Infof("happened in file %s %d:%d",
-    sourceContext.FileName(eachRef.FileId),
-    eachRef.LineNumber(),
-    eachRef.Range.Character)
-}
-```
-
-Or see [cmd/srctx/cmd_diff.go](cmd/srctx/cmd_diff.go) for a real example with git diff.
+See [example/api_base_test.go](example/api_base_test.go) for details.
 
 # Correctness / Accuracy
 

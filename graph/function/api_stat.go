@@ -19,8 +19,8 @@ func (v *VertexStat) VisitedIds() []string {
 }
 
 func (fg *FuncGraph) Stat(f *FuncVertex) *VertexStat {
-	referenceIds := fg.ReferenceIds(f)
-	referencedIds := fg.ReferencedIds(f)
+	referenceIds := fg.DirectReferenceIds(f)
+	referencedIds := fg.DirectReferencedIds(f)
 
 	transitiveReferencedIds := fg.TransitiveReferencedIds(f)
 	transitiveReferenceIds := fg.TransitiveReferenceIds(f)

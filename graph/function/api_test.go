@@ -23,8 +23,8 @@ func TestFuncGraph(t *testing.T) {
 
 		for _, eachFunc := range testFuncs {
 			if eachFunc.Name == "TestApi" {
-				beingRefs := fg.ReferencedIds(eachFunc)
-				refOut := fg.ReferenceIds(eachFunc)
+				beingRefs := fg.DirectReferencedIds(eachFunc)
+				refOut := fg.DirectReferenceIds(eachFunc)
 				assert.Len(t, beingRefs, 0)
 				assert.Len(t, refOut, 4)
 			}

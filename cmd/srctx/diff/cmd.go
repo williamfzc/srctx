@@ -199,7 +199,7 @@ func AddDiffCmd(app *cli.App) {
 				if withIndex {
 					switch lang {
 					case core.LangGo:
-						funcGraph, err = function.CreateFuncGraphFromGolangDir(src, lang)
+						funcGraph, err = function.CreateFuncGraphFromGolangDir(src)
 					default:
 						return errors.New("did not specify `--lang`")
 					}
