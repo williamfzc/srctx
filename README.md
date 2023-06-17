@@ -46,12 +46,28 @@ for _, each := range functions {
 
     // context of this function
     outVs := funcGraph.DirectReferencedIds(each)
-    log.Infof("this function reach %v other functions", len(outVs))
+    log.Infof("this function reached by %v other functions", len(outVs))
     for _, eachOutV := range outVs {
         outV, _ := funcGraph.GetById(eachOutV)
         log.Infof("%v directly reached by %v", each.Name, outV.Name)
     }
 }
+```
+
+Output:
+
+```text
+time="2023-06-17T19:48:52+08:00" level=info msg="func: cmd/srctx/main.go:#16-#26:main||mainFunc|[]string|"
+time="2023-06-17T19:48:52+08:00" level=info msg="decl location: cmd/srctx/main.go#16-26"
+time="2023-06-17T19:48:52+08:00" level=info msg="func name: mainFunc"
+time="2023-06-17T19:48:52+08:00" level=info msg="this function reached by 7 other functions"
+time="2023-06-17T19:48:52+08:00" level=info msg="mainFunc directly reached by TestDiffDir"
+time="2023-06-17T19:48:52+08:00" level=info msg="mainFunc directly reached by TestDiffNoDiff"
+time="2023-06-17T19:48:52+08:00" level=info msg="mainFunc directly reached by TestRenderHtml"
+time="2023-06-17T19:48:52+08:00" level=info msg="mainFunc directly reached by TestDiffRaw"
+time="2023-06-17T19:48:52+08:00" level=info msg="mainFunc directly reached by TestDiffSpecificLang"
+time="2023-06-17T19:48:52+08:00" level=info msg="mainFunc directly reached by TestDiff"
+time="2023-06-17T19:48:52+08:00" level=info msg="mainFunc directly reached by main"
 ```
 
 > Currently, srctx is still in an active development phase. 

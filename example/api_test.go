@@ -44,7 +44,7 @@ func TestFunc(t *testing.T) {
 
 			// context of this function
 			outVs := funcGraph.DirectReferencedIds(each)
-			log.Infof("this function reach %v other functions", len(outVs))
+			log.Infof("this function reached by %v other functions", len(outVs))
 			for _, eachOutV := range outVs {
 				outV, _ := funcGraph.GetById(eachOutV)
 				log.Infof("%v directly reached by %v", each.Name, outV.Name)
