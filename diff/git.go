@@ -33,14 +33,18 @@ func GitDiff(rootDir string, before string, after string) (AffectedLineMap, erro
 func PathOffset(repoRoot string, srcRoot string, origin AffectedLineMap) (AffectedLineMap, error) {
 	modifiedLineMap := make(map[string][]int)
 	for file, lines := range origin {
-		absFile := filepath.Join(repoRoot, file)
-		relPath, err := filepath.Rel(srcRoot, absFile)
+		afterPath, err := PathOffsetOne(repoRoot, srcRoot, file)
 		if err != nil {
 			return nil, err
 		}
-		modifiedLineMap[relPath] = lines
+		modifiedLineMap[afterPath] = lines
 	}
 	return modifiedLineMap, nil
+}
+
+func PathOffsetOne(repoRoot string, srcRoot string, target string) (string, error) {
+	absFile := filepath.Join(repoRoot, target)
+	return filepath.Rel(srcRoot, absFile)
 }
 
 func Unified2Affected(patch []byte) (AffectedLineMap, error) {

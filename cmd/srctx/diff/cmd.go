@@ -160,6 +160,7 @@ func AddDiffCmd(app *cli.App) {
 			lang := core.LangType(lang)
 
 			var lineMap diff.AffectedLineMap
+			totalLineCountMap := make(map[string]int)
 			if !noDiff {
 				// prepare
 				lineMap, err = diff.GitDiff(src, before, after)
@@ -179,6 +180,13 @@ func AddDiffCmd(app *cli.App) {
 					lineMap, err = diff.PathOffset(repoRoot, src, lineMap)
 					if err != nil {
 						return err
+					}
+
+					for eachPath := range lineMap {
+						totalLineCountMap[eachPath], err = lineCounter(filepath.Join(src, eachPath))
+						if err != nil {
+							return err
+						}
 					}
 				}
 			} else {
@@ -288,20 +296,6 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			if outputCsv != "" || outputJson != "" {
-				// need to access files
-				// todo: should be removed
-				originWorkdir, err := os.Getwd()
-				if err != nil {
-					return err
-				}
-				err = os.Chdir(src)
-				if err != nil {
-					return err
-				}
-				defer func() {
-					_ = os.Chdir(originWorkdir)
-				}()
-
 				fileMap := make(map[string]*FileVertex)
 				for _, eachStat := range stats {
 					path := eachStat.Root.FuncPos.Path
@@ -309,10 +303,7 @@ func AddDiffCmd(app *cli.App) {
 					if cur, ok := fileMap[path]; ok {
 						cur.AffectedReferenceIds = append(cur.AffectedReferenceIds, eachStat.VisitedIds()...)
 					} else {
-						totalLine, err := lineCounter(path)
-						if err != nil {
-							return err
-						}
+						totalLine := totalLineCountMap[path]
 						fileMap[path] = &FileVertex{
 							FileName:             path,
 							AffectedLines:        len(lineMap[path]),
