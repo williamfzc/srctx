@@ -319,15 +319,24 @@ func AddDiffCmd(app *cli.App) {
 				fileList := make([]*FileVertex, 0, len(fileMap))
 				for _, v := range fileMap {
 					// calc
-					v.AffectedLinePercent = float32(v.AffectedLines) / float32(v.TotalLines)
+					v.AffectedLinePercent = 0.0
+					if v.TotalLines != 0 {
+						v.AffectedLinePercent = float32(v.AffectedLines) / float32(v.TotalLines)
+					}
 
 					m := make(map[string]struct{})
 					for _, each := range v.AffectedReferenceIds {
 						m[each] = struct{}{}
 					}
 					v.AffectedReferences = len(m)
-					v.AffectedReferencePercent = float32(v.AffectedReferences) / float32(v.TotalReferences)
-					v.AffectedFunctionPercent = float32(v.AffectedFunctions) / float32(v.TotalFunctions)
+					v.AffectedReferencePercent = 0.0
+					if v.TotalReferences != 0 {
+						v.AffectedReferencePercent = float32(v.AffectedReferences) / float32(v.TotalReferences)
+					}
+					v.AffectedFunctionPercent = 0.0
+					if v.TotalFunctions != 0 {
+						v.AffectedFunctionPercent = float32(v.AffectedFunctions) / float32(v.TotalFunctions)
+					}
 
 					fileList = append(fileList, v)
 				}
@@ -358,7 +367,7 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			if outputHtml != "" {
-				log.Infof("createing output html: %s", outputHtml)
+				log.Infof("creating output html: %s", outputHtml)
 
 				var g6data *g6.Data
 				if nodeLevel != nodeLevelFunc {
