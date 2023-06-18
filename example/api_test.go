@@ -29,12 +29,6 @@ func TestFunc(t *testing.T) {
 	})
 
 	t.Run("func", func(t *testing.T) {
-		src := filepath.Dir(filepath.Dir(curFile))
-		lsif := "../dump.lsif"
-		lang := core.LangGo
-
-		funcGraph, _ := function.CreateFuncGraphFromDirWithLSIF(src, lsif, lang)
-
 		functions := funcGraph.GetFunctionsByFile("cmd/srctx/main.go")
 		for _, each := range functions {
 			// about this function

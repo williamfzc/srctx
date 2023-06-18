@@ -113,6 +113,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 			cur := CreateFuncVertex(eachFunc, file)
 			_ = fg.g.AddVertex(cur)
 			fg.Cache[path] = append(fg.Cache[path], cur)
+			fg.IdCache[cur.Id()] = cur
 		}
 	}
 
