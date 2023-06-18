@@ -232,28 +232,36 @@ func AddDiffCmd(app *cli.App) {
 			}
 			log.Infof("diff finished.")
 
+			// tag (with priority)
+			for _, eachStat := range stats {
+				for _, eachVisited := range eachStat.VisitedIds() {
+					err := funcGraph.FillWithYellow(eachVisited)
+					if err != nil {
+						return err
+					}
+				}
+			}
+			for _, eachStat := range stats {
+				for _, eachId := range eachStat.ReferencedIds {
+					err := funcGraph.FillWithOrange(eachId)
+					if err != nil {
+						return err
+					}
+				}
+			}
+			for _, eachStat := range stats {
+				err := funcGraph.FillWithRed(eachStat.Root.Id())
+				if err != nil {
+					return err
+				}
+			}
+
 			// output
 			if outputDot != "" {
 				log.Infof("creating dot file: %v", outputDot)
 
 				switch nodeLevel {
 				case nodeLevelFunc:
-					// colorful
-					for _, eachStat := range stats {
-						for _, eachVisited := range eachStat.VisitedIds() {
-							err := funcGraph.FillWithYellow(eachVisited)
-							if err != nil {
-								return err
-							}
-						}
-					}
-					for _, eachStat := range stats {
-						err := funcGraph.FillWithRed(eachStat.Root.Id())
-						if err != nil {
-							return err
-						}
-					}
-
 					err := funcGraph.DrawDot(outputDot)
 					if err != nil {
 						return err
@@ -396,19 +404,6 @@ func AddDiffCmd(app *cli.App) {
 					g6data, err = funcGraph.ToG6Data()
 					if err != nil {
 						return err
-					}
-					for _, eachStat := range stats {
-						for _, eachId := range eachStat.TransitiveReferencedIds {
-							g6data.FillWithYellow(eachId)
-						}
-					}
-					for _, eachStat := range stats {
-						for _, eachId := range eachStat.ReferencedIds {
-							g6data.FillWithOrange(eachId)
-						}
-					}
-					for _, eachStat := range stats {
-						g6data.FillWithRed(eachStat.Root.Id())
 					}
 				}
 

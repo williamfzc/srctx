@@ -43,12 +43,24 @@ func (fg *FuncGraph) ToG6Data() (*g6.Data, error) {
 
 	// Nodes
 	for nodeId, funcId := range storage.VertexIds {
+		funcObj := cache[funcId]
 		curNode := &g6.Node{
 			Id:      strconv.Itoa(nodeId),
 			Label:   funcId,
 			Style:   &g6.NodeStyle{},
-			ComboId: cache[funcId].Path,
+			ComboId: funcObj.Path,
 		}
+
+		if funcObj.ContainTag(TagYellow) {
+			curNode.Style.Fill = "yellow"
+		}
+		if funcObj.ContainTag(TagOrange) {
+			curNode.Style.Fill = "orange"
+		}
+		if funcObj.ContainTag(TagRed) {
+			curNode.Style.Fill = "red"
+		}
+
 		data.Nodes = append(data.Nodes, curNode)
 	}
 	// Edges
