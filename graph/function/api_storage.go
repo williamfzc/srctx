@@ -87,6 +87,13 @@ func Load(fgs *FgStorage) (*FuncGraph, error) {
 
 	// vertex building
 	ret.Cache = fgs.Cache
+	// rebuild id cache
+	for _, functions := range ret.Cache {
+		for _, eachFunc := range functions {
+			ret.IdCache[eachFunc.Id()] = eachFunc
+		}
+	}
+
 	for _, eachFile := range ret.Cache {
 		for _, eachFunc := range eachFile {
 			_ = ret.g.AddVertex(eachFunc)

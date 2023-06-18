@@ -28,6 +28,9 @@ func (f *FuncPos) Repr() string {
 type FuncVertex struct {
 	*object2.Function
 	*FuncPos
+
+	// https://github.com/williamfzc/srctx/issues/41
+	Tags map[string]struct{} `json:"tags,omitempty"`
 }
 
 func (fv *FuncVertex) Id() string {
@@ -36,6 +39,29 @@ func (fv *FuncVertex) Id() string {
 
 func (fv *FuncVertex) PosKey() string {
 	return fmt.Sprintf("%s#%d", fv.Path, fv.Start)
+}
+
+func (fv *FuncVertex) ListTags() []string {
+	ret := make([]string, 0, len(fv.Tags))
+	for each := range fv.Tags {
+		ret = append(ret, each)
+	}
+	return ret
+}
+
+func (fv *FuncVertex) ContainTag(tag string) bool {
+	if _, ok := fv.Tags[tag]; ok {
+		return true
+	}
+	return false
+}
+
+func (fv *FuncVertex) AddTag(tag string) {
+	fv.Tags[tag] = struct{}{}
+}
+
+func (fv *FuncVertex) RemoveTag(tag string) {
+	delete(fv.Tags, tag)
 }
 
 func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *FuncVertex {
@@ -48,6 +74,7 @@ func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *Fu
 			Start: int(f.GetSpan().Start.Row + 1),
 			End:   int(f.GetSpan().End.Row + 1),
 		},
+		Tags: make(map[string]struct{}),
 	}
 	return cur
 }
@@ -60,6 +87,8 @@ type FuncGraph struct {
 
 	// k: file, v: function
 	Cache map[string][]*FuncVertex
+	// k: id, v: function
+	IdCache map[string]*FuncVertex
 
 	// source context ptr
 	sc *object.SourceContext
@@ -67,10 +96,11 @@ type FuncGraph struct {
 
 func NewEmptyFuncGraph() *FuncGraph {
 	return &FuncGraph{
-		g:     graph.New((*FuncVertex).Id, graph.Directed()),
-		rg:    graph.New((*FuncVertex).Id, graph.Directed()),
-		Cache: make(map[string][]*FuncVertex),
-		sc:    nil,
+		g:       graph.New((*FuncVertex).Id, graph.Directed()),
+		rg:      graph.New((*FuncVertex).Id, graph.Directed()),
+		Cache:   make(map[string][]*FuncVertex),
+		IdCache: make(map[string]*FuncVertex),
+		sc:      nil,
 	}
 }
 

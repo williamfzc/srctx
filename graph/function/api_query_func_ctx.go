@@ -5,11 +5,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (fg *FuncGraph) FuncCount() int {
-	ret, _ := fg.g.Order()
-	return ret
-}
-
 // DirectReferencedCount
 // This function returns the number of direct references to a given function vertex in the function graph.
 // It does so by counting the length of the slice of IDs of the function vertices that directly reference the given function vertex.
