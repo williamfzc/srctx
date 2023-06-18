@@ -43,11 +43,17 @@ func (fg *FuncGraph) ListFunctions() []*FuncVertex {
 }
 
 func (fg *FuncGraph) FilterFunctions(f func(*FuncVertex) bool) []*FuncVertex {
-	ret := make([]*FuncVertex, 0, len(fg.IdCache))
-	for _, each := range ret {
+	ret := make([]*FuncVertex, 0)
+	for _, each := range fg.IdCache {
 		if f(each) {
 			ret = append(ret, each)
 		}
 	}
 	return ret
+}
+
+func (fg *FuncGraph) ListEntries() []*FuncVertex {
+	return fg.FilterFunctions(func(funcVertex *FuncVertex) bool {
+		return funcVertex.ContainTag(TagEntry)
+	})
 }

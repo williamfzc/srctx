@@ -77,3 +77,15 @@ func (fg *FuncGraph) TransitiveReferenceIds(f *FuncVertex) []string {
 	}
 	return ret
 }
+
+func (fg *FuncGraph) EntryIds(f *FuncVertex) []string {
+	ret := make([]string, 0)
+	all := fg.TransitiveReferencedIds(f)
+	for _, eachId := range all {
+		item := fg.IdCache[eachId]
+		if item.ContainTag(TagEntry) {
+			ret = append(ret, eachId)
+		}
+	}
+	return ret
+}

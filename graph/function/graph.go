@@ -14,6 +14,10 @@ import (
 	"github.com/williamfzc/srctx/parser"
 )
 
+const (
+	TagEntry = "entry"
+)
+
 type FuncPos struct {
 	Path  string `json:"path,omitempty"`
 	Lang  string `json:"lang,omitempty"`
@@ -162,6 +166,15 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 				}
 			}
 		}
+	}
+
+	// entries tag
+	entries := fg.FilterFunctions(func(funcVertex *FuncVertex) bool {
+		return len(fg.DirectReferencedIds(funcVertex)) == 0
+	})
+	log.Infof("detect entries: %d", len(entries))
+	for _, entry := range entries {
+		entry.AddTag(TagEntry)
 	}
 
 	nodeCount, err := fg.g.Order()

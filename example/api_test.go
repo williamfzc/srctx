@@ -29,7 +29,7 @@ func TestFunc(t *testing.T) {
 	})
 
 	t.Run("func", func(t *testing.T) {
-		functions := funcGraph.GetFunctionsByFile("cmd/srctx/main.go")
+		functions := funcGraph.GetFunctionsByFile("graph/function/api_query_func.go")
 		for _, each := range functions {
 			// about this function
 			log.Infof("func: %v", each.Id())
@@ -43,6 +43,10 @@ func TestFunc(t *testing.T) {
 				outV, _ := funcGraph.GetById(eachOutV)
 				log.Infof("%v directly reached by %v", each.Name, outV.Name)
 			}
+
+			allEntries := funcGraph.ListEntries()
+			entries := funcGraph.EntryIds(each)
+			log.Infof("this function affects %d/%d entries", len(entries), len(allEntries))
 		}
 	})
 }

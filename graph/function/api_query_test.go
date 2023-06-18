@@ -29,4 +29,19 @@ func TestQuery(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("Entries", func(t *testing.T) {
+		testFuncs := fg.GetFunctionsByFile("graph/function/api_query_test.go")
+		assert.NotEmpty(t, testFuncs)
+
+		entries := fg.ListEntries()
+		assert.NotEmpty(t, entries)
+
+		for _, eachFunc := range testFuncs {
+			if eachFunc.Name == "TestQuery" {
+				entries := fg.EntryIds(eachFunc)
+				assert.Len(t, entries, 0)
+			}
+		}
+	})
 }
