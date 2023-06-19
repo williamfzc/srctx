@@ -25,7 +25,7 @@ func TestQuery(t *testing.T) {
 				beingRefs := fg.DirectReferencedIds(eachFunc)
 				refOut := fg.DirectReferenceIds(eachFunc)
 				assert.Len(t, beingRefs, 0)
-				assert.Len(t, refOut, 4)
+				assert.Len(t, refOut, 6)
 			}
 		}
 	})

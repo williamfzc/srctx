@@ -156,12 +156,12 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 				}
 
 				for _, eachPossibleFunc := range fg.Cache[refFile] {
+					// eachPossibleFunc 's range contains eachFunc 's ref
+					// so eachPossibleFunc calls eachFunc
 					if eachPossibleFunc.GetSpan().ContainLine(eachRef.IndexLineNumber()) {
-						// build `referenced by` edge
 						log.Debugf("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())
-						// eachFunc def, eachPossibleFunc ref
-						_ = fg.rg.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
-						_ = fg.g.AddEdge(eachPossibleFunc.Id(), eachFunc.Id())
+						_ = fg.g.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
+						_ = fg.rg.AddEdge(eachPossibleFunc.Id(), eachFunc.Id())
 					}
 				}
 			}

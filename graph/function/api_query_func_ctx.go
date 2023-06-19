@@ -13,6 +13,20 @@ func (fg *FuncGraph) DirectReferencedCount(f *FuncVertex) int {
 }
 
 func (fg *FuncGraph) DirectReferencedIds(f *FuncVertex) []string {
+	adjacencyMap, err := fg.g.AdjacencyMap()
+	if err != nil {
+		log.Warnf("failed to get adjacency map: %v", f)
+		return nil
+	}
+	m := adjacencyMap[f.Id()]
+	ret := make([]string, 0, len(m))
+	for k := range m {
+		ret = append(ret, k)
+	}
+	return ret
+}
+
+func (fg *FuncGraph) DirectReferenceIds(f *FuncVertex) []string {
 	adjacencyMap, err := fg.rg.AdjacencyMap()
 	if err != nil {
 		log.Warnf("failed to get adjacency map: %v", f)
@@ -40,20 +54,6 @@ func (fg *FuncGraph) TransitiveReferencedIds(f *FuncVertex) []string {
 		m[cur] = struct{}{}
 		return false
 	})
-	ret := make([]string, 0, len(m))
-	for k := range m {
-		ret = append(ret, k)
-	}
-	return ret
-}
-
-func (fg *FuncGraph) DirectReferenceIds(f *FuncVertex) []string {
-	predecessorMap, err := fg.rg.PredecessorMap()
-	if err != nil {
-		log.Warnf("failed to get predecessor map: %v", f)
-		return nil
-	}
-	m := predecessorMap[f.Id()]
 	ret := make([]string, 0, len(m))
 	for k := range m {
 		ret = append(ret, k)

@@ -38,11 +38,13 @@ func TestFunc(t *testing.T) {
 
 			// context of this function
 			outVs := funcGraph.DirectReferencedIds(each)
-			log.Infof("this function reached by %v other functions", len(outVs))
+			log.Infof("this function referenced by %v other functions", len(outVs))
 			for _, eachOutV := range outVs {
 				outV, _ := funcGraph.GetById(eachOutV)
-				log.Infof("%v directly reached by %v", each.Name, outV.Name)
+				log.Infof("%v directly referenced by %v", each.Name, outV.Name)
 			}
+			transOutVs := funcGraph.TransitiveReferencedIds(each)
+			log.Infof("this function transitively referenced by %d other functions", len(transOutVs))
 
 			allEntries := funcGraph.ListEntries()
 			entries := funcGraph.EntryIds(each)
