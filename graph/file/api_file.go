@@ -53,6 +53,16 @@ func (fg *FileGraph) ToDirGraph() (*FileGraph, error) {
 	return fileGraph, nil
 }
 
+func (fg *FileGraph) GetById(id string) *FileVertex {
+	v, err := fg.G.Vertex(id)
+	if err != nil {
+
+		log.Warnf("no vertex: %v", id)
+		return nil
+	}
+	return v
+}
+
 func path2dir(fp string) string {
 	return filepath.ToSlash(filepath.Dir(fp))
 }
