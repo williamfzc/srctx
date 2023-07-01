@@ -1,10 +1,11 @@
 package file
 
 import (
-	log "github.com/sirupsen/logrus"
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,6 +16,11 @@ func TestQuery(t *testing.T) {
 	fg, err := CreateFileGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"))
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fg)
+
+	t.Run("List", func(t *testing.T) {
+		fs := fg.ListFiles()
+		assert.NotEmpty(t, fs)
+	})
 
 	t.Run("GetHot", func(t *testing.T) {
 		fileVertex := fg.GetById("graph/function/api_query_test.go")

@@ -6,7 +6,7 @@ import (
 	"github.com/dominikbraun/graph/draw"
 )
 
-func (fg *FileGraph) DrawDot(filename string) error {
+func (fg *Graph) DrawDot(filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -19,7 +19,7 @@ func (fg *FileGraph) DrawDot(filename string) error {
 	return nil
 }
 
-func (fg *FileGraph) FillWithYellow(vertexHash string) error {
+func (fg *Graph) FillWithYellow(vertexHash string) error {
 	err := fg.setProperty(vertexHash, "style", "filled")
 	if err != nil {
 		return err
@@ -31,7 +31,7 @@ func (fg *FileGraph) FillWithYellow(vertexHash string) error {
 	return nil
 }
 
-func (fg *FileGraph) FillWithRed(vertexHash string) error {
+func (fg *Graph) FillWithRed(vertexHash string) error {
 	err := fg.setProperty(vertexHash, "style", "filled")
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (fg *FileGraph) FillWithRed(vertexHash string) error {
 	return nil
 }
 
-func (fg *FileGraph) setProperty(vertexHash string, propertyK string, propertyV string) error {
+func (fg *Graph) setProperty(vertexHash string, propertyK string, propertyV string) error {
 	_, properties, err := fg.G.VertexWithProperties(vertexHash)
 	if err != nil {
 		return err

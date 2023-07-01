@@ -2,11 +2,11 @@ package file
 
 import log "github.com/sirupsen/logrus"
 
-func (fg *FileGraph) DirectReferencedCount(f *FileVertex) int {
+func (fg *Graph) DirectReferencedCount(f *Vertex) int {
 	return len(fg.DirectReferencedIds(f))
 }
 
-func (fg *FileGraph) DirectReferencedIds(f *FileVertex) []string {
+func (fg *Graph) DirectReferencedIds(f *Vertex) []string {
 	adjacencyMap, err := fg.G.AdjacencyMap()
 	if err != nil {
 		log.Warnf("failed to get adjacency map: %v", f)
@@ -20,7 +20,7 @@ func (fg *FileGraph) DirectReferencedIds(f *FileVertex) []string {
 	return ret
 }
 
-func (fg *FileGraph) DirectReferenceIds(f *FileVertex) []string {
+func (fg *Graph) DirectReferenceIds(f *Vertex) []string {
 	adjacencyMap, err := fg.Rg.AdjacencyMap()
 	if err != nil {
 		log.Warnf("failed to get adjacency map: %v", f)

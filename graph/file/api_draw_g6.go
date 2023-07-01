@@ -6,7 +6,7 @@ import (
 	"github.com/williamfzc/srctx/graph/visual/g6"
 )
 
-func (fg *FileGraph) ToG6Data() (*g6.Data, error) {
+func (fg *Graph) ToG6Data() (*g6.Data, error) {
 	data := g6.EmptyG6Data()
 
 	adjacencyMap, err := fg.G.AdjacencyMap()
@@ -48,7 +48,7 @@ func (fg *FileGraph) ToG6Data() (*g6.Data, error) {
 	return data, nil
 }
 
-func (fg *FileGraph) DrawG6Html(filename string) error {
+func (fg *Graph) DrawG6Html(filename string) error {
 	data, err := fg.ToG6Data()
 	if err != nil {
 		return err

@@ -6,11 +6,11 @@ import (
 	"github.com/williamfzc/srctx/graph/file"
 )
 
-func (fg *FuncGraph) ToFileGraph() (*file.FileGraph, error) {
+func (fg *FuncGraph) ToFileGraph() (*file.Graph, error) {
 	// create graph
-	fileGraph := &file.FileGraph{
-		G:  graph.New((*file.FileVertex).Id, graph.Directed()),
-		Rg: graph.New((*file.FileVertex).Id, graph.Directed()),
+	fileGraph := &file.Graph{
+		G:  graph.New((*file.Vertex).Id, graph.Directed()),
+		Rg: graph.New((*file.Vertex).Id, graph.Directed()),
 	}
 	// building edges
 	err := FuncGraph2FileGraph(fg.g, fileGraph.G)
@@ -35,7 +35,7 @@ func (fg *FuncGraph) ToFileGraph() (*file.FileGraph, error) {
 	return fileGraph, nil
 }
 
-func (fg *FuncGraph) ToDirGraph() (*file.FileGraph, error) {
+func (fg *FuncGraph) ToDirGraph() (*file.Graph, error) {
 	fileGraph, err := fg.ToFileGraph()
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (fg *FuncGraph) ToDirGraph() (*file.FileGraph, error) {
 	return fileGraph.ToDirGraph()
 }
 
-func FuncGraph2FileGraph(f graph.Graph[string, *FuncVertex], g graph.Graph[string, *file.FileVertex]) error {
+func FuncGraph2FileGraph(f graph.Graph[string, *FuncVertex], g graph.Graph[string, *file.Vertex]) error {
 	m, err := f.AdjacencyMap()
 	if err != nil {
 		return err

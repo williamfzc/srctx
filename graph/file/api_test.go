@@ -5,19 +5,15 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/williamfzc/srctx/graph/function"
+	"github.com/williamfzc/srctx/graph/file"
 
-	"github.com/opensibyl/sibyl2/pkg/core"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFuncGraph_ToFileGraph(t *testing.T) {
+func TestFileGraph(t *testing.T) {
 	_, curFile, _, _ := runtime.Caller(0)
 	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
-	fg, err := function.CreateFuncGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"), core.LangGo)
-	assert.Nil(t, err)
-	assert.NotEmpty(t, fg.Cache)
-	fileGraph, err := fg.ToFileGraph()
+	fileGraph, err := file.CreateFileGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"))
 	assert.Nil(t, err)
 
 	t.Run("Transform", func(t *testing.T) {
@@ -32,11 +28,9 @@ func TestFuncGraph_ToFileGraph(t *testing.T) {
 	})
 
 	t.Run("RemoveNode", func(t *testing.T) {
-		fileGraph, err := fg.ToFileGraph()
-		assert.Nil(t, err)
 		before, err := fileGraph.G.Order()
 		assert.Nil(t, err)
-		err = fileGraph.RemoveNodeById("graph/file/api_file_test.go")
+		err = fileGraph.RemoveNodeById("graph/file/api_test.go")
 		assert.Nil(t, err)
 		after, err := fileGraph.G.Order()
 		assert.Nil(t, err)
@@ -44,8 +38,6 @@ func TestFuncGraph_ToFileGraph(t *testing.T) {
 	})
 
 	t.Run("DrawG6", func(t *testing.T) {
-		fileGraph, err := fg.ToFileGraph()
-		assert.Nil(t, err)
 		err = fileGraph.DrawG6Html("b.html")
 		assert.Nil(t, err)
 	})

@@ -7,71 +7,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type FileGraph struct {
-	// reference graph (called graph)
-	G graph.Graph[string, *FileVertex]
-	// reverse reference graph (call graph)
-	Rg graph.Graph[string, *FileVertex]
-}
-
-type FileVertex struct {
-	Path       string
-	Referenced int
-}
-
-func (fv *FileVertex) Id() string {
-	return fv.Path
-}
-
-func (fg *FileGraph) ToDirGraph() (*FileGraph, error) {
-	// create graph
-	fileGraph := &FileGraph{
-		G:  graph.New((*FileVertex).Id, graph.Directed()),
-		Rg: graph.New((*FileVertex).Id, graph.Directed()),
-	}
-
-	// building edges
-	err := fileGraph2FileGraph(fg.G, fileGraph.G)
-	if err != nil {
-		return nil, err
-	}
-	err = fileGraph2FileGraph(fg.Rg, fileGraph.Rg)
-	if err != nil {
-		return nil, err
-	}
-
-	nodeCount, err := fileGraph.G.Order()
-	if err != nil {
-		return nil, err
-	}
-	edgeCount, err := fileGraph.G.Size()
-	if err != nil {
-		return nil, err
-	}
-	log.Infof("dir graph ready. nodes: %d, edges: %d", nodeCount, edgeCount)
-
-	return fileGraph, nil
-}
-
-func (fg *FileGraph) GetById(id string) *FileVertex {
-	v, err := fg.G.Vertex(id)
-	if err != nil {
-
-		log.Warnf("no vertex: %v", id)
-		return nil
-	}
-	return v
-}
-
 func path2dir(fp string) string {
 	return filepath.ToSlash(filepath.Dir(fp))
 }
 
-func Path2vertex(fp string) *FileVertex {
-	return &FileVertex{Path: fp}
+func Path2vertex(fp string) *Vertex {
+	return &Vertex{Path: fp}
 }
 
-func fileGraph2FileGraph(f graph.Graph[string, *FileVertex], g graph.Graph[string, *FileVertex]) error {
+func fileGraph2FileGraph(f graph.Graph[string, *Vertex], g graph.Graph[string, *Vertex]) error {
 	m, err := f.AdjacencyMap()
 	if err != nil {
 		return err

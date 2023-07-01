@@ -7,14 +7,63 @@ import (
 	"github.com/williamfzc/srctx/parser"
 )
 
-func NewEmptyFileGraph() *FileGraph {
-	return &FileGraph{
-		G:  graph.New((*FileVertex).Id, graph.Directed()),
-		Rg: graph.New((*FileVertex).Id, graph.Directed()),
+type Graph struct {
+	// reference graph (called graph)
+	G graph.Graph[string, *Vertex]
+	// reverse reference graph (call graph)
+	Rg graph.Graph[string, *Vertex]
+	// k: id, v: file
+	IdCache map[string]*Vertex
+}
+
+type Vertex struct {
+	Path       string
+	Referenced int
+}
+
+func (fv *Vertex) Id() string {
+	return fv.Path
+}
+
+func (fg *Graph) ToDirGraph() (*Graph, error) {
+	// create graph
+	fileGraph := &Graph{
+		G:  graph.New((*Vertex).Id, graph.Directed()),
+		Rg: graph.New((*Vertex).Id, graph.Directed()),
+	}
+
+	// building edges
+	err := fileGraph2FileGraph(fg.G, fileGraph.G)
+	if err != nil {
+		return nil, err
+	}
+	err = fileGraph2FileGraph(fg.Rg, fileGraph.Rg)
+	if err != nil {
+		return nil, err
+	}
+
+	nodeCount, err := fileGraph.G.Order()
+	if err != nil {
+		return nil, err
+	}
+	edgeCount, err := fileGraph.G.Size()
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("dir graph ready. nodes: %d, edges: %d", nodeCount, edgeCount)
+
+	return fileGraph, nil
+}
+
+func NewEmptyFileGraph() *Graph {
+	return &Graph{
+		G:       graph.New((*Vertex).Id, graph.Directed()),
+		Rg:      graph.New((*Vertex).Id, graph.Directed()),
+		IdCache: make(map[string]*Vertex),
 	}
 }
 
-func CreateFileGraphFromDirWithLSIF(src string, lsifFile string) (*FileGraph, error) {
+func CreateFileGraphFromDirWithLSIF(src string, lsifFile string) (*Graph, error) {
 	sourceContext, err := parser.FromLsifFile(lsifFile, src)
 	if err != nil {
 		return nil, err
@@ -23,26 +72,23 @@ func CreateFileGraphFromDirWithLSIF(src string, lsifFile string) (*FileGraph, er
 	return CreateFileGraph(sourceContext)
 }
 
-func CreateFileGraph(relationship *object.SourceContext) (*FileGraph, error) {
+func CreateFileGraph(relationship *object.SourceContext) (*Graph, error) {
 	g := NewEmptyFileGraph()
 
 	// nodes
 	for each := range relationship.FileMapping {
-		err := g.G.AddVertex(&FileVertex{
-			Path:       each,
-			Referenced: 0,
-		})
+		v := Path2vertex(each)
+		err := g.G.AddVertex(v)
 		if err != nil {
 			return nil, err
 		}
 
-		err = g.Rg.AddVertex(&FileVertex{
-			Path:       each,
-			Referenced: 0,
-		})
+		err = g.Rg.AddVertex(v)
 		if err != nil {
 			return nil, err
 		}
+
+		g.IdCache[each] = v
 	}
 
 	for eachSrcFile := range relationship.FileMapping {
