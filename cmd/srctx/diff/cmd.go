@@ -26,118 +26,125 @@ const (
 	nodeLevelDir  = "dir"
 )
 
-func AddDiffCmd(app *cli.App) {
+type Options struct {
 	// required
-	var src string
-	var repoRoot string
-	var before string
-	var after string
-	var lsifZip string
-	var scipFile string
+	Src      string `json:"src,omitempty"`
+	RepoRoot string `json:"repoRoot,omitempty"`
+	Before   string `json:"before,omitempty"`
+	After    string `json:"after,omitempty"`
+	LsifZip  string `json:"lsifZip,omitempty"`
+	ScipFile string `json:"scipFile,omitempty"`
 
 	// output
-	var outputJson string
-	var outputCsv string
-	var outputDot string
-	var outputHtml string
-	var nodeLevel string
+	OutputJson string `json:"outputJson,omitempty"`
+	OutputCsv  string `json:"outputCsv,omitempty"`
+	OutputDot  string `json:"outputDot,omitempty"`
+	OutputHtml string `json:"outputHtml,omitempty"`
 
 	// options
-	var withIndex bool
-	var cacheType string
-	var lang string
-	var noDiff bool
+	NodeLevel string `json:"nodeLevel,omitempty"`
+	WithIndex bool   `json:"withIndex,omitempty"`
+	CacheType string `json:"cacheType,omitempty"`
+	Lang      string `json:"lang,omitempty"`
+	NoDiff    bool   `json:"noDiff,omitempty"`
+}
 
+func NewOptionsFromCliFlags(c *cli.Context) Options {
+	return Options{
+		Src:        c.String("src"),
+		RepoRoot:   c.String("repoRoot"),
+		Before:     c.String("before"),
+		After:      c.String("after"),
+		LsifZip:    c.String("lsif"),
+		ScipFile:   c.String("scip"),
+		OutputJson: c.String("outputJson"),
+		OutputCsv:  c.String("outputCsv"),
+		OutputDot:  c.String("outputDot"),
+		OutputHtml: c.String("outputHtml"),
+		NodeLevel:  c.String("nodeLevel"),
+		WithIndex:  c.Bool("withIndex"),
+		CacheType:  c.String("cacheType"),
+		Lang:       c.String("lang"),
+		NoDiff:     c.Bool("noDiff"),
+	}
+}
+
+func AddDiffCmd(app *cli.App) {
 	flags := []cli.Flag{
 		&cli.StringFlag{
-			Name:        "src",
-			Value:       ".",
-			Usage:       "project path",
-			Destination: &src,
+			Name:  "src",
+			Value: ".",
+			Usage: "project path",
 		},
 		&cli.StringFlag{
-			Name:        "repoRoot",
-			Value:       "",
-			Usage:       "root path of your repo",
-			Destination: &repoRoot,
+			Name:  "repoRoot",
+			Value: "",
+			Usage: "root path of your repo",
 		},
 		&cli.StringFlag{
-			Name:        "before",
-			Value:       "HEAD~1",
-			Usage:       "before rev",
-			Destination: &before,
+			Name:  "before",
+			Value: "HEAD~1",
+			Usage: "before rev",
 		},
 		&cli.StringFlag{
-			Name:        "after",
-			Value:       "HEAD",
-			Usage:       "after rev",
-			Destination: &after,
+			Name:  "after",
+			Value: "HEAD",
+			Usage: "after rev",
 		},
 		&cli.StringFlag{
-			Name:        "lsif",
-			Value:       "./dump.lsif",
-			Usage:       "lsif path, can be zip or origin file",
-			Destination: &lsifZip,
+			Name:  "lsif",
+			Value: "./dump.lsif",
+			Usage: "lsif path, can be zip or origin file",
 		},
 		&cli.StringFlag{
-			Name:        "scip",
-			Value:       "",
-			Usage:       "scip file",
-			Destination: &scipFile,
+			Name:  "scip",
+			Value: "",
+			Usage: "scip file",
 		},
 		&cli.StringFlag{
-			Name:        "nodeLevel",
-			Value:       nodeLevelFunc,
-			Usage:       "graph level (file or func or dir)",
-			Destination: &nodeLevel,
+			Name:  "nodeLevel",
+			Value: nodeLevelFunc,
+			Usage: "graph level (file or func or dir)",
 		},
 		&cli.StringFlag{
-			Name:        "outputJson",
-			Value:       "",
-			Usage:       "json output",
-			Destination: &outputJson,
+			Name:  "outputJson",
+			Value: "",
+			Usage: "json output",
 		},
 		&cli.StringFlag{
-			Name:        "outputCsv",
-			Value:       "",
-			Usage:       "csv output",
-			Destination: &outputCsv,
+			Name:  "outputCsv",
+			Value: "",
+			Usage: "csv output",
 		},
 		&cli.StringFlag{
-			Name:        "outputDot",
-			Value:       "",
-			Usage:       "reference dot file output",
-			Destination: &outputDot,
+			Name:  "outputDot",
+			Value: "",
+			Usage: "reference dot file output",
 		},
 		&cli.StringFlag{
-			Name:        "outputHtml",
-			Value:       "",
-			Usage:       "render html report with g6",
-			Destination: &outputHtml,
+			Name:  "outputHtml",
+			Value: "",
+			Usage: "render html report with g6",
 		},
 		&cli.BoolFlag{
-			Name:        "withIndex",
-			Value:       false,
-			Usage:       "create indexes first if enabled, currently support golang only",
-			Destination: &withIndex,
+			Name:  "withIndex",
+			Value: false,
+			Usage: "create indexes first if enabled, currently support golang only",
 		},
 		&cli.StringFlag{
-			Name:        "cacheType",
-			Value:       lsif.CacheTypeFile,
-			Usage:       "mem or file",
-			Destination: &cacheType,
+			Name:  "cacheType",
+			Value: lsif.CacheTypeFile,
+			Usage: "mem or file",
 		},
 		&cli.StringFlag{
-			Name:        "lang",
-			Value:       string(core.LangUnknown),
-			Usage:       "language of repo",
-			Destination: &lang,
+			Name:  "lang",
+			Value: string(core.LangUnknown),
+			Usage: "language of repo",
 		},
 		&cli.BoolFlag{
-			Name:        "noDiff",
-			Value:       false,
-			Usage:       "will not calc git diff if enabled",
-			Destination: &noDiff,
+			Name:  "noDiff",
+			Value: false,
+			Usage: "will not calc git diff if enabled",
 		},
 	}
 
@@ -146,32 +153,33 @@ func AddDiffCmd(app *cli.App) {
 		Usage: "diff with lsif",
 		Flags: flags,
 		Action: func(cCtx *cli.Context) error {
+			opts := NewOptionsFromCliFlags(cCtx)
 			// standardize the path
-			src, err := filepath.Abs(src)
+			src, err := filepath.Abs(opts.Src)
 			if err != nil {
 				return err
 			}
 			log.Infof("start diffing: %v", src)
 
-			if cacheType != lsif.CacheTypeFile {
+			if opts.CacheType != lsif.CacheTypeFile {
 				parser.UseMemCache()
 			}
 
-			lang := core.LangType(lang)
+			lang := core.LangType(opts.Lang)
 
 			var lineMap diff.AffectedLineMap
 			totalLineCountMap := make(map[string]int)
-			if !noDiff {
+			if !opts.NoDiff {
 				// prepare
-				lineMap, err = diff.GitDiff(src, before, after)
+				lineMap, err = diff.GitDiff(src, opts.Before, opts.After)
 				if err != nil {
 					return err
 				}
 
 				// Maybe the src does not start from the root of repo.
 				// But the lineMap will start from the root of repo.
-				if repoRoot != "" {
-					repoRoot, err := filepath.Abs(repoRoot)
+				if opts.RepoRoot != "" {
+					repoRoot, err := filepath.Abs(opts.RepoRoot)
 					if err != nil {
 						return err
 					}
@@ -197,14 +205,14 @@ func AddDiffCmd(app *cli.App) {
 			// metadata
 			var funcGraph *function.FuncGraph
 
-			if scipFile != "" {
+			if opts.ScipFile != "" {
 				// using SCIP
 				log.Infof("using SCIP as index")
-				funcGraph, err = function.CreateFuncGraphFromDirWithSCIP(src, scipFile, lang)
+				funcGraph, err = function.CreateFuncGraphFromDirWithSCIP(src, opts.ScipFile, lang)
 			} else {
 				// using LSIF
 				log.Infof("using LSIF as index")
-				if withIndex {
+				if opts.WithIndex {
 					switch lang {
 					case core.LangGo:
 						funcGraph, err = function.CreateFuncGraphFromGolangDir(src)
@@ -212,7 +220,7 @@ func AddDiffCmd(app *cli.App) {
 						return errors.New("did not specify `--lang`")
 					}
 				} else {
-					funcGraph, err = function.CreateFuncGraphFromDirWithLSIF(src, lsifZip, lang)
+					funcGraph, err = function.CreateFuncGraphFromDirWithLSIF(src, opts.LsifZip, lang)
 				}
 			}
 
@@ -265,12 +273,12 @@ func AddDiffCmd(app *cli.App) {
 			}
 
 			// output
-			if outputDot != "" {
-				log.Infof("creating dot file: %v", outputDot)
+			if opts.OutputDot != "" {
+				log.Infof("creating dot file: %v", opts.OutputDot)
 
-				switch nodeLevel {
+				switch opts.NodeLevel {
 				case nodeLevelFunc:
-					err := funcGraph.DrawDot(outputDot)
+					err := funcGraph.DrawDot(opts.OutputDot)
 					if err != nil {
 						return err
 					}
@@ -279,7 +287,7 @@ func AddDiffCmd(app *cli.App) {
 					if err != nil {
 						return err
 					}
-					err = fileGraph.DrawDot(outputDot)
+					err = fileGraph.DrawDot(opts.OutputDot)
 					if err != nil {
 						return err
 					}
@@ -288,14 +296,14 @@ func AddDiffCmd(app *cli.App) {
 					if err != nil {
 						return err
 					}
-					err = dirGraph.DrawDot(outputDot)
+					err = dirGraph.DrawDot(opts.OutputDot)
 					if err != nil {
 						return err
 					}
 				}
 			}
 
-			if outputCsv != "" || outputJson != "" {
+			if opts.OutputCsv != "" || opts.OutputJson != "" {
 				fileMap := make(map[string]*FileVertex)
 				for _, eachStat := range stats {
 					path := eachStat.Root.FuncPos.Path
@@ -340,9 +348,9 @@ func AddDiffCmd(app *cli.App) {
 					fileList = append(fileList, v)
 				}
 
-				if outputCsv != "" {
-					log.Infof("creating output csv: %v", outputCsv)
-					csvFile, err := os.OpenFile(outputCsv, os.O_RDWR|os.O_CREATE, os.ModePerm)
+				if opts.OutputCsv != "" {
+					log.Infof("creating output csv: %v", opts.OutputCsv)
+					csvFile, err := os.OpenFile(opts.OutputCsv, os.O_RDWR|os.O_CREATE, os.ModePerm)
 					if err != nil {
 						return err
 					}
@@ -352,24 +360,24 @@ func AddDiffCmd(app *cli.App) {
 					}
 				}
 
-				if outputJson != "" {
-					log.Infof("creating output json: %s", outputJson)
+				if opts.OutputJson != "" {
+					log.Infof("creating output json: %s", opts.OutputJson)
 					contentBytes, err := json.Marshal(&fileList)
 					if err != nil {
 						return err
 					}
-					err = os.WriteFile(outputJson, contentBytes, os.ModePerm)
+					err = os.WriteFile(opts.OutputJson, contentBytes, os.ModePerm)
 					if err != nil {
 						return err
 					}
 				}
 			}
 
-			if outputHtml != "" {
-				log.Infof("creating output html: %s", outputHtml)
+			if opts.OutputHtml != "" {
+				log.Infof("creating output html: %s", opts.OutputHtml)
 
 				var g6data *g6.Data
-				if nodeLevel != nodeLevelFunc {
+				if opts.NodeLevel != nodeLevelFunc {
 					fileGraph, err := funcGraph.ToFileGraph()
 					if err != nil {
 						return err
@@ -398,7 +406,7 @@ func AddDiffCmd(app *cli.App) {
 					}
 				}
 
-				err = g6data.RenderHtml(outputHtml)
+				err = g6data.RenderHtml(opts.OutputHtml)
 				if err != nil {
 					return err
 				}
