@@ -24,6 +24,23 @@ const (
 	nodeLevelFunc = "func"
 	nodeLevelFile = "file"
 	nodeLevelDir  = "dir"
+
+	// flags
+	srcFlagName        = "src"
+	repoRootFlagName   = "repoRoot"
+	beforeFlagName     = "before"
+	afterFlagName      = "after"
+	lsifFlagName       = "lsif"
+	scipFlagName       = "scip"
+	nodeLevelFlagName  = "nodeLevel"
+	outputJsonFlagName = "outputJson"
+	outputCsvFlagName  = "outputCsv"
+	outputDotFlagName  = "outputDot"
+	outputHtmlFlagName = "outputHtml"
+	withIndexFlagName  = "withIndex"
+	cacheTypeFlagName  = "cacheType"
+	langFlagName       = "lang"
+	noDiffFlagName     = "noDiff"
 )
 
 type Options struct {
@@ -49,100 +66,100 @@ type Options struct {
 	NoDiff    bool   `json:"noDiff,omitempty"`
 }
 
-func NewOptionsFromCliFlags(c *cli.Context) Options {
-	return Options{
-		Src:        c.String("src"),
-		RepoRoot:   c.String("repoRoot"),
-		Before:     c.String("before"),
-		After:      c.String("after"),
-		LsifZip:    c.String("lsif"),
-		ScipFile:   c.String("scip"),
-		OutputJson: c.String("outputJson"),
-		OutputCsv:  c.String("outputCsv"),
-		OutputDot:  c.String("outputDot"),
-		OutputHtml: c.String("outputHtml"),
-		NodeLevel:  c.String("nodeLevel"),
-		WithIndex:  c.Bool("withIndex"),
-		CacheType:  c.String("cacheType"),
-		Lang:       c.String("lang"),
-		NoDiff:     c.Bool("noDiff"),
+func NewOptionsFromCliFlags(c *cli.Context) *Options {
+	return &Options{
+		Src:        c.String(srcFlagName),
+		RepoRoot:   c.String(repoRootFlagName),
+		Before:     c.String(beforeFlagName),
+		After:      c.String(afterFlagName),
+		LsifZip:    c.String(lsifFlagName),
+		ScipFile:   c.String(scipFlagName),
+		OutputJson: c.String(outputJsonFlagName),
+		OutputCsv:  c.String(outputCsvFlagName),
+		OutputDot:  c.String(outputDotFlagName),
+		OutputHtml: c.String(outputHtmlFlagName),
+		NodeLevel:  c.String(nodeLevelFlagName),
+		WithIndex:  c.Bool(withIndexFlagName),
+		CacheType:  c.String(cacheTypeFlagName),
+		Lang:       c.String(langFlagName),
+		NoDiff:     c.Bool(noDiffFlagName),
 	}
 }
 
 func AddDiffCmd(app *cli.App) {
 	flags := []cli.Flag{
 		&cli.StringFlag{
-			Name:  "src",
+			Name:  srcFlagName,
 			Value: ".",
 			Usage: "project path",
 		},
 		&cli.StringFlag{
-			Name:  "repoRoot",
+			Name:  repoRootFlagName,
 			Value: "",
 			Usage: "root path of your repo",
 		},
 		&cli.StringFlag{
-			Name:  "before",
+			Name:  beforeFlagName,
 			Value: "HEAD~1",
 			Usage: "before rev",
 		},
 		&cli.StringFlag{
-			Name:  "after",
+			Name:  afterFlagName,
 			Value: "HEAD",
 			Usage: "after rev",
 		},
 		&cli.StringFlag{
-			Name:  "lsif",
+			Name:  lsifFlagName,
 			Value: "./dump.lsif",
 			Usage: "lsif path, can be zip or origin file",
 		},
 		&cli.StringFlag{
-			Name:  "scip",
+			Name:  scipFlagName,
 			Value: "",
 			Usage: "scip file",
 		},
 		&cli.StringFlag{
-			Name:  "nodeLevel",
+			Name:  nodeLevelFlagName,
 			Value: nodeLevelFunc,
 			Usage: "graph level (file or func or dir)",
 		},
 		&cli.StringFlag{
-			Name:  "outputJson",
+			Name:  outputJsonFlagName,
 			Value: "",
 			Usage: "json output",
 		},
 		&cli.StringFlag{
-			Name:  "outputCsv",
+			Name:  outputCsvFlagName,
 			Value: "",
 			Usage: "csv output",
 		},
 		&cli.StringFlag{
-			Name:  "outputDot",
+			Name:  outputDotFlagName,
 			Value: "",
 			Usage: "reference dot file output",
 		},
 		&cli.StringFlag{
-			Name:  "outputHtml",
+			Name:  outputHtmlFlagName,
 			Value: "",
 			Usage: "render html report with g6",
 		},
 		&cli.BoolFlag{
-			Name:  "withIndex",
+			Name:  withIndexFlagName,
 			Value: false,
 			Usage: "create indexes first if enabled, currently support golang only",
 		},
 		&cli.StringFlag{
-			Name:  "cacheType",
+			Name:  cacheTypeFlagName,
 			Value: lsif.CacheTypeFile,
 			Usage: "mem or file",
 		},
 		&cli.StringFlag{
-			Name:  "lang",
+			Name:  langFlagName,
 			Value: string(core.LangUnknown),
 			Usage: "language of repo",
 		},
 		&cli.BoolFlag{
-			Name:  "noDiff",
+			Name:  noDiffFlagName,
 			Value: false,
 			Usage: "will not calc git diff if enabled",
 		},
@@ -159,71 +176,29 @@ func AddDiffCmd(app *cli.App) {
 			if err != nil {
 				return err
 			}
+			// todo: check the config file
+			opts.Src = src
+
 			log.Infof("start diffing: %v", src)
 
 			if opts.CacheType != lsif.CacheTypeFile {
 				parser.UseMemCache()
 			}
 
-			lang := core.LangType(opts.Lang)
+			// collect diff info
+			lineMap, err := collectLineMap(opts)
+			if err != nil {
+				return err
+			}
 
-			var lineMap diff.AffectedLineMap
-			totalLineCountMap := make(map[string]int)
-			if !opts.NoDiff {
-				// prepare
-				lineMap, err = diff.GitDiff(src, opts.Before, opts.After)
-				if err != nil {
-					return err
-				}
-
-				// Maybe the src does not start from the root of repo.
-				// But the lineMap will start from the root of repo.
-				if opts.RepoRoot != "" {
-					repoRoot, err := filepath.Abs(opts.RepoRoot)
-					if err != nil {
-						return err
-					}
-
-					log.Infof("path sync from %s to %s", repoRoot, src)
-					lineMap, err = diff.PathOffset(repoRoot, src, lineMap)
-					if err != nil {
-						return err
-					}
-
-					for eachPath := range lineMap {
-						totalLineCountMap[eachPath], err = lineCounter(filepath.Join(src, eachPath))
-						if err != nil {
-							return err
-						}
-					}
-				}
-			} else {
-				log.Infof("noDiff enabled")
-				lineMap = make(diff.AffectedLineMap)
+			// collect info from file (line number/size ...)
+			totalLineCountMap, err := collectTotalLineCountMap(opts, src, lineMap)
+			if err != nil {
+				return err
 			}
 
 			// metadata
-			var funcGraph *function.FuncGraph
-
-			if opts.ScipFile != "" {
-				// using SCIP
-				log.Infof("using SCIP as index")
-				funcGraph, err = function.CreateFuncGraphFromDirWithSCIP(src, opts.ScipFile, lang)
-			} else {
-				// using LSIF
-				log.Infof("using LSIF as index")
-				if opts.WithIndex {
-					switch lang {
-					case core.LangGo:
-						funcGraph, err = function.CreateFuncGraphFromGolangDir(src)
-					default:
-						return errors.New("did not specify `--lang`")
-					}
-				} else {
-					funcGraph, err = function.CreateFuncGraphFromDirWithLSIF(src, opts.LsifZip, lang)
-				}
-			}
-
+			funcGraph, err := createFuncGraph(opts)
 			if err != nil {
 				return err
 			}
@@ -419,6 +394,86 @@ func AddDiffCmd(app *cli.App) {
 	app.Commands = append(app.Commands, diffCmd)
 }
 
+func createFuncGraph(opts *Options) (*function.FuncGraph, error) {
+	var funcGraph *function.FuncGraph
+	var err error
+
+	if opts.ScipFile != "" {
+		// using SCIP
+		log.Infof("using SCIP as index")
+		funcGraph, err = function.CreateFuncGraphFromDirWithSCIP(opts.Src, opts.ScipFile, core.LangType(opts.Lang))
+	} else {
+		// using LSIF
+		log.Infof("using LSIF as index")
+		if opts.WithIndex {
+			switch core.LangType(opts.Lang) {
+			case core.LangGo:
+				funcGraph, err = function.CreateFuncGraphFromGolangDir(opts.Src)
+			default:
+				return nil, errors.New("did not specify `--lang`")
+			}
+		} else {
+			funcGraph, err = function.CreateFuncGraphFromDirWithLSIF(opts.Src, opts.LsifZip, core.LangType(opts.Lang))
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	return funcGraph, nil
+}
+
+func collectLineMap(opts *Options) (diff.AffectedLineMap, error) {
+	if !opts.NoDiff {
+		lineMap, err := diff.GitDiff(opts.Src, opts.Before, opts.After)
+		if err != nil {
+			return nil, err
+		}
+		return lineMap, nil
+	}
+	log.Infof("noDiff enabled")
+	return make(diff.AffectedLineMap), nil
+}
+
+func collectTotalLineCountMap(opts *Options, src string, lineMap diff.AffectedLineMap) (map[string]int, error) {
+	totalLineCountMap := make(map[string]int)
+
+	if opts.RepoRoot != "" {
+		repoRoot, err := filepath.Abs(opts.RepoRoot)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Infof("path sync from %s to %s", repoRoot, src)
+		lineMap, err = diff.PathOffset(repoRoot, src, lineMap)
+		if err != nil {
+			return nil, err
+		}
+
+		for eachPath := range lineMap {
+			totalLineCountMap[eachPath], err = lineCounter(filepath.Join(src, eachPath))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return totalLineCountMap, nil
+}
+
+// https://stackoverflow.com/a/24563853
+func lineCounter(fileName string) (int, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return 0, err
+	}
+	fileScanner := bufio.NewScanner(file)
+	lineCount := 0
+	for fileScanner.Scan() {
+		lineCount++
+	}
+	return lineCount, nil
+}
+
 type FileVertex struct {
 	FileName                 string  `csv:"fileName" json:"fileName"`
 	AffectedLinePercent      float32 `csv:"affectedLinePercent" json:"affectedLinePercent"`
@@ -434,18 +489,4 @@ type FileVertex struct {
 	AffectedReferences   int      `csv:"affectedReferences" json:"affectedReferences"`
 	AffectedReferenceIds []string `csv:"-" json:"-"`
 	TotalReferences      int      `csv:"totalReferences" json:"totalReferences"`
-}
-
-// https://stackoverflow.com/a/24563853
-func lineCounter(fileName string) (int, error) {
-	file, err := os.Open(fileName)
-	if err != nil {
-		return 0, err
-	}
-	fileScanner := bufio.NewScanner(file)
-	lineCount := 0
-	for fileScanner.Scan() {
-		lineCount++
-	}
-	return lineCount, nil
 }
