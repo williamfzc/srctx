@@ -47,7 +47,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Name:  nodeLevelFlagName,
 		Value: nodeLevelFunc,
-		Usage: "graph level (file or func or dir)",
+		Usage: "graph level (file or func)",
 	},
 	&cli.StringFlag{
 		Name:  outputJsonFlagName,

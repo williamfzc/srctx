@@ -12,7 +12,6 @@ import (
 const (
 	nodeLevelFunc = "func"
 	nodeLevelFile = "file"
-	nodeLevelDir  = "dir"
 
 	// flags
 	srcFlagName        = "src"

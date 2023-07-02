@@ -19,26 +19,9 @@ func (fg *Graph) DrawDot(filename string) error {
 	return nil
 }
 
-func (fg *Graph) FillWithYellow(vertexHash string) error {
-	err := fg.setProperty(vertexHash, "style", "filled")
-	if err != nil {
-		return err
-	}
-	err = fg.setProperty(vertexHash, "color", "yellow")
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (fg *Graph) FillWithRed(vertexHash string) error {
-	err := fg.setProperty(vertexHash, "style", "filled")
-	if err != nil {
-		return err
-	}
-	err = fg.setProperty(vertexHash, "color", "red")
-	if err != nil {
-		return err
+	if item, ok := fg.IdCache[vertexHash]; ok {
+		item.AddTag(TagRed)
 	}
 	return nil
 }

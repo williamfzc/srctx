@@ -12,7 +12,10 @@ func path2dir(fp string) string {
 }
 
 func Path2vertex(fp string) *Vertex {
-	return &Vertex{Path: fp}
+	return &Vertex{
+		Path: fp,
+		Tags: make(map[string]struct{}),
+	}
 }
 
 func fileGraph2FileGraph(f graph.Graph[string, *Vertex], g graph.Graph[string, *Vertex]) error {

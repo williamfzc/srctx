@@ -19,10 +19,28 @@ type Graph struct {
 type Vertex struct {
 	Path       string
 	Referenced int
+
+	// https://github.com/williamfzc/srctx/issues/41
+	Tags map[string]struct{} `json:"tags,omitempty"`
 }
 
 func (fv *Vertex) Id() string {
 	return fv.Path
+}
+
+func (fv *Vertex) ContainTag(tag string) bool {
+	if _, ok := fv.Tags[tag]; ok {
+		return true
+	}
+	return false
+}
+
+func (fv *Vertex) AddTag(tag string) {
+	fv.Tags[tag] = struct{}{}
+}
+
+func (fv *Vertex) RemoveTag(tag string) {
+	delete(fv.Tags, tag)
 }
 
 func (fg *Graph) ToDirGraph() (*Graph, error) {
@@ -69,6 +87,22 @@ func CreateFileGraphFromDirWithLSIF(src string, lsifFile string) (*Graph, error)
 		return nil, err
 	}
 	log.Infof("fact ready. creating file graph ...")
+	return CreateFileGraph(sourceContext)
+}
+
+func CreateFileGraphFromGolangDir(src string) (*Graph, error) {
+	sourceContext, err := parser.FromGolangSrc(src)
+	if err != nil {
+		return nil, err
+	}
+	return CreateFileGraph(sourceContext)
+}
+
+func CreateFileGraphFromDirWithSCIP(src string, scipFile string) (*Graph, error) {
+	sourceContext, err := parser.FromScipFile(scipFile, src)
+	if err != nil {
+		return nil, err
+	}
 	return CreateFileGraph(sourceContext)
 }
 

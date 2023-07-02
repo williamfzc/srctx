@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/williamfzc/srctx/graph/file"
+
 	"github.com/gocarina/gocsv"
 	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
@@ -37,6 +39,60 @@ func MainDiff(opts *Options) error {
 		return err
 	}
 
+	switch opts.NodeLevel {
+	case nodeLevelFunc:
+		err = funcLevelMain(opts, lineMap, totalLineCountMap)
+		if err != nil {
+			return err
+		}
+	case nodeLevelFile:
+		err = fileLevelMain(opts, lineMap)
+		if err != nil {
+			return err
+		}
+	}
+
+	log.Infof("everything done.")
+	return nil
+}
+
+func fileLevelMain(opts *Options, lineMap diff.AffectedLineMap) error {
+	fileGraph, err := createFileGraph(opts)
+	if err != nil {
+		return err
+	}
+
+	// look up start points
+	startPoints := make([]*file.Vertex, 0)
+	for path := range lineMap {
+		pv := file.Path2vertex(path)
+		startPoints = append(startPoints, pv)
+	}
+
+	// tag
+	for _, eachStartPoint := range startPoints {
+		err = fileGraph.FillWithRed(eachStartPoint.Id())
+		if err != nil {
+			return err
+		}
+	}
+
+	if opts.OutputHtml != "" {
+		log.Infof("creating output html: %s", opts.OutputHtml)
+
+		g6data, err := fileGraph.ToG6Data()
+		if err != nil {
+			return err
+		}
+		err = g6data.RenderHtml(opts.OutputHtml)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMap map[string]int) error {
 	// metadata
 	funcGraph, err := createFuncGraph(opts)
 	if err != nil {
@@ -91,30 +147,9 @@ func MainDiff(opts *Options) error {
 	if opts.OutputDot != "" {
 		log.Infof("creating dot file: %v", opts.OutputDot)
 
-		switch opts.NodeLevel {
-		case nodeLevelFunc:
-			err := funcGraph.DrawDot(opts.OutputDot)
-			if err != nil {
-				return err
-			}
-		case nodeLevelFile:
-			fileGraph, err := funcGraph.ToFileGraph()
-			if err != nil {
-				return err
-			}
-			err = fileGraph.DrawDot(opts.OutputDot)
-			if err != nil {
-				return err
-			}
-		case nodeLevelDir:
-			dirGraph, err := funcGraph.ToDirGraph()
-			if err != nil {
-				return err
-			}
-			err = dirGraph.DrawDot(opts.OutputDot)
-			if err != nil {
-				return err
-			}
+		err := funcGraph.DrawDot(opts.OutputDot)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -192,33 +227,26 @@ func MainDiff(opts *Options) error {
 		log.Infof("creating output html: %s", opts.OutputHtml)
 
 		var g6data *g6.Data
-		if opts.NodeLevel != nodeLevelFunc {
-			fileGraph, err := funcGraph.ToFileGraph()
-			if err != nil {
-				return err
-			}
-			g6data, err = fileGraph.ToG6Data()
-			if err != nil {
-				return err
-			}
+		fileGraph, err := funcGraph.ToFileGraph()
+		if err != nil {
+			return err
+		}
+		g6data, err = fileGraph.ToG6Data()
+		if err != nil {
+			return err
+		}
 
-			for _, eachStat := range stats {
-				for _, eachId := range eachStat.TransitiveReferencedIds {
-					f, err := funcGraph.GetById(eachId)
-					if err != nil {
-						return err
-					}
-					g6data.FillWithYellow(f.Path)
+		for _, eachStat := range stats {
+			for _, eachId := range eachStat.TransitiveReferencedIds {
+				f, err := funcGraph.GetById(eachId)
+				if err != nil {
+					return err
 				}
+				g6data.FillWithYellow(f.Path)
 			}
-			for _, eachStat := range stats {
-				g6data.FillWithRed(eachStat.Root.Path)
-			}
-		} else {
-			g6data, err = funcGraph.ToG6Data()
-			if err != nil {
-				return err
-			}
+		}
+		for _, eachStat := range stats {
+			g6data.FillWithRed(eachStat.Root.Path)
 		}
 
 		err = g6data.RenderHtml(opts.OutputHtml)
@@ -226,9 +254,35 @@ func MainDiff(opts *Options) error {
 			return err
 		}
 	}
-
-	log.Infof("everything done.")
 	return nil
+}
+
+func createFileGraph(opts *Options) (*file.Graph, error) {
+	var fileGraph *file.Graph
+	var err error
+
+	if opts.ScipFile != "" {
+		// using SCIP
+		log.Infof("using SCIP as index")
+		fileGraph, err = file.CreateFileGraphFromDirWithSCIP(opts.Src, opts.ScipFile)
+	} else {
+		// using LSIF
+		log.Infof("using LSIF as index")
+		if opts.WithIndex {
+			switch core.LangType(opts.Lang) {
+			case core.LangGo:
+				fileGraph, err = file.CreateFileGraphFromGolangDir(opts.Src)
+			default:
+				return nil, errors.New("did not specify `--lang`")
+			}
+		} else {
+			fileGraph, err = file.CreateFileGraphFromDirWithLSIF(opts.Src, opts.LsifZip)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	return fileGraph, nil
 }
 
 func createFuncGraph(opts *Options) (*function.FuncGraph, error) {
