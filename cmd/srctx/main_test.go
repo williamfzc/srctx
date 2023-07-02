@@ -1,6 +1,12 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/williamfzc/srctx/cmd/srctx/diff"
+)
 
 func TestDiff(t *testing.T) {
 	mainFunc([]string{
@@ -79,4 +85,12 @@ func TestRenderHtml(t *testing.T) {
 		"--lsif", "../../dump.lsif",
 		"--nodeLevel", "func",
 	})
+}
+
+func TestDiffCfg(t *testing.T) {
+	mainFunc([]string{
+		"srctx", "diffcfg",
+	})
+	defer os.Remove(diff.DefaultConfigFile)
+	assert.FileExists(t, diff.DefaultConfigFile)
 }

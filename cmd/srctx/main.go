@@ -19,6 +19,7 @@ func mainFunc(args []string) {
 	app.Usage = "source context tool"
 
 	diff.AddDiffCmd(app)
+	diff.AddConfigCmd(app)
 
 	log.Infof("srctx version %v (%s)", srctx.Version, srctx.RepoUrl)
 	err := app.Run(args)
