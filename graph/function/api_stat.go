@@ -1,40 +1,31 @@
 package function
 
-type VertexStat struct {
-	Referenced           int `json:"referenced" csv:"referenced"`
-	Reference            int `json:"reference" csv:"reference"`
-	TransitiveReferenced int `json:"transitiveReferenced" csv:"transitiveReferenced"`
-	TransitiveReference  int `json:"transitiveReference" csv:"transitiveReference"`
+import "github.com/williamfzc/srctx/object"
 
-	// raw
-	Root                    *FuncVertex `json:"-" csv:"-"`
-	ReferencedIds           []string    `json:"-" csv:"-"`
-	ReferenceIds            []string    `json:"-" csv:"-"`
-	TransitiveReferencedIds []string    `json:"-" csv:"-"`
-	TransitiveReferenceIds  []string    `json:"-" csv:"-"`
-}
-
-func (v *VertexStat) VisitedIds() []string {
-	return append(v.TransitiveReferenceIds, v.TransitiveReferencedIds...)
-}
-
-func (fg *FuncGraph) Stat(f *FuncVertex) *VertexStat {
+func (fg *FuncGraph) Stat(f *FuncVertex) *object.ImpactUnit {
 	referenceIds := fg.DirectReferenceIds(f)
 	referencedIds := fg.DirectReferencedIds(f)
 
 	transitiveReferencedIds := fg.TransitiveReferencedIds(f)
 	transitiveReferenceIds := fg.TransitiveReferenceIds(f)
 
-	return &VertexStat{
-		Referenced:           len(referencedIds),
-		Reference:            len(referenceIds),
-		TransitiveReferenced: len(transitiveReferencedIds),
-		TransitiveReference:  len(transitiveReferenceIds),
+	impactUnit := object.NewImpactUnit()
 
-		Root:                    f,
-		ReferencedIds:           referencedIds,
-		ReferenceIds:            referenceIds,
-		TransitiveReferencedIds: transitiveReferencedIds,
-		TransitiveReferenceIds:  transitiveReferenceIds,
-	}
+	impactUnit.FileName = f.Path
+	impactUnit.UnitName = f.Id()
+
+	impactUnit.DirectConnectCount = len(referencedIds) + len(referenceIds)
+	impactUnit.InDirectConnectCount = len(transitiveReferenceIds) + len(transitiveReferencedIds)
+	impactUnit.TotalUnitCount = len(fg.IdCache)
+
+	impactUnit.AffectedEntries = len(fg.EntryIds(f))
+	impactUnit.TotalEntriesCount = len(fg.ListEntries())
+
+	// details
+	impactUnit.ReferenceIds = referenceIds
+	impactUnit.ReferencedIds = referencedIds
+	impactUnit.TransitiveReferenceIds = transitiveReferenceIds
+	impactUnit.TransitiveReferencedIds = transitiveReferencedIds
+
+	return impactUnit
 }

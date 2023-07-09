@@ -5,6 +5,8 @@ import (
 	"errors"
 	"os"
 
+	"github.com/williamfzc/srctx/object"
+
 	"github.com/gocarina/gocsv"
 	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
@@ -32,11 +34,11 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 	}
 
 	// start scan
-	stats := make([]*function.VertexStat, 0)
+	stats := make([]*object.ImpactUnit, 0)
 	for _, eachPtr := range startPoints {
 		eachStat := funcGraph.Stat(eachPtr)
 		stats = append(stats, eachStat)
-		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), eachStat.Referenced, eachStat.Reference)
+		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))
 	}
 	log.Infof("diff finished.")
 
@@ -58,7 +60,7 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 		}
 	}
 	for _, eachStat := range stats {
-		err := funcGraph.FillWithRed(eachStat.Root.Id())
+		err := funcGraph.FillWithRed(eachStat.UnitName)
 		if err != nil {
 			return err
 		}
@@ -75,50 +77,6 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 	}
 
 	if opts.OutputCsv != "" || opts.OutputJson != "" {
-		fileMap := make(map[string]*FileVertex)
-		for _, eachStat := range stats {
-			path := eachStat.Root.FuncPos.Path
-
-			if cur, ok := fileMap[path]; ok {
-				cur.AffectedReferenceIds = append(cur.AffectedReferenceIds, eachStat.VisitedIds()...)
-			} else {
-				totalLine := totalLineCountMap[path]
-				fileMap[path] = &FileVertex{
-					FileName:             path,
-					AffectedLines:        len(lineMap[path]),
-					TotalLines:           totalLine,
-					AffectedFunctions:    len(funcGraph.GetFunctionsByFileLines(path, lineMap[path])),
-					TotalFunctions:       len(funcGraph.GetFunctionsByFile(path)),
-					AffectedReferenceIds: eachStat.VisitedIds(),
-					TotalReferences:      funcGraph.FuncCount(),
-				}
-			}
-		}
-		fileList := make([]*FileVertex, 0, len(fileMap))
-		for _, v := range fileMap {
-			// calc
-			v.AffectedLinePercent = 0.0
-			if v.TotalLines != 0 {
-				v.AffectedLinePercent = float32(v.AffectedLines) / float32(v.TotalLines)
-			}
-
-			m := make(map[string]struct{})
-			for _, each := range v.AffectedReferenceIds {
-				m[each] = struct{}{}
-			}
-			v.AffectedReferences = len(m)
-			v.AffectedReferencePercent = 0.0
-			if v.TotalReferences != 0 {
-				v.AffectedReferencePercent = float32(v.AffectedReferences) / float32(v.TotalReferences)
-			}
-			v.AffectedFunctionPercent = 0.0
-			if v.TotalFunctions != 0 {
-				v.AffectedFunctionPercent = float32(v.AffectedFunctions) / float32(v.TotalFunctions)
-			}
-
-			fileList = append(fileList, v)
-		}
-
 		if opts.OutputCsv != "" {
 			log.Infof("creating output csv: %v", opts.OutputCsv)
 			csvFile, err := os.OpenFile(opts.OutputCsv, os.O_RDWR|os.O_CREATE, os.ModePerm)
@@ -126,14 +84,14 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 				return err
 			}
 			defer csvFile.Close()
-			if err := gocsv.MarshalFile(&fileList, csvFile); err != nil {
+			if err := gocsv.MarshalFile(&stats, csvFile); err != nil {
 				return err
 			}
 		}
 
 		if opts.OutputJson != "" {
 			log.Infof("creating output json: %s", opts.OutputJson)
-			contentBytes, err := json.Marshal(&fileList)
+			contentBytes, err := json.Marshal(&stats)
 			if err != nil {
 				return err
 			}
@@ -148,26 +106,9 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 		log.Infof("creating output html: %s", opts.OutputHtml)
 
 		var g6data *g6.Data
-		fileGraph, err := funcGraph.ToFileGraph()
+		g6data, err = funcGraph.ToG6Data()
 		if err != nil {
 			return err
-		}
-		g6data, err = fileGraph.ToG6Data()
-		if err != nil {
-			return err
-		}
-
-		for _, eachStat := range stats {
-			for _, eachId := range eachStat.TransitiveReferencedIds {
-				f, err := funcGraph.GetById(eachId)
-				if err != nil {
-					return err
-				}
-				g6data.FillWithYellow(f.Path)
-			}
-		}
-		for _, eachStat := range stats {
-			g6data.FillWithRed(eachStat.Root.Path)
 		}
 
 		err = g6data.RenderHtml(opts.OutputHtml)
