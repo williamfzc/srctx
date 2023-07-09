@@ -29,6 +29,7 @@ const (
 	cacheTypeFlagName  = "cacheType"
 	langFlagName       = "lang"
 	noDiffFlagName     = "noDiff"
+	indexCmdFlagName   = "indexCmd"
 
 	// config file
 	DefaultConfigFile = "srctx_cfg.json"
@@ -36,25 +37,26 @@ const (
 
 type Options struct {
 	// required
-	Src      string `json:"src,omitempty"`
-	RepoRoot string `json:"repoRoot,omitempty"`
-	Before   string `json:"before,omitempty"`
-	After    string `json:"after,omitempty"`
-	LsifZip  string `json:"lsifZip,omitempty"`
-	ScipFile string `json:"scipFile,omitempty"`
+	Src      string `json:"src"`
+	RepoRoot string `json:"repoRoot"`
+	Before   string `json:"before"`
+	After    string `json:"after"`
+	LsifZip  string `json:"lsifZip"`
+	ScipFile string `json:"scipFile"`
 
 	// output
-	OutputJson string `json:"outputJson,omitempty"`
-	OutputCsv  string `json:"outputCsv,omitempty"`
-	OutputDot  string `json:"outputDot,omitempty"`
-	OutputHtml string `json:"outputHtml,omitempty"`
+	OutputJson string `json:"outputJson"`
+	OutputCsv  string `json:"outputCsv"`
+	OutputDot  string `json:"outputDot"`
+	OutputHtml string `json:"outputHtml"`
 
 	// options
-	NodeLevel string `json:"nodeLevel,omitempty"`
-	WithIndex bool   `json:"withIndex,omitempty"`
-	CacheType string `json:"cacheType,omitempty"`
-	Lang      string `json:"lang,omitempty"`
-	NoDiff    bool   `json:"noDiff,omitempty"`
+	NodeLevel string `json:"nodeLevel"`
+	WithIndex bool   `json:"withIndex"`
+	CacheType string `json:"cacheType"`
+	Lang      string `json:"lang"`
+	NoDiff    bool   `json:"noDiff"`
+	IndexCmd  string `json:"indexCmd"`
 }
 
 func NewOptionsFromCliFlags(c *cli.Context) *Options {
@@ -74,6 +76,7 @@ func NewOptionsFromCliFlags(c *cli.Context) *Options {
 		CacheType:  c.String(cacheTypeFlagName),
 		Lang:       c.String(langFlagName),
 		NoDiff:     c.Bool(noDiffFlagName),
+		IndexCmd:   c.String(indexCmdFlagName),
 	}
 }
 

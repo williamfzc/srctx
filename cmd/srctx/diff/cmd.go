@@ -89,6 +89,11 @@ var flags = []cli.Flag{
 		Value: false,
 		Usage: "will not calc git diff if enabled",
 	},
+	&cli.StringFlag{
+		Name:  indexCmdFlagName,
+		Value: "",
+		Usage: "specific scip or lsif cmd",
+	},
 }
 
 func AddDiffCmd(app *cli.App) {
