@@ -111,7 +111,7 @@ func AddDiffCmd(app *cli.App) {
 			optsFromSrc, err := NewOptionsFromSrc(src)
 			if err != nil {
 				// ok
-				log.Infof("read config failed: %v", err)
+				log.Infof("no config: %v", err)
 			} else {
 				log.Infof("config file found")
 				opts = optsFromSrc

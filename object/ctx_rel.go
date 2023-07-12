@@ -3,7 +3,6 @@ package object
 import (
 	"fmt"
 
-	"github.com/dominikbraun/graph"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,26 +15,14 @@ func (sc *SourceContext) RefsByFileName(fileName string) ([]*RelVertex, error) {
 
 	// collect all the nodes starting from this file
 	startPoints := make([]*RelVertex, 0)
-	err := graph.BFS(sc.FactGraph, fileId, func(i int) bool {
-		// exclude itself
-		if i == fileId {
-			return false
-		}
-		if _, err := sc.FactGraph.Edge(fileId, i); err != nil {
-			return true
-		}
-
-		v, err := sc.FactGraph.Vertex(i)
+	for each := range sc.FactAdjMap[fileId] {
+		factVertex, err := sc.FactGraph.Vertex(each)
 		if err != nil {
-			log.Warnf("unknown vertex: %d", i)
-			return false
+			return nil, err
 		}
-		startPoints = append(startPoints, v.ToRelVertex())
-		return false
-	})
-	if err != nil {
-		return nil, err
+		startPoints = append(startPoints, factVertex.ToRelVertex())
 	}
+
 	return startPoints, nil
 }
 
@@ -84,27 +71,14 @@ func (sc *SourceContext) RefsFromDefId(defId int) ([]*FactVertex, error) {
 		return ret, nil
 	}
 
-	err = graph.BFS(sc.RelGraph, defId, func(i int) bool {
-		// exclude itself
-		if defId == i {
-			return false
-		}
-		// connected to current?
-		if _, err := sc.RelGraph.Edge(defId, i); err != nil {
-			return true
-		}
-
-		vertex, err := sc.FactGraph.Vertex(i)
+	for each := range sc.RelAdjMap[defId] {
+		vertex, err := sc.FactGraph.Vertex(each)
 		if err != nil {
-			return false
+			return nil, err
 		}
-
 		ret = append(ret, vertex)
-		return false
-	})
-	if err != nil {
-		return nil, err
 	}
+
 	return ret, nil
 }
 

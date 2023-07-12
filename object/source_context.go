@@ -93,6 +93,10 @@ type SourceContext struct {
 	FileMapping map[string]int
 	FactGraph   graph.Graph[int, *FactVertex]
 	RelGraph    graph.Graph[int, *RelVertex]
+
+	// caches
+	FactAdjMap map[int]map[int]graph.Edge[int]
+	RelAdjMap  map[int]map[int]graph.Edge[int]
 }
 
 func NewSourceContext() SourceContext {
@@ -103,5 +107,7 @@ func NewSourceContext() SourceContext {
 		FileMapping: make(map[string]int),
 		FactGraph:   factGraph,
 		RelGraph:    relGraph,
+		FactAdjMap:  nil,
+		RelAdjMap:   nil,
 	}
 }
