@@ -288,6 +288,13 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 		}
 	}
 
+	// cache for perf
+	// https://github.com/williamfzc/srctx/issues/44
+	factAdjMap, _ := factGraph.AdjacencyMap()
+	relAdjMap, _ := relGraph.AdjacencyMap()
+	ret.FactAdjMap = factAdjMap
+	ret.RelAdjMap = relAdjMap
+
 	factSize, err := factGraph.Size()
 	if err != nil {
 		return nil, err
