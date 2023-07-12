@@ -16,6 +16,7 @@ import (
 )
 
 func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMap map[string]int) error {
+	log.Infof("func level main entry")
 	// metadata
 	funcGraph, err := createFuncGraph(opts)
 	if err != nil {

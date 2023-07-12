@@ -125,7 +125,12 @@ func CreateFileGraph(relationship *object.SourceContext) (*Graph, error) {
 		g.IdCache[each] = v
 	}
 
+	current := 0
+	total := len(relationship.FileMapping)
 	for eachSrcFile := range relationship.FileMapping {
+		log.Infof("processing: %d / %d", current, total)
+		current++
+
 		refs, err := relationship.RefsByFileName(eachSrcFile)
 		if err != nil {
 			return nil, err

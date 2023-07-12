@@ -55,7 +55,7 @@ func NewDocs() (*Docs, error) {
 func (d *Docs) Parse(r io.Reader) error {
 	scanner := bufio.NewScanner(r)
 	buf := make([]byte, 0, maxScanTokenSize)
-	scanner.Buffer(buf, 2*maxScanTokenSize)
+	scanner.Buffer(buf, 4*maxScanTokenSize)
 
 	for scanner.Scan() {
 		if err := d.process(scanner.Bytes()); err != nil {

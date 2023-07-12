@@ -10,6 +10,7 @@ import (
 )
 
 func fileLevelMain(opts *Options, lineMap diff.AffectedLineMap) error {
+	log.Infof("file level main entry")
 	fileGraph, err := createFileGraph(opts)
 	if err != nil {
 		return err
