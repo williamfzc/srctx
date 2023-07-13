@@ -5,8 +5,6 @@ import (
 	"errors"
 	"os"
 
-	"github.com/williamfzc/srctx/object"
-
 	"github.com/gocarina/gocsv"
 	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
@@ -35,10 +33,25 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 	}
 
 	// start scan
-	stats := make([]*object.ImpactUnit, 0)
+	stats := make([]*ImpactUnitWithFile, 0)
 	for _, eachPtr := range startPoints {
 		eachStat := funcGraph.Stat(eachPtr)
-		stats = append(stats, eachStat)
+		wrappedStat := WrapImpactUnitWithFile(eachStat)
+
+		totalLineCount := len(eachPtr.GetSpan().Lines())
+		affectedLineCount := 0
+
+		if lines, ok := lineMap[eachPtr.Path]; ok {
+			for _, eachLine := range lines {
+				if eachPtr.GetSpan().ContainLine(eachLine) {
+					affectedLineCount++
+				}
+			}
+		}
+		wrappedStat.TotalLineCount = totalLineCount
+		wrappedStat.AffectedLineCount = affectedLineCount
+
+		stats = append(stats, wrappedStat)
 		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))
 	}
 	log.Infof("diff finished.")

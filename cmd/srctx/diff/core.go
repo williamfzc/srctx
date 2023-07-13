@@ -45,7 +45,7 @@ func MainDiff(opts *Options) error {
 			return err
 		}
 	case nodeLevelFile:
-		err = fileLevelMain(opts, lineMap)
+		err = fileLevelMain(opts, lineMap, totalLineCountMap)
 		if err != nil {
 			return err
 		}

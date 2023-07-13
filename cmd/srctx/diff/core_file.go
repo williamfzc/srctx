@@ -6,15 +6,13 @@ import (
 	"os"
 
 	"github.com/gocarina/gocsv"
-	"github.com/williamfzc/srctx/object"
-
 	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/diff"
 	"github.com/williamfzc/srctx/graph/file"
 )
 
-func fileLevelMain(opts *Options, lineMap diff.AffectedLineMap) error {
+func fileLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMap map[string]int) error {
 	log.Infof("file level main entry")
 	fileGraph, err := createFileGraph(opts)
 	if err != nil {
@@ -28,10 +26,19 @@ func fileLevelMain(opts *Options, lineMap diff.AffectedLineMap) error {
 		startPoints = append(startPoints, pv)
 	}
 	// start scan
-	stats := make([]*object.ImpactUnit, 0)
+	stats := make([]*ImpactUnitWithFile, 0)
 	for _, eachPtr := range startPoints {
 		eachStat := fileGraph.Stat(eachPtr)
-		stats = append(stats, eachStat)
+		wrappedStat := WrapImpactUnitWithFile(eachStat)
+
+		// fill with file info
+		if totalLineCount, ok := totalLineCountMap[eachStat.FileName]; ok {
+			wrappedStat.TotalLineCount = totalLineCount
+		}
+		if affectedLineCount, ok := lineMap[eachStat.FileName]; ok {
+			wrappedStat.AffectedLineCount = len(affectedLineCount)
+		}
+		stats = append(stats, wrappedStat)
 		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))
 	}
 	log.Infof("diff finished.")

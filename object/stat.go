@@ -1,12 +1,11 @@
 package object
 
-type FileImpactPart struct {
-	// file level
+type FileInfoPart struct {
 	FileName string `csv:"fileName" json:"fileName"`
 
-	// line level impact
-	AffectedLineCount int `csv:"affectedLineCount" json:"affectedLineCount"`
-	TotalLineCount    int `csv:"totalLineCount" json:"totalLineCount"`
+	// actually graph will not access the real file system
+	// so of course it knows nothing about the real files
+	// all the data we can access is from the indexing file
 }
 
 type UnitImpactPart struct {
@@ -35,17 +34,15 @@ type ImpactDetails struct {
 }
 
 type ImpactUnit struct {
-	*FileImpactPart
+	*FileInfoPart
 	*UnitImpactPart
 	*ImpactDetails `json:"-" csv:"-"`
 }
 
 func NewImpactUnit() *ImpactUnit {
 	return &ImpactUnit{
-		FileImpactPart: &FileImpactPart{
-			FileName:          "",
-			AffectedLineCount: 0,
-			TotalLineCount:    0,
+		FileInfoPart: &FileInfoPart{
+			FileName: "",
 		},
 		UnitImpactPart: &UnitImpactPart{
 			UnitName:             "",

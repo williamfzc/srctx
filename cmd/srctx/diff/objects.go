@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/williamfzc/srctx/object"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -101,19 +103,18 @@ func NewOptionsFromJSONFile(fp string) (*Options, error) {
 	return &opts, nil
 }
 
-type FileVertex struct {
-	FileName                 string  `csv:"fileName" json:"fileName"`
-	AffectedLinePercent      float32 `csv:"affectedLinePercent" json:"affectedLinePercent"`
-	AffectedFunctionPercent  float32 `csv:"affectedFunctionPercent" json:"affectedFunctionPercent"`
-	AffectedReferencePercent float32 `csv:"affectedReferencePercent" json:"affectedReferencePercent"`
+type ImpactUnitWithFile struct {
+	*object.ImpactUnit
 
-	AffectedLines int `csv:"affectedLines" json:"affectedLines"`
-	TotalLines    int `csv:"totalLines" json:"totalLines"`
+	// line level impact
+	AffectedLineCount int `csv:"affectedLineCount" json:"affectedLineCount"`
+	TotalLineCount    int `csv:"totalLineCount" json:"totalLineCount"`
+}
 
-	AffectedFunctions int `csv:"affectedFunctions" json:"affectedFunctions"`
-	TotalFunctions    int `csv:"totalFunctions" json:"totalFunctions"`
-
-	AffectedReferences   int      `csv:"affectedReferences" json:"affectedReferences"`
-	AffectedReferenceIds []string `csv:"-" json:"-"`
-	TotalReferences      int      `csv:"totalReferences" json:"totalReferences"`
+func WrapImpactUnitWithFile(impactUnit *object.ImpactUnit) *ImpactUnitWithFile {
+	return &ImpactUnitWithFile{
+		ImpactUnit:        impactUnit,
+		AffectedLineCount: 0,
+		TotalLineCount:    0,
+	}
 }
