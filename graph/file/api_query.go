@@ -19,3 +19,19 @@ func (fg *Graph) ListFiles() []*Vertex {
 	}
 	return ret
 }
+
+func (fg *Graph) FilterFunctions(f func(*Vertex) bool) []*Vertex {
+	ret := make([]*Vertex, 0)
+	for _, each := range fg.IdCache {
+		if f(each) {
+			ret = append(ret, each)
+		}
+	}
+	return ret
+}
+
+func (fg *Graph) ListEntries() []*Vertex {
+	return fg.FilterFunctions(func(vertex *Vertex) bool {
+		return vertex.ContainTag(TagEntry)
+	})
+}

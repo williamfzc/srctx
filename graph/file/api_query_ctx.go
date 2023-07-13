@@ -1,6 +1,9 @@
 package file
 
-import log "github.com/sirupsen/logrus"
+import (
+	"github.com/dominikbraun/graph"
+	log "github.com/sirupsen/logrus"
+)
 
 func (fg *Graph) DirectReferencedCount(f *Vertex) int {
 	return len(fg.DirectReferencedIds(f))
@@ -30,6 +33,52 @@ func (fg *Graph) DirectReferenceIds(f *Vertex) []string {
 	ret := make([]string, 0, len(m))
 	for k := range m {
 		ret = append(ret, k)
+	}
+	return ret
+}
+
+func (fg *Graph) TransitiveReferencedIds(f *Vertex) []string {
+	m := make(map[string]struct{}, 0)
+	start := f.Id()
+	graph.BFS(fg.G, start, func(cur string) bool {
+		if cur == start {
+			return false
+		}
+		m[cur] = struct{}{}
+		return false
+	})
+	ret := make([]string, 0, len(m))
+	for k := range m {
+		ret = append(ret, k)
+	}
+	return ret
+}
+
+func (fg *Graph) TransitiveReferenceIds(f *Vertex) []string {
+	m := make(map[string]struct{}, 0)
+	start := f.Id()
+	graph.BFS(fg.Rg, start, func(cur string) bool {
+		if cur == start {
+			return false
+		}
+		m[cur] = struct{}{}
+		return false
+	})
+	ret := make([]string, 0, len(m))
+	for k := range m {
+		ret = append(ret, k)
+	}
+	return ret
+}
+
+func (fg *Graph) EntryIds(f *Vertex) []string {
+	ret := make([]string, 0)
+	all := fg.TransitiveReferencedIds(f)
+	for _, eachId := range all {
+		item := fg.IdCache[eachId]
+		if item.ContainTag(TagEntry) {
+			ret = append(ret, eachId)
+		}
 	}
 	return ret
 }

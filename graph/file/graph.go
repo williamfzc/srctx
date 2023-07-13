@@ -7,6 +7,8 @@ import (
 	"github.com/williamfzc/srctx/parser"
 )
 
+const TagEntry = "entry"
+
 type Graph struct {
 	// reference graph (called graph)
 	G graph.Graph[string, *Vertex]
@@ -152,6 +154,15 @@ func CreateFileGraph(relationship *object.SourceContext) (*Graph, error) {
 				_ = g.Rg.AddEdge(targetFile, eachSrcFile)
 			}
 		}
+	}
+
+	// entries tag
+	entries := g.FilterFunctions(func(vertex *Vertex) bool {
+		return len(g.DirectReferencedIds(vertex)) == 0
+	})
+	log.Infof("detect entries: %d", len(entries))
+	for _, entry := range entries {
+		entry.AddTag(TagEntry)
 	}
 
 	nodeCount, err := g.G.Order()

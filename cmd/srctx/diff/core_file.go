@@ -1,7 +1,12 @@
 package diff
 
 import (
+	"encoding/json"
 	"errors"
+	"os"
+
+	"github.com/gocarina/gocsv"
+	"github.com/williamfzc/srctx/object"
 
 	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
@@ -22,12 +27,46 @@ func fileLevelMain(opts *Options, lineMap diff.AffectedLineMap) error {
 		pv := file.Path2vertex(path)
 		startPoints = append(startPoints, pv)
 	}
+	// start scan
+	stats := make([]*object.ImpactUnit, 0)
+	for _, eachPtr := range startPoints {
+		eachStat := fileGraph.Stat(eachPtr)
+		stats = append(stats, eachStat)
+		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))
+	}
+	log.Infof("diff finished.")
 
 	// tag
 	for _, eachStartPoint := range startPoints {
 		err = fileGraph.FillWithRed(eachStartPoint.Id())
 		if err != nil {
 			return err
+		}
+	}
+
+	if opts.OutputCsv != "" || opts.OutputJson != "" {
+		if opts.OutputCsv != "" {
+			log.Infof("creating output csv: %v", opts.OutputCsv)
+			csvFile, err := os.OpenFile(opts.OutputCsv, os.O_RDWR|os.O_CREATE, os.ModePerm)
+			if err != nil {
+				return err
+			}
+			defer csvFile.Close()
+			if err := gocsv.MarshalFile(&stats, csvFile); err != nil {
+				return err
+			}
+		}
+
+		if opts.OutputJson != "" {
+			log.Infof("creating output json: %s", opts.OutputJson)
+			contentBytes, err := json.Marshal(&stats)
+			if err != nil {
+				return err
+			}
+			err = os.WriteFile(opts.OutputJson, contentBytes, os.ModePerm)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
