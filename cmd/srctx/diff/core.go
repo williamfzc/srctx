@@ -88,6 +88,7 @@ func collectLineMap(opts *Options) (diff.AffectedLineMap, error) {
 
 func collectTotalLineCountMap(opts *Options, src string, lineMap diff.AffectedLineMap) (map[string]int, error) {
 	totalLineCountMap := make(map[string]int)
+	var err error
 
 	if opts.RepoRoot != "" {
 		repoRoot, err := filepath.Abs(opts.RepoRoot)
@@ -100,12 +101,12 @@ func collectTotalLineCountMap(opts *Options, src string, lineMap diff.AffectedLi
 		if err != nil {
 			return nil, err
 		}
+	}
 
-		for eachPath := range lineMap {
-			totalLineCountMap[eachPath], err = lineCounter(filepath.Join(src, eachPath))
-			if err != nil {
-				return nil, err
-			}
+	for eachPath := range lineMap {
+		totalLineCountMap[eachPath], err = lineCounter(filepath.Join(src, eachPath))
+		if err != nil {
+			return nil, err
 		}
 	}
 
