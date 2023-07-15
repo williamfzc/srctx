@@ -34,7 +34,12 @@ jobs:
           make
           ./srctx diff --outputHtml output.html
 
-      - name: Build Extra Dep
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.16.0'
+
+      - name: Build Extra Dep (scip-java)
         run: |
           # scip-java
           curl -fL "https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz" | gzip -d > coursier \
@@ -42,21 +47,38 @@ jobs:
             && ./coursier setup -y \
             && ./coursier bootstrap --standalone --bat=true -o scip-java com.sourcegraph:scip-java_2.13:0.8.18 --main com.sourcegraph.scip_java.ScipJava
 
+      - name: Build Extra Dep (lsif-node)
+        run: |
+          # lsif-node
+          npm install -g lsif
+          lsif -v
+
       - name: Third Party Test (Golang)
         run: |
           git clone https://github.com/gin-gonic/gin --depth=2
           cd gin
           lsif-go -v
-          ../srctx diff --outputHtml ../golang.html
+          ../srctx diff --outputHtml ../golang.html --outputJson ../golang.json
           cd ..
+          cat ./golang.json
 
       - name: Third Party Test (Java)
         run: |
           git clone https://github.com/junit-team/junit4 --depth=2
           cd junit4
           ../scip-java index -- package -DskipTests --batch-mode --errors --settings .github/workflows/settings.xml
-          ../srctx diff --scip ./index.scip --outputHtml ../java.html
+          ../srctx diff --scip ./index.scip --outputHtml ../java.html --outputJson ../java.json
           cd ..
+          cat ./java.json
+
+      - name: Thrid Party Test (Node)
+        run: |
+          git clone https://github.com/microsoft/lsif-node.git --depth=2
+          cd lsif-node
+          lsif tsc -p ./tsconfig.json --package ./package.json --noContents --out ./dump.lsif
+          ../srctx diff --lsif ./dump.lsif --outputHtml ../node.html --outputJson ../node.json
+          cd ..
+          cat ./node.json
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
