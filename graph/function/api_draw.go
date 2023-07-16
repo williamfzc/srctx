@@ -10,7 +10,7 @@ const (
 	TagOrange = "orange"
 )
 
-func (fg *FuncGraph) FillWithYellow(vertexHash string) error {
+func (fg *Graph) FillWithYellow(vertexHash string) error {
 	item, ok := fg.IdCache[vertexHash]
 	if !ok {
 		return fmt.Errorf("no such vertex: %v", vertexHash)
@@ -19,7 +19,7 @@ func (fg *FuncGraph) FillWithYellow(vertexHash string) error {
 	return nil
 }
 
-func (fg *FuncGraph) FillWithOrange(vertexHash string) error {
+func (fg *Graph) FillWithOrange(vertexHash string) error {
 	item, ok := fg.IdCache[vertexHash]
 	if !ok {
 		return fmt.Errorf("no such vertex: %v", vertexHash)
@@ -28,7 +28,7 @@ func (fg *FuncGraph) FillWithOrange(vertexHash string) error {
 	return nil
 }
 
-func (fg *FuncGraph) FillWithRed(vertexHash string) error {
+func (fg *Graph) FillWithRed(vertexHash string) error {
 	item, ok := fg.IdCache[vertexHash]
 	if !ok {
 		return fmt.Errorf("no such vertex: %v", vertexHash)

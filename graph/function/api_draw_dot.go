@@ -6,7 +6,7 @@ import (
 	"github.com/dominikbraun/graph/draw"
 )
 
-func (fg *FuncGraph) setProperty(vertexHash string, propertyK string, propertyV string) error {
+func (fg *Graph) setProperty(vertexHash string, propertyK string, propertyV string) error {
 	_, properties, err := fg.g.VertexWithProperties(vertexHash)
 	if err != nil {
 		return err
@@ -15,7 +15,7 @@ func (fg *FuncGraph) setProperty(vertexHash string, propertyK string, propertyV 
 	return nil
 }
 
-func (fg *FuncGraph) DrawDot(filename string) error {
+func (fg *Graph) DrawDot(filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

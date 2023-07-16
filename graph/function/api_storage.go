@@ -7,13 +7,13 @@ import (
 )
 
 type FgStorage struct {
-	VertexIds map[int]string           `json:"vertexIds"`
-	GEdges    map[int][]int            `json:"gEdges"`
-	RGEdges   map[int][]int            `json:"rgEdges"`
-	Cache     map[string][]*FuncVertex `json:"cache"`
+	VertexIds map[int]string       `json:"vertexIds"`
+	GEdges    map[int][]int        `json:"gEdges"`
+	RGEdges   map[int][]int        `json:"rgEdges"`
+	Cache     map[string][]*Vertex `json:"cache"`
 }
 
-func (fg *FuncGraph) DumpFile(fp string) error {
+func (fg *Graph) DumpFile(fp string) error {
 	storage, err := fg.Dump()
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (fg *FuncGraph) DumpFile(fp string) error {
 	return nil
 }
 
-func (fg *FuncGraph) Dump() (*FgStorage, error) {
+func (fg *Graph) Dump() (*FgStorage, error) {
 	ret := &FgStorage{
 		VertexIds: make(map[int]string),
 		GEdges:    make(map[int][]int),
@@ -41,7 +41,7 @@ func (fg *FuncGraph) Dump() (*FgStorage, error) {
 	}
 	ret.Cache = fg.Cache
 
-	allVertices := make([]*FuncVertex, 0)
+	allVertices := make([]*Vertex, 0)
 	for _, vertices := range ret.Cache {
 		for _, each := range vertices {
 			allVertices = append(allVertices, each)
@@ -82,7 +82,7 @@ func (fg *FuncGraph) Dump() (*FgStorage, error) {
 	return ret, err
 }
 
-func Load(fgs *FgStorage) (*FuncGraph, error) {
+func Load(fgs *FgStorage) (*Graph, error) {
 	ret := NewEmptyFuncGraph()
 
 	// vertex building
@@ -120,7 +120,7 @@ func Load(fgs *FgStorage) (*FuncGraph, error) {
 	return ret, nil
 }
 
-func LoadFile(fp string) (*FuncGraph, error) {
+func LoadFile(fp string) (*Graph, error) {
 	file, err := os.Open(fp)
 	if err != nil {
 		return nil, err

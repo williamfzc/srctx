@@ -7,7 +7,7 @@ import (
 	"github.com/williamfzc/srctx/graph/visual/g6"
 )
 
-func (fg *FuncGraph) ToG6Data() (*g6.Data, error) {
+func (fg *Graph) ToG6Data() (*g6.Data, error) {
 	storage, err := fg.Dump()
 	if err != nil {
 		return nil, err
@@ -15,7 +15,7 @@ func (fg *FuncGraph) ToG6Data() (*g6.Data, error) {
 
 	data := g6.EmptyG6Data()
 	// cache
-	cache := make(map[string]*FuncVertex)
+	cache := make(map[string]*Vertex)
 	// dir combos (#35)
 	dirCombos := make(map[string]struct{})
 	for eachFile, fs := range fg.Cache {
@@ -76,7 +76,7 @@ func (fg *FuncGraph) ToG6Data() (*g6.Data, error) {
 	return data, nil
 }
 
-func (fg *FuncGraph) DrawG6Html(filename string) error {
+func (fg *Graph) DrawG6Html(filename string) error {
 	g6data, err := fg.ToG6Data()
 	if err != nil {
 		return err

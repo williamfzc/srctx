@@ -29,7 +29,7 @@ func (f *FuncPos) Repr() string {
 	return fmt.Sprintf("%s#%d-%d", f.Path, f.Start, f.End)
 }
 
-type FuncVertex struct {
+type Vertex struct {
 	*object2.Function
 	*FuncPos
 
@@ -37,15 +37,15 @@ type FuncVertex struct {
 	Tags map[string]struct{} `json:"tags,omitempty"`
 }
 
-func (fv *FuncVertex) Id() string {
+func (fv *Vertex) Id() string {
 	return fmt.Sprintf("%v:#%d-#%d:%s", fv.Path, fv.Start, fv.End, fv.GetSignature())
 }
 
-func (fv *FuncVertex) PosKey() string {
+func (fv *Vertex) PosKey() string {
 	return fmt.Sprintf("%s#%d", fv.Path, fv.Start)
 }
 
-func (fv *FuncVertex) ListTags() []string {
+func (fv *Vertex) ListTags() []string {
 	ret := make([]string, 0, len(fv.Tags))
 	for each := range fv.Tags {
 		ret = append(ret, each)
@@ -53,23 +53,23 @@ func (fv *FuncVertex) ListTags() []string {
 	return ret
 }
 
-func (fv *FuncVertex) ContainTag(tag string) bool {
+func (fv *Vertex) ContainTag(tag string) bool {
 	if _, ok := fv.Tags[tag]; ok {
 		return true
 	}
 	return false
 }
 
-func (fv *FuncVertex) AddTag(tag string) {
+func (fv *Vertex) AddTag(tag string) {
 	fv.Tags[tag] = struct{}{}
 }
 
-func (fv *FuncVertex) RemoveTag(tag string) {
+func (fv *Vertex) RemoveTag(tag string) {
 	delete(fv.Tags, tag)
 }
 
-func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *FuncVertex {
-	cur := &FuncVertex{
+func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *Vertex {
+	cur := &Vertex{
 		Function: f,
 		FuncPos: &FuncPos{
 			Path: fr.Path,
@@ -83,32 +83,32 @@ func CreateFuncVertex(f *object2.Function, fr *extractor.FunctionFileResult) *Fu
 	return cur
 }
 
-type FuncGraph struct {
+type Graph struct {
 	// reference graph (called graph), ref -> def
-	g graph.Graph[string, *FuncVertex]
+	g graph.Graph[string, *Vertex]
 	// reverse reference graph (call graph), def -> ref
-	rg graph.Graph[string, *FuncVertex]
+	rg graph.Graph[string, *Vertex]
 
 	// k: file, v: function
-	Cache map[string][]*FuncVertex
+	Cache map[string][]*Vertex
 	// k: id, v: function
-	IdCache map[string]*FuncVertex
+	IdCache map[string]*Vertex
 
 	// source context ptr
 	sc *object.SourceContext
 }
 
-func NewEmptyFuncGraph() *FuncGraph {
-	return &FuncGraph{
-		g:       graph.New((*FuncVertex).Id, graph.Directed()),
-		rg:      graph.New((*FuncVertex).Id, graph.Directed()),
-		Cache:   make(map[string][]*FuncVertex),
-		IdCache: make(map[string]*FuncVertex),
+func NewEmptyFuncGraph() *Graph {
+	return &Graph{
+		g:       graph.New((*Vertex).Id, graph.Directed()),
+		rg:      graph.New((*Vertex).Id, graph.Directed()),
+		Cache:   make(map[string][]*Vertex),
+		IdCache: make(map[string]*Vertex),
 		sc:      nil,
 	}
 }
 
-func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*FuncGraph, error) {
+func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Graph, error) {
 	fg := NewEmptyFuncGraph()
 
 	// add all the nodes
@@ -169,7 +169,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 	}
 
 	// entries tag
-	entries := fg.FilterFunctions(func(funcVertex *FuncVertex) bool {
+	entries := fg.FilterFunctions(func(funcVertex *Vertex) bool {
 		return len(fg.DirectReferencedIds(funcVertex)) == 0
 	})
 	log.Infof("detect entries: %d", len(entries))
@@ -190,7 +190,7 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Fu
 	return fg, nil
 }
 
-func CreateFuncGraphFromGolangDir(src string) (*FuncGraph, error) {
+func CreateFuncGraphFromGolangDir(src string) (*Graph, error) {
 	sourceContext, err := parser.FromGolangSrc(src)
 	if err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func CreateFuncGraphFromGolangDir(src string) (*FuncGraph, error) {
 	return srcctx2graph(src, sourceContext, core.LangGo)
 }
 
-func CreateFuncGraphFromDirWithLSIF(src string, lsifFile string, lang core.LangType) (*FuncGraph, error) {
+func CreateFuncGraphFromDirWithLSIF(src string, lsifFile string, lang core.LangType) (*Graph, error) {
 	sourceContext, err := parser.FromLsifFile(lsifFile, src)
 	if err != nil {
 		return nil, err
@@ -206,7 +206,7 @@ func CreateFuncGraphFromDirWithLSIF(src string, lsifFile string, lang core.LangT
 	return srcctx2graph(src, sourceContext, lang)
 }
 
-func CreateFuncGraphFromDirWithSCIP(src string, scipFile string, lang core.LangType) (*FuncGraph, error) {
+func CreateFuncGraphFromDirWithSCIP(src string, scipFile string, lang core.LangType) (*Graph, error) {
 	sourceContext, err := parser.FromScipFile(scipFile, src)
 	if err != nil {
 		return nil, err
@@ -214,7 +214,7 @@ func CreateFuncGraphFromDirWithSCIP(src string, scipFile string, lang core.LangT
 	return srcctx2graph(src, sourceContext, lang)
 }
 
-func srcctx2graph(src string, sourceContext *object.SourceContext, lang core.LangType) (*FuncGraph, error) {
+func srcctx2graph(src string, sourceContext *object.SourceContext, lang core.LangType) (*Graph, error) {
 	log.Infof("createing fact with sibyl2")
 
 	// change workdir because sibyl2 needs to access the files

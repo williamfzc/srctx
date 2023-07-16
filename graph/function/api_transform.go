@@ -6,7 +6,7 @@ import (
 	"github.com/williamfzc/srctx/graph/file"
 )
 
-func (fg *FuncGraph) ToFileGraph() (*file.Graph, error) {
+func (fg *Graph) ToFileGraph() (*file.Graph, error) {
 	// create graph
 	fileGraph := &file.Graph{
 		G:  graph.New((*file.Vertex).Id, graph.Directed()),
@@ -35,7 +35,7 @@ func (fg *FuncGraph) ToFileGraph() (*file.Graph, error) {
 	return fileGraph, nil
 }
 
-func (fg *FuncGraph) ToDirGraph() (*file.Graph, error) {
+func (fg *Graph) ToDirGraph() (*file.Graph, error) {
 	fileGraph, err := fg.ToFileGraph()
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (fg *FuncGraph) ToDirGraph() (*file.Graph, error) {
 	return fileGraph.ToDirGraph()
 }
 
-func FuncGraph2FileGraph(f graph.Graph[string, *FuncVertex], g graph.Graph[string, *file.Vertex]) error {
+func FuncGraph2FileGraph(f graph.Graph[string, *Vertex], g graph.Graph[string, *file.Vertex]) error {
 	m, err := f.AdjacencyMap()
 	if err != nil {
 		return err

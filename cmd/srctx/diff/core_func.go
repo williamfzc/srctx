@@ -22,7 +22,7 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 	}
 
 	// look up start points
-	startPoints := make([]*function.FuncVertex, 0)
+	startPoints := make([]*function.Vertex, 0)
 	for path, lines := range lineMap {
 		curPoints := funcGraph.GetFunctionsByFileLines(path, lines)
 		if len(curPoints) == 0 {
@@ -133,8 +133,8 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 	return nil
 }
 
-func createFuncGraph(opts *Options) (*function.FuncGraph, error) {
-	var funcGraph *function.FuncGraph
+func createFuncGraph(opts *Options) (*function.Graph, error) {
+	var funcGraph *function.Graph
 	var err error
 
 	if opts.ScipFile != "" {

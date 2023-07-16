@@ -1,6 +1,6 @@
 package function
 
-func (fg *FuncGraph) ListFiles() []string {
+func (fg *Graph) ListFiles() []string {
 	ret := make([]string, 0, len(fg.Cache))
 	for k := range fg.Cache {
 		ret = append(ret, k)
@@ -8,6 +8,6 @@ func (fg *FuncGraph) ListFiles() []string {
 	return ret
 }
 
-func (fg *FuncGraph) FileCount() int {
+func (fg *Graph) FileCount() int {
 	return len(fg.ListFiles())
 }

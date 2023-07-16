@@ -4,7 +4,7 @@ import (
 	"github.com/williamfzc/srctx/graph/utils"
 )
 
-func (fg *FuncGraph) RemoveNodeById(funcId string) error {
+func (fg *Graph) RemoveNodeById(funcId string) error {
 	err := utils.RemoveFromGraph(fg.g, funcId)
 	if err != nil {
 		return err

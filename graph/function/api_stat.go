@@ -2,7 +2,7 @@ package function
 
 import "github.com/williamfzc/srctx/object"
 
-func (fg *FuncGraph) Stat(f *FuncVertex) *object.ImpactUnit {
+func (fg *Graph) Stat(f *Vertex) *object.ImpactUnit {
 	referenceIds := fg.DirectReferenceIds(f)
 	referencedIds := fg.DirectReferencedIds(f)
 
