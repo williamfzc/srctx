@@ -46,7 +46,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  nodeLevelFlagName,
-		Value: nodeLevelFunc,
+		Value: nodeLevelFile,
 		Usage: "graph level (file or func)",
 	},
 	&cli.StringFlag{
