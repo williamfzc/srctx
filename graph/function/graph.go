@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/williamfzc/srctx/graph/common"
+
 	"github.com/dominikbraun/graph"
 	"github.com/opensibyl/sibyl2/pkg/core"
 	"github.com/opensibyl/sibyl2/pkg/extractor"
@@ -159,9 +161,22 @@ func CreateFuncGraph(fact *FactStorage, relationship *object.SourceContext) (*Gr
 					// eachPossibleFunc 's range contains eachFunc 's ref
 					// so eachPossibleFunc calls eachFunc
 					if eachPossibleFunc.GetSpan().ContainLine(eachRef.IndexLineNumber()) {
-						log.Debugf("%v refed in %s#%v", eachFunc.Id(), refFile, eachRef.LineNumber())
-						_ = fg.g.AddEdge(eachFunc.Id(), eachPossibleFunc.Id())
-						_ = fg.rg.AddEdge(eachPossibleFunc.Id(), eachFunc.Id())
+						refLineNumber := eachRef.LineNumber()
+						log.Debugf("%v refed in %s#%v", eachFunc.Id(), refFile, refLineNumber)
+
+						if edge, err := fg.g.Edge(eachFunc.Id(), eachPossibleFunc.Id()); err == nil {
+							storage := edge.Properties.Data.(*common.EdgeStorage)
+							storage.RefLines[refLineNumber] = struct{}{}
+						} else {
+							_ = fg.g.AddEdge(eachFunc.Id(), eachPossibleFunc.Id(), graph.EdgeData(common.NewEdgeStorage()))
+						}
+
+						if edge, err := fg.rg.Edge(eachPossibleFunc.Id(), eachFunc.Id()); err == nil {
+							storage := edge.Properties.Data.(*common.EdgeStorage)
+							storage.RefLines[refLineNumber] = struct{}{}
+						} else {
+							_ = fg.rg.AddEdge(eachPossibleFunc.Id(), eachFunc.Id(), graph.EdgeData(common.NewEdgeStorage()))
+						}
 					}
 				}
 			}

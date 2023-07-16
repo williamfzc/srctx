@@ -3,6 +3,7 @@ package file
 import (
 	"github.com/dominikbraun/graph"
 	log "github.com/sirupsen/logrus"
+	"github.com/williamfzc/srctx/graph/common"
 	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser"
 )
@@ -150,8 +151,21 @@ func CreateFileGraph(relationship *object.SourceContext) (*Graph, error) {
 				if eachSrcFile == targetFile {
 					continue
 				}
-				_ = g.G.AddEdge(eachSrcFile, targetFile)
-				_ = g.Rg.AddEdge(targetFile, eachSrcFile)
+
+				refLineNumber := eachRef.LineNumber()
+				if edge, err := g.G.Edge(eachSrcFile, targetFile); err == nil {
+					storage := edge.Properties.Data.(*common.EdgeStorage)
+					storage.RefLines[refLineNumber] = struct{}{}
+				} else {
+					_ = g.G.AddEdge(eachSrcFile, targetFile, graph.EdgeData(common.NewEdgeStorage()))
+				}
+
+				if edge, err := g.Rg.Edge(targetFile, eachSrcFile); err == nil {
+					storage := edge.Properties.Data.(*common.EdgeStorage)
+					storage.RefLines[refLineNumber] = struct{}{}
+				} else {
+					_ = g.Rg.AddEdge(targetFile, eachSrcFile, graph.EdgeData(common.NewEdgeStorage()))
+				}
 			}
 		}
 	}

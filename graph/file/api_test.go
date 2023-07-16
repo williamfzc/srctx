@@ -5,9 +5,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/williamfzc/srctx/graph/file"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/williamfzc/srctx/graph/file"
 )
 
 func TestFileGraph(t *testing.T) {
@@ -40,5 +40,12 @@ func TestFileGraph(t *testing.T) {
 	t.Run("DrawG6", func(t *testing.T) {
 		err = fileGraph.DrawG6Html("b.html")
 		assert.Nil(t, err)
+	})
+
+	t.Run("Relation", func(t *testing.T) {
+		edgeStorage, err := fileGraph.RelationBetween("graph/function/api_query.go", "graph/function/api_query_test.go")
+		assert.Nil(t, err)
+		log.Debugf("ref lines: %v", edgeStorage.RefLines)
+		assert.NotEmpty(t, edgeStorage.RefLines)
 	})
 }

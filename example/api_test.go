@@ -29,7 +29,7 @@ func TestFunc(t *testing.T) {
 	})
 
 	t.Run("func", func(t *testing.T) {
-		functions := funcGraph.GetFunctionsByFile("graph/function/api_query_func.go")
+		functions := funcGraph.GetFunctionsByFile("graph/function/api_query.go")
 		for _, each := range functions {
 			// about this function
 			log.Infof("func: %v", each.Id())

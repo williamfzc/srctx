@@ -1,6 +1,10 @@
 package function
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/williamfzc/srctx/graph/common"
+)
 
 func (fg *Graph) GetFunctionsByFile(fileName string) []*Vertex {
 	if item, ok := fg.Cache[fileName]; ok {
@@ -56,4 +60,15 @@ func (fg *Graph) ListEntries() []*Vertex {
 	return fg.FilterFunctions(func(funcVertex *Vertex) bool {
 		return funcVertex.ContainTag(TagEntry)
 	})
+}
+
+func (fg *Graph) RelationBetween(a string, b string) (*common.EdgeStorage, error) {
+	edge, err := fg.g.Edge(a, b)
+	if err != nil {
+		return nil, err
+	}
+	if ret, ok := edge.Properties.Data.(*common.EdgeStorage); ok {
+		return ret, nil
+	}
+	return nil, fmt.Errorf("failed to convert %v", edge.Properties.Data)
 }

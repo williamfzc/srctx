@@ -1,6 +1,11 @@
 package file
 
-import "github.com/sirupsen/logrus"
+import (
+	"fmt"
+
+	"github.com/sirupsen/logrus"
+	"github.com/williamfzc/srctx/graph/common"
+)
 
 func (fg *Graph) GetById(id string) *Vertex {
 	v, err := fg.G.Vertex(id)
@@ -34,4 +39,15 @@ func (fg *Graph) ListEntries() []*Vertex {
 	return fg.FilterFunctions(func(vertex *Vertex) bool {
 		return vertex.ContainTag(TagEntry)
 	})
+}
+
+func (fg *Graph) RelationBetween(a string, b string) (*common.EdgeStorage, error) {
+	edge, err := fg.G.Edge(a, b)
+	if err != nil {
+		return nil, err
+	}
+	if ret, ok := edge.Properties.Data.(*common.EdgeStorage); ok {
+		return ret, nil
+	}
+	return nil, fmt.Errorf("failed to convert %v", edge.Properties.Data)
 }

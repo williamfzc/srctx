@@ -5,6 +5,8 @@ import (
 	"runtime"
 	"testing"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/opensibyl/sibyl2/pkg/core"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +27,7 @@ func TestQuery(t *testing.T) {
 				beingRefs := fg.DirectReferencedIds(eachFunc)
 				refOut := fg.DirectReferenceIds(eachFunc)
 				assert.Len(t, beingRefs, 0)
-				assert.Len(t, refOut, 6)
+				assert.Len(t, refOut, 9)
 			}
 		}
 	})
@@ -43,5 +45,19 @@ func TestQuery(t *testing.T) {
 				assert.Len(t, entries, 0)
 			}
 		}
+	})
+
+	t.Run("Relation", func(t *testing.T) {
+		testFuncs := fg.GetFunctionsByFile("graph/function/api_query_test.go")
+		assert.NotEmpty(t, testFuncs)
+
+		function, err := fg.GetById("graph/function/api_query.go:#9-#14:function|*Graph|GetFunctionsByFile|string|")
+		assert.Nil(t, err)
+		assert.NotNil(t, function)
+
+		edgeStorage, err := fg.RelationBetween(function.Id(), testFuncs[0].Id())
+		assert.Nil(t, err)
+		log.Debugf("ref lines: %v", edgeStorage.RefLines)
+		assert.NotEmpty(t, edgeStorage.RefLines)
 	})
 }
