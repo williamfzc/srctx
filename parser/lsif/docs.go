@@ -38,6 +38,10 @@ type Metadata struct {
 	Root string `json:"projectRoot"`
 }
 
+type Source struct {
+	WorkspaceRoot string `json:"workspaceRoot"`
+}
+
 func NewDocs() (*Docs, error) {
 	ranges, err := NewRanges()
 	if err != nil {
@@ -80,6 +84,11 @@ func (d *Docs) process(line []byte) error {
 	switch l.Type {
 	case "metaData":
 		if err := d.addMetadata(line); err != nil {
+			return err
+		}
+	case "source":
+		// for lsif-node
+		if err := d.addSource(line); err != nil {
 			return err
 		}
 	case "document":
@@ -125,6 +134,18 @@ func (d *Docs) addMetadata(line []byte) error {
 	}
 
 	d.Root = strings.TrimSpace(metadata.Root)
+
+	return nil
+}
+
+// lsif stores project info in a split `source` node
+func (d *Docs) addSource(line []byte) error {
+	var source Source
+	if err := json.Unmarshal(line, &source); err != nil {
+		return err
+	}
+
+	d.Root = strings.TrimSpace(source.WorkspaceRoot)
 
 	return nil
 }

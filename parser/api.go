@@ -231,9 +231,10 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 		}
 
 		// search the definition:
-		// ref range - next -> resultSet
-		// resultSet - text/definition -> definitionResult
-		// definitionResult - item/edge -> def ranges
+		// - ref range - next -> resultSet
+		// - resultSet - resultSet - ... - resultSet
+		// - resultSet - text/definition -> definitionResult
+		// - definitionResult - item/edge -> def ranges
 		for eachRefRange := range refRanges {
 			// starts with the ref point
 			resultSetId, ok := readyParser.Docs.Ranges.NextMap[eachRefRange]
@@ -241,6 +242,18 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 				log.Warnf("failed to jump with nextMap: %v", eachRefRange)
 				continue
 			}
+
+			// resultSet - resultSet:
+			// https://microsoft.github.io/language-server-protocol/specifications/lsif/0.6.0/specification/
+			// A results set can also forward information to another result set by linking to it using a next edge.
+			finalResultSetId := resultSetId
+			for ok {
+				if resultSetId, ok = readyParser.Docs.Ranges.NextMap[resultSetId]; ok {
+					finalResultSetId = resultSetId
+				}
+			}
+			resultSetId = finalResultSetId
+
 			foundDefinitionResult, ok := readyParser.Docs.Ranges.TextDefinitionMap[resultSetId]
 			if !ok {
 				log.Warnf("failed to jump with reference map: %v", resultSetId)
