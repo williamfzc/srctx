@@ -2,6 +2,7 @@ package lsif
 
 import (
 	"encoding/json"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"unicode/utf8"
 
@@ -65,6 +66,7 @@ func newCodeHovers(contents json.RawMessage) ([]*codeHover, error) {
 	if err := json.Unmarshal(contents, &rawContents); err != nil {
 		rawContents = []json.RawMessage{contents}
 	}
+	log.Debug("abc")
 
 	codeHovers := []*codeHover{}
 	for _, rawContent := range rawContents {
