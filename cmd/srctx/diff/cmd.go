@@ -61,7 +61,7 @@ func AddDiffCmd(app *cli.App) {
 		&cli.StringFlag{
 			Name:        "outputDot",
 			Value:       "",
-			Usage:       "reference dot file output",
+			Usage:       "referencefff dot file output",
 			Destination: &outputDot,
 		},
 	}
