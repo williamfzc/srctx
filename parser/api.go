@@ -249,6 +249,7 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 			finalResultSetId := resultSetId
 			for ok {
 				if resultSetId, ok = readyParser.Docs.Ranges.NextMap[resultSetId]; ok {
+					log.Debugf("result set id offset: %d -> %d", finalResultSetId, resultSetId)
 					finalResultSetId = resultSetId
 				}
 			}
@@ -256,7 +257,9 @@ func FromParser(readyParser *lsif.Parser) (*object.SourceContext, error) {
 
 			foundDefinitionResult, ok := readyParser.Docs.Ranges.TextDefinitionMap[resultSetId]
 			if !ok {
-				log.Warnf("failed to jump with reference map: %v", resultSetId)
+				// this result set may not exist for def/ref
+				// maybe moniker
+				log.Warnf("result set %d is not related to any def/ref", resultSetId)
 				continue
 			}
 
