@@ -17,6 +17,6 @@ limitations under the License.
 package srctx
 
 const (
-	Version = "v0.10.0"
+	Version = "v0.10.1"
 	RepoUrl = "https://github.com/williamfzc/srctx"
 )
