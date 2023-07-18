@@ -97,3 +97,12 @@ jobs:
           ../srctx diff --before HEAD~5 --scip ./index.scip --outputHtml ../python.html --outputJson ../python.json
           cd ..
           cat ./python.json
+
+      - name: diffctx
+        uses: williamfzc/diffctx@v0.3.3
+        with:
+          lang: "golang"
+
+# for creating comments
+permissions:
+  pull-requests: write
