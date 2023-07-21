@@ -9,6 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/williamfzc/srctx/diff"
+	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser"
 	"github.com/williamfzc/srctx/parser/lsif"
 )
@@ -39,12 +40,12 @@ func MainDiff(opts *Options) error {
 	}
 
 	switch opts.NodeLevel {
-	case nodeLevelFunc:
+	case object.NodeLevelFunc:
 		err = funcLevelMain(opts, lineMap, totalLineCountMap)
 		if err != nil {
 			return err
 		}
-	case nodeLevelFile:
+	case object.NodeLevelFile:
 		err = fileLevelMain(opts, lineMap, totalLineCountMap)
 		if err != nil {
 			return err

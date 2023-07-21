@@ -12,9 +12,6 @@ import (
 )
 
 const (
-	nodeLevelFunc = "func"
-	nodeLevelFile = "file"
-
 	// flags
 	srcFlagName        = "src"
 	repoRootFlagName   = "repoRoot"
@@ -32,6 +29,7 @@ const (
 	langFlagName       = "lang"
 	noDiffFlagName     = "noDiff"
 	indexCmdFlagName   = "indexCmd"
+	statJsonFlagName   = "statJson"
 
 	// config file
 	DefaultConfigFile = "srctx_cfg.json"
@@ -51,6 +49,7 @@ type Options struct {
 	OutputCsv  string `json:"outputCsv"`
 	OutputDot  string `json:"outputDot"`
 	OutputHtml string `json:"outputHtml"`
+	StatJson   string `json:"statJson"`
 
 	// options
 	NodeLevel string `json:"nodeLevel"`
@@ -79,6 +78,7 @@ func NewOptionsFromCliFlags(c *cli.Context) *Options {
 		Lang:       c.String(langFlagName),
 		NoDiff:     c.Bool(noDiffFlagName),
 		IndexCmd:   c.String(indexCmdFlagName),
+		StatJson:   c.String(statJsonFlagName),
 	}
 }
 

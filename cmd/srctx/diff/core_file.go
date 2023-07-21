@@ -27,8 +27,9 @@ func fileLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap 
 	}
 	// start scan
 	stats := make([]*ImpactUnitWithFile, 0)
-	for _, eachPtr := range startPoints {
-		eachStat := fileGraph.Stat(eachPtr)
+	globalStat := fileGraph.GlobalStat(startPoints)
+
+	for _, eachStat := range globalStat.ImpactUnitsMap {
 		wrappedStat := WrapImpactUnitWithFile(eachStat)
 
 		// fill with file info
@@ -39,7 +40,7 @@ func fileLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap 
 			wrappedStat.ImpactLineCount = len(impactLineCount)
 		}
 		stats = append(stats, wrappedStat)
-		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))
+		log.Infof("start point: %v, refed: %d, ref: %d", eachStat.UnitName, len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))
 	}
 	log.Infof("diff finished.")
 
@@ -89,6 +90,19 @@ func fileLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap 
 			return err
 		}
 	}
+
+	if opts.StatJson != "" {
+		log.Infof("creating stat json: %s", opts.StatJson)
+		contentBytes, err := json.Marshal(&globalStat)
+		if err != nil {
+			return err
+		}
+		err = os.WriteFile(opts.StatJson, contentBytes, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

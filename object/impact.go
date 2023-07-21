@@ -18,19 +18,24 @@ type UnitImpactPart struct {
 	// Heat
 	ImpactCount      int `csv:"impactCount" json:"impactCount"`
 	TransImpactCount int `csv:"transImpactCount" json:"transImpactCount"`
-	TotalUnitCount   int `csv:"totalUnitCount" json:"totalUnitCount"`
 
 	// entries
-	ImpactEntries     int `csv:"impactEntries" json:"impactEntries"`
-	TotalEntriesCount int `csv:"totalEntriesCount" json:"totalEntriesCount"`
+	ImpactEntries int `csv:"impactEntries" json:"impactEntries"`
+}
+
+type GraphVertex interface {
+	Id() string
+	ContainTag(tag string) bool
 }
 
 type ImpactDetails struct {
 	// raw
-	ReferencedIds           []string `json:"-" csv:"-"`
-	ReferenceIds            []string `json:"-" csv:"-"`
-	TransitiveReferencedIds []string `json:"-" csv:"-"`
-	TransitiveReferenceIds  []string `json:"-" csv:"-"`
+	Self                    GraphVertex `json:"-" csv:"-"`
+	ReferencedIds           []string    `json:"-" csv:"-"`
+	ReferenceIds            []string    `json:"-" csv:"-"`
+	TransitiveReferencedIds []string    `json:"-" csv:"-"`
+	TransitiveReferenceIds  []string    `json:"-" csv:"-"`
+	Entries                 []string    `json:"-" csv:"-"`
 }
 
 type ImpactUnit struct {
@@ -45,14 +50,13 @@ func NewImpactUnit() *ImpactUnit {
 			FileName: "",
 		},
 		UnitImpactPart: &UnitImpactPart{
-			UnitName:          "",
-			ImpactCount:       0,
-			TransImpactCount:  0,
-			TotalUnitCount:    0,
-			ImpactEntries:     0,
-			TotalEntriesCount: 0,
+			UnitName:         "",
+			ImpactCount:      0,
+			TransImpactCount: 0,
+			ImpactEntries:    0,
 		},
 		ImpactDetails: &ImpactDetails{
+			Self:                    nil,
 			ReferencedIds:           make([]string, 0),
 			ReferenceIds:            make([]string, 0),
 			TransitiveReferencedIds: make([]string, 0),

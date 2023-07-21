@@ -34,16 +34,18 @@ func funcLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap 
 
 	// start scan
 	stats := make([]*ImpactUnitWithFile, 0)
-	for _, eachPtr := range startPoints {
-		eachStat := funcGraph.Stat(eachPtr)
-		wrappedStat := WrapImpactUnitWithFile(eachStat)
+	globalStat := funcGraph.GlobalStat(startPoints)
 
-		totalLineCount := len(eachPtr.GetSpan().Lines())
+	for _, eachStat := range globalStat.ImpactUnitsMap {
+		wrappedStat := WrapImpactUnitWithFile(eachStat)
+		self := eachStat.Self.(*function.Vertex)
+
+		totalLineCount := len(self.GetSpan().Lines())
 		impactLineCount := 0
 
-		if lines, ok := lineMap[eachPtr.Path]; ok {
+		if lines, ok := lineMap[self.Path]; ok {
 			for _, eachLine := range lines {
-				if eachPtr.GetSpan().ContainLine(eachLine) {
+				if self.GetSpan().ContainLine(eachLine) {
 					impactLineCount++
 				}
 			}
@@ -52,7 +54,7 @@ func funcLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap 
 		wrappedStat.ImpactLineCount = impactLineCount
 
 		stats = append(stats, wrappedStat)
-		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))
+		log.Infof("start point: %v, refed: %d, ref: %d", self.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))
 	}
 	log.Infof("diff finished.")
 
@@ -130,6 +132,19 @@ func funcLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap 
 			return err
 		}
 	}
+
+	if opts.StatJson != "" {
+		log.Infof("creating stat json: %s", opts.StatJson)
+		contentBytes, err := json.Marshal(&globalStat)
+		if err != nil {
+			return err
+		}
+		err = os.WriteFile(opts.StatJson, contentBytes, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

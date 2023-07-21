@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/williamfzc/srctx/object"
+
 	"github.com/goccy/go-json"
 	log "github.com/sirupsen/logrus"
 
@@ -46,7 +48,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  nodeLevelFlagName,
-		Value: nodeLevelFile,
+		Value: object.NodeLevelFile,
 		Usage: "graph level (file or func)",
 	},
 	&cli.StringFlag{
@@ -93,6 +95,11 @@ var flags = []cli.Flag{
 		Name:  indexCmdFlagName,
 		Value: "",
 		Usage: "specific scip or lsif cmd",
+	},
+	&cli.StringFlag{
+		Name:  statJsonFlagName,
+		Value: "stat.json",
+		Usage: "",
 	},
 }
 

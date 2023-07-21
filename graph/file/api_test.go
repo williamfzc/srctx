@@ -48,4 +48,11 @@ func TestFileGraph(t *testing.T) {
 		log.Debugf("ref lines: %v", edgeStorage.RefLines)
 		assert.NotEmpty(t, edgeStorage.RefLines)
 	})
+
+	t.Run("stat", func(t *testing.T) {
+		ptr := fileGraph.GetById("graph/function/api_query.go")
+		stat := fileGraph.GlobalStat([]*file.Vertex{ptr})
+		assert.NotEmpty(t, stat)
+		assert.NotEmpty(t, stat.ImpactUnitsMap)
+	})
 }
