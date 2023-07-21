@@ -107,14 +107,14 @@ type ImpactUnitWithFile struct {
 	*object.ImpactUnit
 
 	// line level impact
-	AffectedLineCount int `csv:"affectedLineCount" json:"affectedLineCount"`
-	TotalLineCount    int `csv:"totalLineCount" json:"totalLineCount"`
+	ImpactLineCount int `csv:"impactLineCount" json:"impactLineCount"`
+	TotalLineCount  int `csv:"totalLineCount" json:"totalLineCount"`
 }
 
 func WrapImpactUnitWithFile(impactUnit *object.ImpactUnit) *ImpactUnitWithFile {
 	return &ImpactUnitWithFile{
-		ImpactUnit:        impactUnit,
-		AffectedLineCount: 0,
-		TotalLineCount:    0,
+		ImpactUnit:      impactUnit,
+		ImpactLineCount: 0,
+		TotalLineCount:  0,
 	}
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/williamfzc/srctx/graph/file"
 )
 
-func fileLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMap map[string]int) error {
+func fileLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap map[string]int) error {
 	log.Infof("file level main entry")
 	fileGraph, err := createFileGraph(opts)
 	if err != nil {
@@ -35,8 +35,8 @@ func fileLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 		if totalLineCount, ok := totalLineCountMap[eachStat.FileName]; ok {
 			wrappedStat.TotalLineCount = totalLineCount
 		}
-		if affectedLineCount, ok := lineMap[eachStat.FileName]; ok {
-			wrappedStat.AffectedLineCount = len(affectedLineCount)
+		if impactLineCount, ok := lineMap[eachStat.FileName]; ok {
+			wrappedStat.ImpactLineCount = len(impactLineCount)
 		}
 		stats = append(stats, wrappedStat)
 		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))

@@ -13,7 +13,7 @@ import (
 	"github.com/williamfzc/srctx/graph/visual/g6"
 )
 
-func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMap map[string]int) error {
+func funcLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap map[string]int) error {
 	log.Infof("func level main entry")
 	// metadata
 	funcGraph, err := createFuncGraph(opts)
@@ -39,17 +39,17 @@ func funcLevelMain(opts *Options, lineMap diff.AffectedLineMap, totalLineCountMa
 		wrappedStat := WrapImpactUnitWithFile(eachStat)
 
 		totalLineCount := len(eachPtr.GetSpan().Lines())
-		affectedLineCount := 0
+		impactLineCount := 0
 
 		if lines, ok := lineMap[eachPtr.Path]; ok {
 			for _, eachLine := range lines {
 				if eachPtr.GetSpan().ContainLine(eachLine) {
-					affectedLineCount++
+					impactLineCount++
 				}
 			}
 		}
 		wrappedStat.TotalLineCount = totalLineCount
-		wrappedStat.AffectedLineCount = affectedLineCount
+		wrappedStat.ImpactLineCount = impactLineCount
 
 		stats = append(stats, wrappedStat)
 		log.Infof("start point: %v, refed: %d, ref: %d", eachPtr.Id(), len(eachStat.ReferencedIds), len(eachStat.ReferenceIds))

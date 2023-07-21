@@ -19,3 +19,18 @@
 
 # Go workspace file
 go.work
+
+# idea
+.idea
+
+# macos
+.Ds_Store
+
+# temp data
+cmd/srctx/*.json
+cmd/srctx/*.csv
+cmd/srctx/*.html
+cmd/srctx/*.dot
+/*.lsif
+/src_darwin_amd64
+/srctx

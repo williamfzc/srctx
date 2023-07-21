@@ -14,11 +14,11 @@ func (fg *Graph) Stat(f *Vertex) *object.ImpactUnit {
 	impactUnit.FileName = f.Path
 	impactUnit.UnitName = f.Id()
 
-	impactUnit.DirectConnectCount = len(referencedIds) + len(referenceIds)
-	impactUnit.InDirectConnectCount = len(transitiveReferenceIds) + len(transitiveReferencedIds)
+	impactUnit.ImpactCount = len(referencedIds) + len(referenceIds)
+	impactUnit.TransImpactCount = len(transitiveReferenceIds) + len(transitiveReferencedIds)
 	impactUnit.TotalUnitCount = len(fg.IdCache)
 
-	impactUnit.AffectedEntries = len(fg.EntryIds(f))
+	impactUnit.ImpactEntries = len(fg.EntryIds(f))
 	impactUnit.TotalEntriesCount = len(fg.ListEntries())
 
 	// details
@@ -28,4 +28,7 @@ func (fg *Graph) Stat(f *Vertex) *object.ImpactUnit {
 	impactUnit.TransitiveReferencedIds = transitiveReferencedIds
 
 	return impactUnit
+}
+
+func (fg *Graph) GlobalStat() {
 }

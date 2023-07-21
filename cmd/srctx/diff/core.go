@@ -74,7 +74,7 @@ func createIndexFile(opts *Options) error {
 	return nil
 }
 
-func collectLineMap(opts *Options) (diff.AffectedLineMap, error) {
+func collectLineMap(opts *Options) (diff.ImpactLineMap, error) {
 	if !opts.NoDiff {
 		lineMap, err := diff.GitDiff(opts.Src, opts.Before, opts.After)
 		if err != nil {
@@ -83,10 +83,10 @@ func collectLineMap(opts *Options) (diff.AffectedLineMap, error) {
 		return lineMap, nil
 	}
 	log.Infof("noDiff enabled")
-	return make(diff.AffectedLineMap), nil
+	return make(diff.ImpactLineMap), nil
 }
 
-func collectTotalLineCountMap(opts *Options, src string, lineMap diff.AffectedLineMap) (map[string]int, error) {
+func collectTotalLineCountMap(opts *Options, src string, lineMap diff.ImpactLineMap) (map[string]int, error) {
 	totalLineCountMap := make(map[string]int)
 	var err error
 

@@ -9,11 +9,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// file name -> lines
-type AffectedLineMap = map[string][]int
+// ImpactLineMap file name -> lines
+type ImpactLineMap = map[string][]int
 
-func GitDiff(rootDir string, before string, after string) (AffectedLineMap, error) {
-	// about why I use cmd rather than some libs
+func GitDiff(rootDir string, before string, after string) (ImpactLineMap, error) {
+	// about why, I use cmd rather than some libs
 	// because go-git 's patch has some bugs ...
 	gitDiffCmd := exec.Command("git", "diff", before, after)
 	gitDiffCmd.Dir = rootDir
@@ -23,14 +23,14 @@ func GitDiff(rootDir string, before string, after string) (AffectedLineMap, erro
 		return nil, err
 	}
 
-	affected, err := Unified2Affected(data)
+	affected, err := Unified2Impact(data)
 	if err != nil {
 		return nil, err
 	}
 	return affected, nil
 }
 
-func PathOffset(repoRoot string, srcRoot string, origin AffectedLineMap) (AffectedLineMap, error) {
+func PathOffset(repoRoot string, srcRoot string, origin ImpactLineMap) (ImpactLineMap, error) {
 	modifiedLineMap := make(map[string][]int)
 	for file, lines := range origin {
 		afterPath, err := PathOffsetOne(repoRoot, srcRoot, file)
@@ -47,28 +47,28 @@ func PathOffsetOne(repoRoot string, srcRoot string, target string) (string, erro
 	return filepath.Rel(srcRoot, absFile)
 }
 
-func Unified2Affected(patch []byte) (AffectedLineMap, error) {
+func Unified2Impact(patch []byte) (ImpactLineMap, error) {
 	parsed, _, err := gitdiff.Parse(bytes.NewReader(patch))
 	if err != nil {
 		return nil, err
 	}
 
-	affectedMap := make(map[string][]int)
+	impactLineMap := make(ImpactLineMap)
 	for _, each := range parsed {
 		if each.IsBinary || each.IsDelete {
 			continue
 		}
-		affectedMap[each.NewName] = make([]int, 0)
+		impactLineMap[each.NewName] = make([]int, 0)
 		fragments := each.TextFragments
 		for _, eachF := range fragments {
 			left := int(eachF.NewPosition)
 
 			for i, eachLine := range eachF.Lines {
 				if eachLine.New() && eachLine.Op == gitdiff.OpAdd {
-					affectedMap[each.NewName] = append(affectedMap[each.NewName], left+i-1)
+					impactLineMap[each.NewName] = append(impactLineMap[each.NewName], left+i-1)
 				}
 			}
 		}
 	}
-	return affectedMap, nil
+	return impactLineMap, nil
 }

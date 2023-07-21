@@ -16,12 +16,12 @@ type UnitImpactPart struct {
 	UnitName string `csv:"unitName" json:"unitName"`
 
 	// Heat
-	DirectConnectCount   int `csv:"directConnectCount" json:"directConnectCount"`
-	InDirectConnectCount int `csv:"inDirectConnectCount" json:"inDirectConnectCount"`
-	TotalUnitCount       int `csv:"totalUnitCount" json:"totalUnitCount"`
+	ImpactCount      int `csv:"impactCount" json:"impactCount"`
+	TransImpactCount int `csv:"transImpactCount" json:"transImpactCount"`
+	TotalUnitCount   int `csv:"totalUnitCount" json:"totalUnitCount"`
 
 	// entries
-	AffectedEntries   int `csv:"affectedEntries" json:"affectedEntries"`
+	ImpactEntries     int `csv:"impactEntries" json:"impactEntries"`
 	TotalEntriesCount int `csv:"totalEntriesCount" json:"totalEntriesCount"`
 }
 
@@ -45,12 +45,12 @@ func NewImpactUnit() *ImpactUnit {
 			FileName: "",
 		},
 		UnitImpactPart: &UnitImpactPart{
-			UnitName:             "",
-			DirectConnectCount:   0,
-			InDirectConnectCount: 0,
-			TotalUnitCount:       0,
-			AffectedEntries:      0,
-			TotalEntriesCount:    0,
+			UnitName:          "",
+			ImpactCount:       0,
+			TransImpactCount:  0,
+			TotalUnitCount:    0,
+			ImpactEntries:     0,
+			TotalEntriesCount: 0,
 		},
 		ImpactDetails: &ImpactDetails{
 			ReferencedIds:           make([]string, 0),
