@@ -65,6 +65,7 @@ func newCodeHovers(contents json.RawMessage) ([]*codeHover, error) {
 	var rawContents []json.RawMessage
 	if err := json.Unmarshal(contents, &rawContents); err != nil {
 		rawContents = []json.RawMessage{contents}
+		// fake edge
 	}
 	log.Debug("abc")
 
