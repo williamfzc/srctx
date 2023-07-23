@@ -32,69 +32,78 @@ func (fg *Graph) Stat(f *Vertex) *object.ImpactUnit {
 
 func (fg *Graph) GlobalStat(points []*Vertex) *object.StatGlobal {
 	sg := &object.StatGlobal{
-		UnitLevel: object.NodeLevelFunc,
+		UnitLevel:   object.NodeLevelFile,
+		UnitMapping: make(map[string]int),
 	}
 
-	totalUnits := make([]string, 0, len(fg.IdCache))
+	// creating mapping
+	curId := 0
 	for each := range fg.IdCache {
-		totalUnits = append(totalUnits, each)
+		sg.UnitMapping[each] = curId
+		curId++
 	}
-	sg.TotalUnits = totalUnits
 
 	entries := fg.ListEntries()
-	totalEntries := make([]string, 0, len(entries))
+	totalEntries := make([]int, 0, len(entries))
 	for _, each := range entries {
-		totalEntries = append(totalUnits, each.Id())
+		eachId := sg.UnitMapping[each.Id()]
+		totalEntries = append(totalEntries, eachId)
 	}
 	sg.TotalEntries = totalEntries
 
-	stats := make(map[string]*object.ImpactUnit, 0)
+	stats := make(map[int]*object.ImpactUnit, 0)
 	for _, each := range points {
 		eachStat := fg.Stat(each)
-		stats[each.Id()] = eachStat
+		eachId := sg.UnitMapping[each.Id()]
+		stats[eachId] = eachStat
 	}
 	sg.ImpactUnitsMap = stats
 
 	// direct impact
-	directImpactMap := make(map[string]struct{})
+	directImpactMap := make(map[int]struct{})
 	for _, each := range stats {
 		for _, eachReferenced := range each.ReferencedIds {
-			directImpactMap[eachReferenced] = struct{}{}
+			eachId := sg.UnitMapping[eachReferenced]
+			directImpactMap[eachId] = struct{}{}
 		}
 		for _, eachReference := range each.ReferenceIds {
-			directImpactMap[eachReference] = struct{}{}
+			eachId := sg.UnitMapping[eachReference]
+			directImpactMap[eachId] = struct{}{}
 		}
 	}
-	directImpactList := make([]string, 0, len(directImpactMap))
+	directImpactList := make([]int, 0, len(directImpactMap))
 	for each := range directImpactMap {
 		directImpactList = append(directImpactList, each)
 	}
 	sg.ImpactUnits = directImpactList
 
 	// in-direct impact
-	indirectImpactMap := make(map[string]struct{})
+	indirectImpactMap := make(map[int]struct{})
 	for _, each := range stats {
 		for _, eachReferenced := range each.TransitiveReferencedIds {
-			indirectImpactMap[eachReferenced] = struct{}{}
+			eachId := sg.UnitMapping[eachReferenced]
+			indirectImpactMap[eachId] = struct{}{}
 		}
 		for _, eachReference := range each.TransitiveReferenceIds {
-			indirectImpactMap[eachReference] = struct{}{}
+			eachId := sg.UnitMapping[eachReference]
+			indirectImpactMap[eachId] = struct{}{}
 		}
 	}
-	indirectImpactList := make([]string, 0, len(indirectImpactMap))
+	indirectImpactList := make([]int, 0, len(indirectImpactMap))
 	for each := range indirectImpactMap {
 		indirectImpactList = append(indirectImpactList, each)
 	}
 	sg.TransImpactUnits = indirectImpactList
 
 	// entries
-	entriesMap := make(map[string]struct{})
+	entriesMap := make(map[int]struct{})
 	for _, each := range stats {
 		for _, eachEntry := range each.Entries {
-			entriesMap[eachEntry] = struct{}{}
+			eachId := sg.UnitMapping[eachEntry]
+			entriesMap[eachId] = struct{}{}
 		}
 	}
-	entriesList := make([]string, 0, len(entriesMap))
+	entriesList := make([]int, 0, len(entriesMap))
 	for each := range entriesMap {
 		entriesList = append(entriesList, each)
 	}
