@@ -27,7 +27,7 @@ jobs:
           make
           git clone https://github.com/gin-gonic/gin --depth=2
           cd gin
-          ../srctx diff --withIndex --lang GOLANG --outputHtml ../sample.html
+          ../srctx diff --withIndex --lang GOLANG --outputHtml ../sample.html --outputJson ../sample.json --statJson ../sample_stat.json
           cd ..
 
       - name: Build
@@ -55,3 +55,5 @@ jobs:
           files: |
             build/srctx-*
             sample.html
+            sample.json
+            sample_stat.json
