@@ -99,7 +99,7 @@ jobs:
           cat ./python.json
 
       - name: diffctx
-        uses: williamfzc/diffctx@v0.3.3
+        uses: williamfzc/diffctx@v0.3.4
         with:
           lang: "golang"
 
