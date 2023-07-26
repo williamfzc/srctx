@@ -2,9 +2,14 @@ name: SmokeTest
 
 on:
   push:
-    branches: '*'
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
   pull_request:
-    branches: '*'
+    branches:
+      - '*'
+
 
 jobs:
   build:
