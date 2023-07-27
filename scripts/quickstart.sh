@@ -3,7 +3,7 @@
 set -e
 
 # Set version number and base url
-version="0.10.2"
+version="0.10.3"
 base_url="https://github.com/williamfzc/srctx/releases/download"
 
 echo "Starting SRCTX..."
