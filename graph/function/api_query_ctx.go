@@ -80,7 +80,8 @@ func (fg *Graph) TransitiveReferenceIds(f *Vertex) []string {
 
 func (fg *Graph) EntryIds(f *Vertex) []string {
 	ret := make([]string, 0)
-	all := fg.TransitiveReferencedIds(f)
+	// and also itself
+	all := append(fg.TransitiveReferencedIds(f), f.Id())
 	for _, eachId := range all {
 		item := fg.IdCache[eachId]
 		if item.ContainTag(TagEntry) {

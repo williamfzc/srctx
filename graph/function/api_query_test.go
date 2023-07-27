@@ -42,7 +42,8 @@ func TestQuery(t *testing.T) {
 		for _, eachFunc := range testFuncs {
 			if eachFunc.Name == "TestQuery" {
 				entries := fg.EntryIds(eachFunc)
-				assert.Len(t, entries, 0)
+				// test case usually is an entry point
+				assert.Len(t, entries, 1)
 			}
 		}
 	})
