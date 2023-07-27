@@ -34,4 +34,10 @@ func TestQuery(t *testing.T) {
 		assert.NotEmpty(t, shouldNotEmpty)
 		log.Infof("outv: %d", len(shouldNotEmpty))
 	})
+
+	t.Run("Entries", func(t *testing.T) {
+		entries := fg.EntryIds(fg.GetById("graph/function/api_query_test.go"))
+		// test case usually is an entry point
+		assert.Len(t, entries, 1)
+	})
 }

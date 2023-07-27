@@ -70,6 +70,9 @@ func (fg *Graph) GlobalStat(points []*Vertex) *object.StatGlobal {
 			eachId := sg.UnitMapping[eachReference]
 			directImpactMap[eachId] = struct{}{}
 		}
+		// and itself
+		itselfId := sg.UnitMapping[each.Self.Id()]
+		directImpactMap[itselfId] = struct{}{}
 	}
 	directImpactList := make([]int, 0, len(directImpactMap))
 	for each := range directImpactMap {

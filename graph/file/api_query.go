@@ -10,7 +10,6 @@ import (
 func (fg *Graph) GetById(id string) *Vertex {
 	v, err := fg.G.Vertex(id)
 	if err != nil {
-
 		logrus.Warnf("no vertex: %v", id)
 		return nil
 	}
