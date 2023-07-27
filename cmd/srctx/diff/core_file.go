@@ -22,8 +22,11 @@ func fileLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap 
 	// look up start points
 	startPoints := make([]*file.Vertex, 0)
 	for path := range lineMap {
-		pv := file.Path2vertex(path)
-		startPoints = append(startPoints, pv)
+		// this vertex may not exist in graph! like: push.yml, README.md
+		pv := fileGraph.GetById(path)
+		if pv != nil {
+			startPoints = append(startPoints, pv)
+		}
 	}
 	// start scan
 	stats := make([]*ImpactUnitWithFile, 0)
