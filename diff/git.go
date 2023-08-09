@@ -60,10 +60,10 @@ func Unified2Impact(patch []byte) (ImpactLineMap, error) {
 		}
 		impactLineMap[each.NewName] = make([]int, 0)
 		fragments := each.TextFragments
-		for _, eachF := range fragments {
-			left := int(eachF.NewPosition)
+		for _, eachFragment := range fragments {
+			left := int(eachFragment.NewPosition)
 
-			for i, eachLine := range eachF.Lines {
+			for i, eachLine := range eachFragment.Lines {
 				if eachLine.New() && eachLine.Op == gitdiff.OpAdd {
 					impactLineMap[each.NewName] = append(impactLineMap[each.NewName], left+i-1)
 				}
