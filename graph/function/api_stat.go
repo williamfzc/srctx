@@ -15,8 +15,8 @@ func (fg *Graph) Stat(f *Vertex) *object.ImpactUnit {
 	impactUnit.FileName = f.Path
 	impactUnit.UnitName = f.Id()
 
-	impactUnit.ImpactCount = len(referencedIds) + len(referenceIds)
-	impactUnit.TransImpactCount = len(transitiveReferenceIds) + len(transitiveReferencedIds)
+	impactUnit.ImpactCount = len(referencedIds)
+	impactUnit.TransImpactCount = len(transitiveReferencedIds)
 	impactUnit.ImpactEntries = len(entries)
 
 	// details
@@ -66,10 +66,6 @@ func (fg *Graph) GlobalStat(points []*Vertex) *object.StatGlobal {
 			eachId := sg.UnitMapping[eachReferenced]
 			directImpactMap[eachId] = struct{}{}
 		}
-		for _, eachReference := range each.ReferenceIds {
-			eachId := sg.UnitMapping[eachReference]
-			directImpactMap[eachId] = struct{}{}
-		}
 		// and itself
 		itselfId := sg.UnitMapping[each.Self.Id()]
 		directImpactMap[itselfId] = struct{}{}
@@ -87,10 +83,9 @@ func (fg *Graph) GlobalStat(points []*Vertex) *object.StatGlobal {
 			eachId := sg.UnitMapping[eachReferenced]
 			indirectImpactMap[eachId] = struct{}{}
 		}
-		for _, eachReference := range each.TransitiveReferenceIds {
-			eachId := sg.UnitMapping[eachReference]
-			indirectImpactMap[eachId] = struct{}{}
-		}
+		// and itself
+		itselfId := sg.UnitMapping[each.Self.Id()]
+		indirectImpactMap[itselfId] = struct{}{}
 	}
 	indirectImpactList := make([]int, 0, len(indirectImpactMap))
 	for each := range indirectImpactMap {
