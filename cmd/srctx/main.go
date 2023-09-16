@@ -31,3 +31,13 @@ func panicIfErr(err error) {
 		panic(err)
 	}
 }
+
+func init() {
+	environment := os.Getenv("SRCTX_ENV")
+
+	if environment == "production" || environment == "prod" {
+		// can be saved to log file
+		log.SetOutput(os.Stdout)
+		log.SetLevel(log.WarnLevel)
+	}
+}
