@@ -107,7 +107,8 @@ func collectTotalLineCountMap(opts *Options, src string, lineMap diff.ImpactLine
 	for eachPath := range lineMap {
 		totalLineCountMap[eachPath], err = lineCounter(filepath.Join(src, eachPath))
 		if err != nil {
-			return nil, err
+			// ignore this err, files can be removed/moved
+			log.Infof("file has been removed: %s, set line counter to 0", eachPath)
 		}
 	}
 
