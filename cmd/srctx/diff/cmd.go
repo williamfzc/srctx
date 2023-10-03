@@ -91,6 +91,11 @@ var flags = []cli.Flag{
 		Value: false,
 		Usage: "will not calc git diff if enabled",
 	},
+	&cli.BoolFlag{
+		Name:  noEntriesFlagName,
+		Value: false,
+		Usage: "will not calc entries if enabled",
+	},
 	&cli.StringFlag{
 		Name:  indexCmdFlagName,
 		Value: "",

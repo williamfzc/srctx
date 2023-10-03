@@ -13,14 +13,21 @@ func TestGraph(t *testing.T) {
 	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
 
 	t.Run("from lsif", func(t *testing.T) {
-		fg, err := CreateFileGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"))
+		opts := DefaultGraphOptions()
+		opts.Src = src
+		opts.LsifFile = filepath.Join(src, "dump.lsif")
+
+		fg, err := CreateFileGraphFromDirWithLSIF(opts)
 		assert.Nil(t, err)
 		assert.NotEmpty(t, fg)
 	})
 
 	t.Run("create index", func(t *testing.T) {
 		t.Skip("this case did not work in github actions")
-		fg, err := CreateFileGraphFromGolangDir(src)
+		opts := DefaultGraphOptions()
+		opts.Src = src
+
+		fg, err := CreateFileGraphFromGolangDir(opts)
 		assert.Nil(t, err)
 		assert.NotEmpty(t, fg)
 	})

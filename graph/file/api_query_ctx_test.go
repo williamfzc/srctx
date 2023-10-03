@@ -13,7 +13,11 @@ import (
 func TestQuery(t *testing.T) {
 	_, curFile, _, _ := runtime.Caller(0)
 	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
-	fg, err := CreateFileGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"))
+
+	opts := DefaultGraphOptions()
+	opts.Src = src
+	opts.LsifFile = filepath.Join(src, "dump.lsif")
+	fg, err := CreateFileGraphFromDirWithLSIF(opts)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fg)
 

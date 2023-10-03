@@ -113,22 +113,29 @@ func createFileGraph(opts *Options) (*file.Graph, error) {
 	var fileGraph *file.Graph
 	var err error
 
+	graphOptions := file.DefaultGraphOptions()
+	graphOptions.Src = opts.Src
+	graphOptions.NoEntries = opts.NoEntries
+
 	if opts.ScipFile != "" {
 		// using SCIP
 		log.Infof("using SCIP as index")
-		fileGraph, err = file.CreateFileGraphFromDirWithSCIP(opts.Src, opts.ScipFile)
+		graphOptions.ScipFile = opts.ScipFile
+		fileGraph, err = file.CreateFileGraphFromDirWithSCIP(graphOptions)
 	} else {
 		// using LSIF
 		log.Infof("using LSIF as index")
 		if opts.WithIndex {
 			switch core.LangType(opts.Lang) {
 			case core.LangGo:
-				fileGraph, err = file.CreateFileGraphFromGolangDir(opts.Src)
+				graphOptions.GenGolangIndex = true
+				fileGraph, err = file.CreateFileGraphFromGolangDir(graphOptions)
 			default:
 				return nil, errors.New("did not specify `--lang`")
 			}
 		} else {
-			fileGraph, err = file.CreateFileGraphFromDirWithLSIF(opts.Src, opts.LsifZip)
+			graphOptions.LsifFile = opts.LsifZip
+			fileGraph, err = file.CreateFileGraphFromDirWithLSIF(graphOptions)
 		}
 	}
 	if err != nil {

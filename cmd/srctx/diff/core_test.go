@@ -1,9 +1,10 @@
 package diff
 
 import (
+	"testing"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestCollectLineMap(t *testing.T) {

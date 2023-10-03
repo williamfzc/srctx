@@ -13,7 +13,10 @@ import (
 func TestFileGraph(t *testing.T) {
 	_, curFile, _, _ := runtime.Caller(0)
 	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
-	fileGraph, err := file.CreateFileGraphFromDirWithLSIF(src, filepath.Join(src, "dump.lsif"))
+	opts := file.DefaultGraphOptions()
+	opts.Src = src
+	opts.LsifFile = filepath.Join(src, "dump.lsif")
+	fileGraph, err := file.CreateFileGraphFromDirWithLSIF(opts)
 	assert.Nil(t, err)
 
 	t.Run("Transform", func(t *testing.T) {

@@ -19,6 +19,26 @@ type Graph struct {
 	IdCache map[string]*Vertex
 }
 
+type GraphOptions struct {
+	Src            string `json:"src"`
+	GenGolangIndex bool   `json:"genGolangIndex"`
+	LsifFile       string `json:"lsifFile"`
+	ScipFile       string `json:"scipFile"`
+
+	// other options (like performance
+	NoEntries bool `json:"noEntries"`
+}
+
+func DefaultGraphOptions() *GraphOptions {
+	return &GraphOptions{
+		Src:            ".",
+		GenGolangIndex: false,
+		LsifFile:       "./dump.lsif",
+		ScipFile:       "",
+		NoEntries:      false,
+	}
+}
+
 type Vertex struct {
 	Path       string
 	Referenced int
@@ -84,32 +104,32 @@ func NewEmptyFileGraph() *Graph {
 	}
 }
 
-func CreateFileGraphFromDirWithLSIF(src string, lsifFile string) (*Graph, error) {
-	sourceContext, err := parser.FromLsifFile(lsifFile, src)
+func CreateFileGraphFromDirWithLSIF(opts *GraphOptions) (*Graph, error) {
+	sourceContext, err := parser.FromLsifFile(opts.LsifFile, opts.Src)
 	if err != nil {
 		return nil, err
 	}
 	log.Infof("fact ready. creating file graph ...")
-	return CreateFileGraph(sourceContext)
+	return CreateFileGraph(sourceContext, opts)
 }
 
-func CreateFileGraphFromGolangDir(src string) (*Graph, error) {
-	sourceContext, err := parser.FromGolangSrc(src)
+func CreateFileGraphFromGolangDir(opts *GraphOptions) (*Graph, error) {
+	sourceContext, err := parser.FromGolangSrc(opts.Src)
 	if err != nil {
 		return nil, err
 	}
-	return CreateFileGraph(sourceContext)
+	return CreateFileGraph(sourceContext, opts)
 }
 
-func CreateFileGraphFromDirWithSCIP(src string, scipFile string) (*Graph, error) {
-	sourceContext, err := parser.FromScipFile(scipFile, src)
+func CreateFileGraphFromDirWithSCIP(opts *GraphOptions) (*Graph, error) {
+	sourceContext, err := parser.FromScipFile(opts.ScipFile, opts.Src)
 	if err != nil {
 		return nil, err
 	}
-	return CreateFileGraph(sourceContext)
+	return CreateFileGraph(sourceContext, opts)
 }
 
-func CreateFileGraph(relationship *object.SourceContext) (*Graph, error) {
+func CreateFileGraph(relationship *object.SourceContext, opts *GraphOptions) (*Graph, error) {
 	g := NewEmptyFileGraph()
 
 	// nodes
@@ -171,12 +191,15 @@ func CreateFileGraph(relationship *object.SourceContext) (*Graph, error) {
 	}
 
 	// entries tag
-	entries := g.FilterFunctions(func(vertex *Vertex) bool {
-		return len(g.DirectReferencedIds(vertex)) == 0
-	})
-	log.Infof("detect entries: %d", len(entries))
-	for _, entry := range entries {
-		entry.AddTag(TagEntry)
+	// calculation takes a few minutes if target project is large
+	if !opts.NoEntries {
+		entries := g.FilterFunctions(func(vertex *Vertex) bool {
+			return len(g.DirectReferencedIds(vertex)) == 0
+		})
+		log.Infof("detect entries: %d", len(entries))
+		for _, entry := range entries {
+			entry.AddTag(TagEntry)
+		}
 	}
 
 	nodeCount, err := g.G.Order()

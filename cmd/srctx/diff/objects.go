@@ -28,6 +28,7 @@ const (
 	cacheTypeFlagName  = "cacheType"
 	langFlagName       = "lang"
 	noDiffFlagName     = "noDiff"
+	noEntriesFlagName  = "noEntries"
 	indexCmdFlagName   = "indexCmd"
 	statJsonFlagName   = "statJson"
 
@@ -57,6 +58,7 @@ type Options struct {
 	CacheType string `json:"cacheType"`
 	Lang      string `json:"lang"`
 	NoDiff    bool   `json:"noDiff"`
+	NoEntries bool   `json:"noEntries"`
 	IndexCmd  string `json:"indexCmd"`
 }
 
