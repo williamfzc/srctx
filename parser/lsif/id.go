@@ -42,7 +42,7 @@ func (id *Id) unmarshalString(b []byte) error {
 		return err
 	}
 
-	i, err := strconv.Atoi(s)
+	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
 		return err
 	}
