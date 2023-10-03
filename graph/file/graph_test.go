@@ -5,6 +5,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/williamfzc/srctx/graph/common"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +15,7 @@ func TestGraph(t *testing.T) {
 	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
 
 	t.Run("from lsif", func(t *testing.T) {
-		opts := DefaultGraphOptions()
+		opts := common.DefaultGraphOptions()
 		opts.Src = src
 		opts.LsifFile = filepath.Join(src, "dump.lsif")
 
@@ -24,7 +26,7 @@ func TestGraph(t *testing.T) {
 
 	t.Run("create index", func(t *testing.T) {
 		t.Skip("this case did not work in github actions")
-		opts := DefaultGraphOptions()
+		opts := common.DefaultGraphOptions()
 		opts.Src = src
 
 		fg, err := CreateFileGraphFromGolangDir(opts)

@@ -19,26 +19,6 @@ type Graph struct {
 	IdCache map[string]*Vertex
 }
 
-type GraphOptions struct {
-	Src            string `json:"src"`
-	GenGolangIndex bool   `json:"genGolangIndex"`
-	LsifFile       string `json:"lsifFile"`
-	ScipFile       string `json:"scipFile"`
-
-	// other options (like performance
-	NoEntries bool `json:"noEntries"`
-}
-
-func DefaultGraphOptions() *GraphOptions {
-	return &GraphOptions{
-		Src:            ".",
-		GenGolangIndex: false,
-		LsifFile:       "./dump.lsif",
-		ScipFile:       "",
-		NoEntries:      false,
-	}
-}
-
 type Vertex struct {
 	Path       string
 	Referenced int
@@ -104,7 +84,7 @@ func NewEmptyFileGraph() *Graph {
 	}
 }
 
-func CreateFileGraphFromDirWithLSIF(opts *GraphOptions) (*Graph, error) {
+func CreateFileGraphFromDirWithLSIF(opts *common.GraphOptions) (*Graph, error) {
 	sourceContext, err := parser.FromLsifFile(opts.LsifFile, opts.Src)
 	if err != nil {
 		return nil, err
@@ -113,7 +93,7 @@ func CreateFileGraphFromDirWithLSIF(opts *GraphOptions) (*Graph, error) {
 	return CreateFileGraph(sourceContext, opts)
 }
 
-func CreateFileGraphFromGolangDir(opts *GraphOptions) (*Graph, error) {
+func CreateFileGraphFromGolangDir(opts *common.GraphOptions) (*Graph, error) {
 	sourceContext, err := parser.FromGolangSrc(opts.Src)
 	if err != nil {
 		return nil, err
@@ -121,7 +101,7 @@ func CreateFileGraphFromGolangDir(opts *GraphOptions) (*Graph, error) {
 	return CreateFileGraph(sourceContext, opts)
 }
 
-func CreateFileGraphFromDirWithSCIP(opts *GraphOptions) (*Graph, error) {
+func CreateFileGraphFromDirWithSCIP(opts *common.GraphOptions) (*Graph, error) {
 	sourceContext, err := parser.FromScipFile(opts.ScipFile, opts.Src)
 	if err != nil {
 		return nil, err
@@ -129,7 +109,7 @@ func CreateFileGraphFromDirWithSCIP(opts *GraphOptions) (*Graph, error) {
 	return CreateFileGraph(sourceContext, opts)
 }
 
-func CreateFileGraph(relationship *object.SourceContext, opts *GraphOptions) (*Graph, error) {
+func CreateFileGraph(relationship *object.SourceContext, opts *common.GraphOptions) (*Graph, error) {
 	g := NewEmptyFileGraph()
 
 	// nodes

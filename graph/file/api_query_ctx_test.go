@@ -5,6 +5,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/williamfzc/srctx/graph/common"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +16,7 @@ func TestQuery(t *testing.T) {
 	_, curFile, _, _ := runtime.Caller(0)
 	src := filepath.Dir(filepath.Dir(filepath.Dir(curFile)))
 
-	opts := DefaultGraphOptions()
+	opts := common.DefaultGraphOptions()
 	opts.Src = src
 	opts.LsifFile = filepath.Join(src, "dump.lsif")
 	fg, err := CreateFileGraphFromDirWithLSIF(opts)

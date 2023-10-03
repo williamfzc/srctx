@@ -5,6 +5,8 @@ import (
 	"errors"
 	"os"
 
+	"github.com/williamfzc/srctx/graph/common"
+
 	"github.com/gocarina/gocsv"
 	"github.com/opensibyl/sibyl2/pkg/core"
 	log "github.com/sirupsen/logrus"
@@ -113,7 +115,7 @@ func createFileGraph(opts *Options) (*file.Graph, error) {
 	var fileGraph *file.Graph
 	var err error
 
-	graphOptions := file.DefaultGraphOptions()
+	graphOptions := common.DefaultGraphOptions()
 	graphOptions.Src = opts.Src
 	graphOptions.NoEntries = opts.NoEntries
 
