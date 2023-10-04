@@ -1,9 +1,12 @@
 package common
 
+import "github.com/opensibyl/sibyl2/pkg/core"
+
 type GraphOptions struct {
-	Src      string `json:"src"`
-	LsifFile string `json:"lsifFile"`
-	ScipFile string `json:"scipFile"`
+	Src      string        `json:"src"`
+	LsifFile string        `json:"lsifFile"`
+	ScipFile string        `json:"scipFile"`
+	Lang     core.LangType `json:"lang"`
 
 	// other options (like performance
 	GenGolangIndex bool `json:"genGolangIndex"`
@@ -13,9 +16,10 @@ type GraphOptions struct {
 func DefaultGraphOptions() *GraphOptions {
 	return &GraphOptions{
 		Src:            ".",
-		GenGolangIndex: false,
 		LsifFile:       "./dump.lsif",
 		ScipFile:       "./index.scip",
+		Lang:           core.LangUnknown,
 		NoEntries:      false,
+		GenGolangIndex: false,
 	}
 }
