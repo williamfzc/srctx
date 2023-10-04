@@ -57,6 +57,15 @@ func fileLevelMain(opts *Options, lineMap diff.ImpactLineMap, totalLineCountMap 
 		}
 	}
 
+	if opts.OutputDot != "" {
+		log.Infof("creating dot file: %v", opts.OutputDot)
+
+		err := fileGraph.DrawDot(opts.OutputDot)
+		if err != nil {
+			return err
+		}
+	}
+
 	if opts.OutputCsv != "" || opts.OutputJson != "" {
 		if opts.OutputCsv != "" {
 			log.Infof("creating output csv: %v", opts.OutputCsv)
