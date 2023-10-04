@@ -17,7 +17,7 @@ func TestStat(t *testing.T) {
 	assert.NotEmpty(t, fg.Cache)
 
 	t.Run("stat", func(t *testing.T) {
-		ptr, err := fg.GetById("graph/function/graph.go:#216-#222:function||CreateFuncGraphFromDirWithLSIF|string,string,core.LangType|*Graph,error")
+		ptr, err := fg.GetById("graph/function/graph.go:#160-#166:function||CreateFuncGraphFromDirWithLSIF|string,string,core.LangType|*Graph,error")
 		assert.Nil(t, err)
 		stat := fg.GlobalStat([]*Vertex{ptr})
 		assert.NotEmpty(t, stat)
