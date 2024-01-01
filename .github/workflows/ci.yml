@@ -85,6 +85,15 @@ jobs:
           cd ..
           cat ./java.json
 
+      - name: Third Party Test (Kotlin)
+        run: |
+          git clone https://github.com/square/kotlinpoet --depth=6
+          cd kotlinpoet
+          ../scip-java index -- clean build
+          ../srctx diff --before HEAD~5 --scip ./index.scip --outputHtml ../kotlin.html --outputJson ../kotlin.json
+          cd ..
+          cat ./kotlin.json
+
       - name: Thrid Party Test (Node)
         run: |
           git clone https://github.com/microsoft/lsif-node.git --depth=6
@@ -102,3 +111,12 @@ jobs:
           ../srctx diff --before HEAD~5 --scip ./index.scip --outputHtml ../python.html --outputJson ../python.json
           cd ..
           cat ./python.json
+
+      - name: diffctx
+        uses: williamfzc/diffctx@v0.3.4
+        with:
+          lang: "golang"
+
+# for creating comments
+permissions:
+  pull-requests: write

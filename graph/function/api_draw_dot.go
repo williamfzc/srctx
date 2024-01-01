@@ -12,6 +12,7 @@ func (fg *Graph) setProperty(vertexHash string, propertyK string, propertyV stri
 		return err
 	}
 	properties.Attributes[propertyK] = propertyV
+	// fake edit 2
 	return nil
 }
 

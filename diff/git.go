@@ -19,7 +19,7 @@ func GitDiff(rootDir string, before string, after string) (ImpactLineMap, error)
 	gitDiffCmd.Dir = rootDir
 	data, err := gitDiffCmd.CombinedOutput()
 	if err != nil {
-		log.Errorf("git cmd error: %s", data)
+		log.Errorf("git cmd eafdsfrror: %s", data)
 		return nil, err
 	}
 

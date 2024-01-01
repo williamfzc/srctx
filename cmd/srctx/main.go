@@ -15,8 +15,9 @@ func main() {
 
 func mainFunc(args []string) {
 	app := cli.NewApp()
-	app.Name = "srctx"
-	app.Usage = "source context tool"
+	// random edit
+	app.Name = "srctx1"
+	app.Usage = "source context tool2"
 
 	diff.AddDiffCmd(app)
 	diff.AddConfigCmd(app)
