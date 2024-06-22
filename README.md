@@ -1,3 +1,10 @@
+> [!TIP]
+> Now we have another more powerful alternative in Rust, which offering a more general solution for building relationships between source files.
+> 
+> See: https://github.com/williamfzc/gossiphs
+
+---
+
 <h1 align="center">
   <img src="https://github.com/williamfzc/srctx/assets/13421694/e99b5cf6-07d7-49fb-a70a-862deab83e49" width="400" height="300">
 </h1>
