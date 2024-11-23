@@ -85,14 +85,15 @@ jobs:
           cd ..
           cat ./java.json
 
-      - name: Thrid Party Test (Node)
-        run: |
-          git clone https://github.com/microsoft/lsif-node.git --depth=6
-          cd lsif-node
-          lsif tsc -p ./tsconfig.json --package ./package.json --noContents --out ./dump.lsif
-          ../srctx diff --before HEAD~5 --lsif ./dump.lsif --outputHtml ../node.html --outputJson ../node.json
-          cd ..
-          cat ./node.json
+      # lsif-node broken
+#      - name: Thrid Party Test (Node)
+#        run: |
+#          git clone https://github.com/microsoft/lsif-node.git --depth=6
+#          cd lsif-node
+#          lsif tsc -p ./tsconfig.json --package ./package.json --noContents --out ./dump.lsif
+#          ../srctx diff --before HEAD~5 --lsif ./dump.lsif --outputHtml ../node.html --outputJson ../node.json
+#          cd ..
+#          cat ./node.json
 
       - name: Thrid Party Test (Python)
         run: |
