@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/williamfzc/srctx/object"
 	"github.com/williamfzc/srctx/parser"
 	"os"
 	"slices"
@@ -21,6 +22,16 @@ var flags = []cli.Flag{
 		Value: "output.csv",
 		Usage: "output csv file",
 	},
+	&cli.StringFlag{
+		Name:  "lsif",
+		Value: "",
+		Usage: "lsif file input",
+	},
+	&cli.StringFlag{
+		Name:  "scip",
+		Value: "",
+		Usage: "scip file input",
+	},
 }
 
 type Options struct {
@@ -36,10 +47,26 @@ func AddDumpCmd(app *cli.App) {
 		Action: func(cCtx *cli.Context) error {
 			src := cCtx.String("src")
 			csvPath := cCtx.String("csv")
+			lsifPath := cCtx.String("lsif")
+			scipPath := cCtx.String("scip")
 
-			sourceContext, err := parser.FromGolangSrc(src)
-			if err != nil {
-				panic(err)
+			var sourceContext *object.SourceContext
+			var err error
+			if lsifPath == "" && scipPath == "" {
+				sourceContext, err = parser.FromGolangSrc(src)
+				if err != nil {
+					panic(err)
+				}
+			} else if lsifPath != "" {
+				sourceContext, err = parser.FromLsifFile(lsifPath, src)
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				sourceContext, err = parser.FromScipFile(scipPath, src)
+				if err != nil {
+					panic(err)
+				}
 			}
 
 			files := sourceContext.Files()

@@ -73,6 +73,14 @@ func TestDiff(t *testing.T) {
 			"--noDiff",
 		})
 	})
+
+	t.Run("dump with existed file", func(t *testing.T) {
+		mainFunc([]string{
+			"srctx", "dump",
+			"--src", "../..",
+			"--lsif", "../../dump.lsif",
+		})
+	})
 }
 
 func TestRenderHtml(t *testing.T) {
