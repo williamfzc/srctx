@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/williamfzc/srctx"
 	"github.com/williamfzc/srctx/cmd/srctx/diff"
+	"github.com/williamfzc/srctx/cmd/srctx/dump"
 )
 
 func main() {
@@ -20,6 +21,7 @@ func mainFunc(args []string) {
 
 	diff.AddDiffCmd(app)
 	diff.AddConfigCmd(app)
+	dump.AddDumpCmd(app)
 
 	log.Infof("srctx version %v (%s)", srctx.Version, srctx.RepoUrl)
 	err := app.Run(args)

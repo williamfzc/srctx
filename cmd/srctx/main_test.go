@@ -108,3 +108,9 @@ func TestDiffCfg(t *testing.T) {
 		assert.FileExists(t, diff.DefaultConfigFile)
 	})
 }
+
+func TestDump(t *testing.T) {
+	t.Run("dump", func(t *testing.T) {
+		mainFunc([]string{"srctx", "dump", "--src", ".."})
+	})
+}
