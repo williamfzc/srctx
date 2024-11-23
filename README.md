@@ -1,5 +1,7 @@
 > [!TIP]
-> Now we have another more powerful alternative in Rust, which offering a more general solution for building relationships between source files.
+> Now we have another more powerful alternative in Rust, 
+> which offering a more general solution for building relationships between source files, 
+> without runtime indexing (like LSIF/SCIP).
 > 
 > See: https://github.com/williamfzc/gossiphs
 
