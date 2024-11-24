@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ## Build
-FROM golang:1.19-alpine AS build
+FROM golang:1.22-alpine AS build
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ RUN apk add --no-cache git bash
 # lsif-go
 RUN wget https://github.com/sourcegraph/lsif-go/releases/download/v1.9.3/src_linux_amd64 -O lsif-go
 # golang
-COPY --from=golang:1.19-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.22-alpine /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 COPY --from=build /app/srctx /srctx_home/srctx

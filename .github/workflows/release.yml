@@ -20,7 +20,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: 1.22
 
       - name: Command Level Test (Golang)
         run: |
@@ -34,7 +34,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v2
         with:
           xgo_version: latest
-          go_version: 1.19
+          go_version: 1.22
           pkg: cmd/srctx
           dest: build
           prefix: srctx
